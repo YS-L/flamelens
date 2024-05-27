@@ -1,0 +1,5 @@
+<module> (long_running.py:24);quick_work (long_running.py:16) 7
+<module> (long_running.py:25);work (long_running.py:8) 421
+<module> (long_running.py:26) 1
+<module> (long_running.py:25);work (long_running.py:7) 218
+<module> (long_running.py:24);quick_work (long_running.py:17) 10
