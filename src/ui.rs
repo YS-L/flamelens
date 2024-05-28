@@ -1,3 +1,4 @@
+use crate::{app::App, flame::StackInfo};
 use ratatui::{
     buffer::Buffer,
     layout::Rect,
@@ -6,8 +7,10 @@ use ratatui::{
     widgets::Widget,
     Frame,
 };
-
-use crate::{app::App, flame::StackInfo};
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 
 pub struct FlamelensWidget<'a> {
     pub app: &'a App,
@@ -45,16 +48,18 @@ impl<'a> FlamelensWidget<'a> {
         if y >= y_max {
             return;
         }
+        let stack_color = self.get_stack_color(stack);
+        let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
         buf.set_span(
             x,
             y,
             &Span::styled(
                 &format!(
-                    "{:width$}",
+                    " {:width$}",
                     stack.short_name,
-                    width = x_budget.saturating_sub(1) as usize
+                    width = x_budget.saturating_sub(1) as usize,
                 ),
-                Style::default().fg(Color::White).bg(Color::Red),
+                Style::default().fg(text_color).bg(stack_color),
             ),
             x_budget,
         );
@@ -66,6 +71,35 @@ impl<'a> FlamelensWidget<'a> {
                 as u16;
             self.render_stacks(child_stack, buf, x + x_offset, y + 1, child_x_budget, y_max);
             x_offset += child_x_budget;
+        }
+    }
+
+    fn get_stack_color(&self, stack: &'a StackInfo) -> Color {
+        // Roughly based on flamegraph.pl
+        fn hash_name(name: &str) -> f64 {
+            let mut hasher = DefaultHasher::new();
+            name.hash(&mut hasher);
+            hasher.finish() as f64 / u64::MAX as f64
+        }
+        let v1 = hash_name(&stack.full_name);
+        let v2 = hash_name(&stack.full_name.chars().rev().collect::<String>());
+        let r = 205 + (50.0 * v2) as u8;
+        let g = (230.0 * v1) as u8;
+        let b = (55.0 * v2) as u8;
+        Color::Rgb(r, g, b)
+    }
+
+    fn get_text_color(c: Color) -> Color {
+        match c {
+            Color::Rgb(r, g, b) => {
+                let luma = 0.2126 * r as f64 + 0.7152 * g as f64 + 0.0722 * b as f64;
+                if luma > 128.0 {
+                    Color::Black
+                } else {
+                    Color::Gray
+                }
+            }
+            _ => Color::Black,
         }
     }
 }
