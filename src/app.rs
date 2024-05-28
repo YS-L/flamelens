@@ -1,4 +1,5 @@
 use crate::flame::FlameGraph;
+use crate::state::FlameGraphState;
 use std::error;
 
 /// Application result type.
@@ -13,6 +14,8 @@ pub struct App {
     pub counter: u8,
     /// Flamegraph
     pub flamegraph: FlameGraph,
+    /// Flamegraph state
+    pub flamegraph_state: FlameGraphState,
 }
 
 impl App {
@@ -22,6 +25,7 @@ impl App {
             flamegraph,
             running: true,
             counter: 0,
+            flamegraph_state: FlameGraphState::default(),
         }
     }
 

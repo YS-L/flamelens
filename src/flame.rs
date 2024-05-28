@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-type StackIdentifier = String;
-static ROOT: &str = "root";
+pub type StackIdentifier = String;
+pub static ROOT: &str = "root";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StackInfo {
