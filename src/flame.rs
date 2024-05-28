@@ -95,6 +95,34 @@ impl FlameGraph {
     pub fn total_count(&self) -> u64 {
         self.root().total_count
     }
+
+    fn get_parent_and_position_as_sibling(
+        &self,
+        stack_id: &StackIdentifier,
+    ) -> Option<(&StackInfo, usize)> {
+        let stack = self.get_stack(stack_id)?;
+        let parent = self.get_stack(stack.parent.as_ref()?)?;
+        let idx = parent.children.iter().position(|x| x == stack_id)?;
+        Some((parent, idx))
+    }
+
+    pub fn get_next_sibling(&self, stack_id: &StackIdentifier) -> Option<&StackInfo> {
+        let (parent, idx) = self.get_parent_and_position_as_sibling(stack_id)?;
+        if idx + 1 < parent.children.len() {
+            self.get_stack(&parent.children[idx + 1])
+        } else {
+            None
+        }
+    }
+
+    pub fn get_previous_sibling(&self, stack_id: &StackIdentifier) -> Option<&StackInfo> {
+        let (parent, idx) = self.get_parent_and_position_as_sibling(stack_id)?;
+        if idx > 0 {
+            self.get_stack(&parent.children[idx - 1])
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(test)]

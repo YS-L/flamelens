@@ -37,15 +37,41 @@ impl App {
         self.running = false;
     }
 
-    pub fn increment_counter(&mut self) {
-        if let Some(res) = self.counter.checked_add(1) {
-            self.counter = res;
+    pub fn to_child_stack(&mut self) {
+        if let Some(stack) = self.flamegraph.get_stack(&self.flamegraph_state.selected) {
+            if let Some(child) = stack.children.first() {
+                self.flamegraph_state.select_id(child);
+            }
+        } else {
+            self.flamegraph_state.select_root();
         }
     }
 
-    pub fn decrement_counter(&mut self) {
-        if let Some(res) = self.counter.checked_sub(1) {
-            self.counter = res;
+    pub fn to_parent_stack(&mut self) {
+        if let Some(stack) = self.flamegraph.get_stack(&self.flamegraph_state.selected) {
+            if let Some(parent) = &stack.parent {
+                self.flamegraph_state.select_id(parent);
+            }
+        } else {
+            self.flamegraph_state.select_root();
+        }
+    }
+
+    pub fn to_previous_sibling(&mut self) {
+        if let Some(stack) = self
+            .flamegraph
+            .get_previous_sibling(&self.flamegraph_state.selected)
+        {
+            self.flamegraph_state.select(stack)
+        }
+    }
+
+    pub fn to_next_sibling(&mut self) {
+        if let Some(stack) = self
+            .flamegraph
+            .get_next_sibling(&self.flamegraph_state.selected)
+        {
+            self.flamegraph_state.select(stack)
         }
     }
 }
