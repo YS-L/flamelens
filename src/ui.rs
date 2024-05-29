@@ -1,10 +1,10 @@
 use crate::{app::App, flame::StackInfo};
 use ratatui::{
     buffer::Buffer,
-    layout::Rect,
+    layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
     text::Span,
-    widgets::Widget,
+    widgets::{Block, Borders, Paragraph, Widget},
     Frame,
 };
 use std::{
@@ -24,14 +24,26 @@ impl<'a> FlamelensWidget<'a> {
 
 impl<'a> Widget for FlamelensWidget<'a> {
     fn render(self, area: Rect, buf: &mut Buffer) {
+        let layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Fill(1), Constraint::Length(2)])
+            .split(area);
+
+        // Framegraph area
+        let flamegraph_area = layout[0];
         self.render_stacks(
             self.app.flamegraph.root(),
             buf,
-            area.x,
-            0,
-            area.width,
-            area.bottom(),
+            flamegraph_area.x,
+            flamegraph_area.y,
+            flamegraph_area.width,
+            flamegraph_area.bottom(),
         );
+
+        // Status bar
+        let status_bar =
+            Paragraph::new(self.get_status_text()).block(Block::new().borders(Borders::TOP));
+        status_bar.render(layout[1], buf)
     }
 }
 
@@ -103,6 +115,24 @@ impl<'a> FlamelensWidget<'a> {
                 }
             }
             _ => Color::Black,
+        }
+    }
+
+    fn get_status_text(&self) -> String {
+        let stack = self
+            .app
+            .flamegraph
+            .get_stack(&self.app.flamegraph_state.selected);
+        match stack {
+            Some(stack) => format!(
+                "Current: {} [Total: {}, {:.2}%] [Self: {}, {:.2}%]",
+                stack.short_name,
+                stack.total_count,
+                (stack.total_count as f64 / self.app.flamegraph.root().total_count as f64) * 100.0,
+                stack.self_count,
+                (stack.self_count as f64 / self.app.flamegraph.root().total_count as f64) * 100.0,
+            ),
+            None => "No stack selected".to_string(),
         }
     }
 }
