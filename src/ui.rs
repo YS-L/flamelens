@@ -1,4 +1,4 @@
-use crate::flame::{FlameGraph, StackIdentifier, StackState};
+use crate::flame::{FlameGraph, StackIdentifier, StackUIState};
 use crate::{app::App, flame::StackInfo};
 use ratatui::{
     buffer::Buffer,
@@ -15,14 +15,14 @@ use std::{
 };
 
 pub struct FlamelensWidgetState {
-    stack_states: HashMap<StackIdentifier, StackState>,
+    stack_states: HashMap<StackIdentifier, StackUIState>,
 }
 
 impl FlamelensWidgetState {
     pub fn new(fg: &FlameGraph) -> Self {
         let mut stack_states = HashMap::new();
         for stack_id in fg.get_stack_identifiers() {
-            stack_states.insert(stack_id, StackState { visible: false });
+            stack_states.insert(stack_id, StackUIState { visible: false });
         }
         Self { stack_states }
     }
@@ -83,7 +83,7 @@ impl<'a> FlamelensWidget<'a> {
                 .stack_states
                 .entry(stack.full_name.clone())
                 .and_modify(|e| e.visible = false)
-                .or_insert(StackState { visible: false });
+                .or_insert(StackUIState { visible: false });
             return;
         }
 
@@ -91,7 +91,7 @@ impl<'a> FlamelensWidget<'a> {
             .stack_states
             .entry(stack.full_name.clone())
             .and_modify(|e| e.visible = true)
-            .or_insert(StackState { visible: true });
+            .or_insert(StackUIState { visible: true });
 
         let stack_color = self.get_stack_color(stack);
         let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
@@ -166,13 +166,12 @@ impl<'a> FlamelensWidget<'a> {
             .get_stack(&self.app.flamegraph_state.selected);
         match stack {
             Some(stack) => format!(
-                "Current: {} [Total: {}, {:.2}%] [Self: {}, {:.2}%] {:?}",
+                "Current: {} [Total: {}, {:.2}%] [Self: {}, {:.2}%]",
                 stack.short_name,
                 stack.total_count,
                 (stack.total_count as f64 / self.app.flamegraph.root().total_count as f64) * 100.0,
                 stack.self_count,
                 (stack.self_count as f64 / self.app.flamegraph.root().total_count as f64) * 100.0,
-                stack.state,
             ),
             None => "No stack selected".to_string(),
         }
@@ -189,6 +188,6 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let mut flamelens_state = FlamelensWidgetState::new(&app.flamegraph);
     frame.render_stateful_widget(flamelens_widget, frame.size(), &mut flamelens_state);
     for (stack_id, stack_state) in &flamelens_state.stack_states {
-        app.flamegraph.set_state(stack_id, stack_state.clone());
+        app.flamegraph.set_ui_state(stack_id, stack_state.clone());
     }
 }

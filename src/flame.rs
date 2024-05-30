@@ -4,7 +4,7 @@ pub type StackIdentifier = String;
 pub static ROOT: &str = "root";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct StackState {
+pub struct StackUIState {
     pub visible: bool,
 }
 
@@ -17,7 +17,7 @@ pub struct StackInfo {
     pub parent: Option<StackIdentifier>,
     pub children: Vec<StackIdentifier>,
     pub level: usize,
-    pub state: Option<StackState>,
+    pub state: Option<StackUIState>,
 }
 
 impl StackInfo {
@@ -170,7 +170,7 @@ impl FlameGraph {
         self.stacks.keys().cloned().collect()
     }
 
-    pub fn set_state(&mut self, stack_id: &StackIdentifier, state: StackState) {
+    pub fn set_ui_state(&mut self, stack_id: &StackIdentifier, state: StackUIState) {
         if let Some(stack) = self.stacks.get_mut(stack_id) {
             stack.state = Some(state);
         }
