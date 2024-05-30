@@ -1,16 +1,32 @@
+use crate::flame::{FlameGraph, StackIdentifier, StackState};
 use crate::{app::App, flame::StackInfo};
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
     text::Span,
-    widgets::{Block, Borders, Paragraph, Widget},
+    widgets::{Block, Borders, Paragraph, StatefulWidget, Widget},
     Frame,
 };
+use std::collections::HashMap;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
 };
+
+pub struct FlamelensWidgetState {
+    stack_states: HashMap<StackIdentifier, StackState>,
+}
+
+impl FlamelensWidgetState {
+    pub fn new(fg: &FlameGraph) -> Self {
+        let mut stack_states = HashMap::new();
+        for stack_id in fg.get_stack_identifiers() {
+            stack_states.insert(stack_id, StackState { visible: false });
+        }
+        Self { stack_states }
+    }
+}
 
 pub struct FlamelensWidget<'a> {
     pub app: &'a App,
@@ -22,8 +38,10 @@ impl<'a> FlamelensWidget<'a> {
     }
 }
 
-impl<'a> Widget for FlamelensWidget<'a> {
-    fn render(self, area: Rect, buf: &mut Buffer) {
+impl<'a> StatefulWidget for FlamelensWidget<'a> {
+    type State = FlamelensWidgetState;
+
+    fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
         let layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints([Constraint::Fill(1), Constraint::Length(2)])
@@ -34,6 +52,7 @@ impl<'a> Widget for FlamelensWidget<'a> {
         self.render_stacks(
             self.app.flamegraph.root(),
             buf,
+            state,
             flamegraph_area.x,
             flamegraph_area.y,
             flamegraph_area.width,
@@ -48,18 +67,32 @@ impl<'a> Widget for FlamelensWidget<'a> {
 }
 
 impl<'a> FlamelensWidget<'a> {
+    #[allow(clippy::too_many_arguments)]
     fn render_stacks(
         &self,
         stack: &'a StackInfo,
         buf: &mut Buffer,
+        state: &mut FlamelensWidgetState,
         x: u16,
         y: u16,
         x_budget: u16,
         y_max: u16,
     ) {
-        if y >= y_max {
+        if y >= y_max || x_budget == 0 {
+            state
+                .stack_states
+                .entry(stack.full_name.clone())
+                .and_modify(|e| e.visible = false)
+                .or_insert(StackState { visible: false });
             return;
         }
+
+        state
+            .stack_states
+            .entry(stack.full_name.clone())
+            .and_modify(|e| e.visible = true)
+            .or_insert(StackState { visible: true });
+
         let stack_color = self.get_stack_color(stack);
         let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
         buf.set_span(
@@ -81,7 +114,15 @@ impl<'a> FlamelensWidget<'a> {
             let child_x_budget = (x_budget as f64
                 * (child_stack.total_count as f64 / stack.total_count as f64))
                 as u16;
-            self.render_stacks(child_stack, buf, x + x_offset, y + 1, child_x_budget, y_max);
+            self.render_stacks(
+                child_stack,
+                buf,
+                state,
+                x + x_offset,
+                y + 1,
+                child_x_budget,
+                y_max,
+            );
             x_offset += child_x_budget;
         }
     }
@@ -125,12 +166,13 @@ impl<'a> FlamelensWidget<'a> {
             .get_stack(&self.app.flamegraph_state.selected);
         match stack {
             Some(stack) => format!(
-                "Current: {} [Total: {}, {:.2}%] [Self: {}, {:.2}%]",
+                "Current: {} [Total: {}, {:.2}%] [Self: {}, {:.2}%] {:?}",
                 stack.short_name,
                 stack.total_count,
                 (stack.total_count as f64 / self.app.flamegraph.root().total_count as f64) * 100.0,
                 stack.self_count,
                 (stack.self_count as f64 / self.app.flamegraph.root().total_count as f64) * 100.0,
+                stack.state,
             ),
             None => "No stack selected".to_string(),
         }
@@ -144,5 +186,9 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     // - https://docs.rs/ratatui/latest/ratatui/widgets/index.html
     // - https://github.com/ratatui-org/ratatui/tree/master/examples
     let flamelens_widget = FlamelensWidget::new(app);
-    frame.render_widget(flamelens_widget, frame.size());
+    let mut flamelens_state = FlamelensWidgetState::new(&app.flamegraph);
+    frame.render_stateful_widget(flamelens_widget, frame.size(), &mut flamelens_state);
+    for (stack_id, stack_state) in &flamelens_state.stack_states {
+        app.flamegraph.set_state(stack_id, stack_state.clone());
+    }
 }

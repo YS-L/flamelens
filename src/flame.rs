@@ -4,6 +4,11 @@ pub type StackIdentifier = String;
 pub static ROOT: &str = "root";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct StackState {
+    pub visible: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StackInfo {
     pub short_name: String,
     pub full_name: StackIdentifier,
@@ -12,6 +17,17 @@ pub struct StackInfo {
     pub parent: Option<StackIdentifier>,
     pub children: Vec<StackIdentifier>,
     pub level: usize,
+    pub state: Option<StackState>,
+}
+
+impl StackInfo {
+    pub fn is_visible(&self) -> bool {
+        if let Some(state) = &self.state {
+            state.visible
+        } else {
+            true
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -33,6 +49,7 @@ impl FlameGraph {
                 parent: None,
                 children: Vec::<StackIdentifier>::new(),
                 level: 0,
+                state: None,
             },
         );
         for line in std::fs::read_to_string(filename)
@@ -66,6 +83,7 @@ impl FlameGraph {
                             },
                             children: Vec::<StackIdentifier>::new(),
                             level,
+                            state: None,
                         },
                     );
                 }
@@ -123,25 +141,39 @@ impl FlameGraph {
     pub fn get_next_sibling(&self, stack_id: &StackIdentifier) -> Option<&StackInfo> {
         let stack = self.get_stack(stack_id)?;
         let level = self.levels.get(stack.level)?;
-        level.iter().position(|x| x == stack_id).and_then(|idx| {
-            if idx + 1 < level.len() {
-                self.get_stack(&level[idx + 1])
-            } else {
-                None
+        let level_idx = level.iter().position(|x| x == stack_id)?;
+        for sibiling_idx in level[level_idx + 1..].iter() {
+            if let Some(stack) = self.get_stack(sibiling_idx) {
+                if stack.is_visible() {
+                    return Some(stack);
+                }
             }
-        })
+        }
+        None
     }
 
     pub fn get_previous_sibling(&self, stack_id: &StackIdentifier) -> Option<&StackInfo> {
         let stack = self.get_stack(stack_id)?;
         let level = self.levels.get(stack.level)?;
-        level.iter().position(|x| x == stack_id).and_then(|idx| {
-            if idx > 0 {
-                self.get_stack(&level[idx - 1])
-            } else {
-                None
+        let level_idx = level.iter().position(|x| x == stack_id)?;
+        for sibiling_idx in level[..level_idx].iter().rev() {
+            if let Some(stack) = self.get_stack(sibiling_idx) {
+                if stack.is_visible() {
+                    return Some(stack);
+                }
             }
-        })
+        }
+        None
+    }
+
+    pub fn get_stack_identifiers(&self) -> Vec<StackIdentifier> {
+        self.stacks.keys().cloned().collect()
+    }
+
+    pub fn set_state(&mut self, stack_id: &StackIdentifier, state: StackState) {
+        if let Some(stack) = self.stacks.get_mut(stack_id) {
+            stack.state = Some(state);
+        }
     }
 }
 
@@ -176,6 +208,7 @@ mod tests {
                         "<module> (long_running.py:26)".into(),
                     ],
                     level: 0,
+                    state: None,
                 },
             ),
             (
@@ -191,6 +224,7 @@ mod tests {
                         "<module> (long_running.py:25);work (long_running.py:7)".into(),
                     ],
                     level: 1,
+                    state: None,
                 },
             ),
             (
@@ -203,6 +237,7 @@ mod tests {
                     parent: Some("<module> (long_running.py:25)".into()),
                     children: vec![],
                     level: 2,
+                    state: None,
                 },
             ),
             (
@@ -215,6 +250,7 @@ mod tests {
                     parent: Some("<module> (long_running.py:25)".into()),
                     children: vec![],
                     level: 2,
+                    state: None,
                 },
             ),
             (
@@ -230,6 +266,7 @@ mod tests {
                         "<module> (long_running.py:24);quick_work (long_running.py:17)".into(),
                     ],
                     level: 1,
+                    state: None,
                 },
             ),
             (
@@ -243,6 +280,7 @@ mod tests {
                     parent: Some("<module> (long_running.py:24)".into()),
                     children: vec![],
                     level: 2,
+                    state: None,
                 },
             ),
             (
@@ -256,6 +294,7 @@ mod tests {
                     parent: Some("<module> (long_running.py:24)".into()),
                     children: vec![],
                     level: 2,
+                    state: None,
                 },
             ),
             (
@@ -268,6 +307,7 @@ mod tests {
                     parent: Some("root".into()),
                     children: vec![],
                     level: 1,
+                    state: None,
                 },
             ),
         ];
@@ -290,6 +330,7 @@ mod tests {
                     "<module> (long_running.py:26)".into()
                 ],
                 level: 0,
+                state: None,
             }
         );
     }

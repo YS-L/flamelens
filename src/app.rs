@@ -39,8 +39,13 @@ impl App {
 
     pub fn to_child_stack(&mut self) {
         if let Some(stack) = self.flamegraph.get_stack(&self.flamegraph_state.selected) {
-            if let Some(child) = stack.children.first() {
-                self.flamegraph_state.select_id(child);
+            for child in &stack.children {
+                if let Some(stack) = self.flamegraph.get_stack(child) {
+                    if stack.is_visible() {
+                        self.flamegraph_state.select_id(child);
+                        return;
+                    }
+                }
             }
         } else {
             self.flamegraph_state.select_root();
@@ -48,6 +53,7 @@ impl App {
     }
 
     pub fn to_parent_stack(&mut self) {
+        // TODO: maybe also check parent visibility to handle resizing / edge cases
         if let Some(stack) = self.flamegraph.get_stack(&self.flamegraph_state.selected) {
             if let Some(parent) = &stack.parent {
                 self.flamegraph_state.select_id(parent);
