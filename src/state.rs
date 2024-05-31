@@ -4,6 +4,7 @@ use crate::flame::{StackIdentifier, StackInfo, ROOT};
 pub struct FlameGraphState {
     pub selected: StackIdentifier,
     pub level_offset: usize,
+    pub frame_height: Option<u16>,
 }
 
 impl Default for FlameGraphState {
@@ -11,6 +12,7 @@ impl Default for FlameGraphState {
         Self {
             selected: ROOT.into(),
             level_offset: 0,
+            frame_height: None,
         }
     }
 }

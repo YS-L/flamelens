@@ -17,6 +17,7 @@ use std::{
 #[derive(Debug, Clone, Default)]
 pub struct FlamelensWidgetState {
     stack_states: HashMap<StackIdentifier, StackUIState>,
+    frame_height: u16,
 }
 
 pub struct FlamelensWidget<'a> {
@@ -40,6 +41,7 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
 
         // Framegraph area
         let flamegraph_area = layout[0];
+        state.frame_height = flamegraph_area.height;
         self.render_stacks(
             self.app.flamegraph.root(),
             buf,
@@ -181,4 +183,5 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     for (stack_id, stack_state) in &flamelens_state.stack_states {
         app.flamegraph.set_ui_state(stack_id, stack_state.clone());
     }
+    app.flamegraph_state.frame_height = Some(flamelens_state.frame_height);
 }

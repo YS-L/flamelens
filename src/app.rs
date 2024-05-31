@@ -1,4 +1,4 @@
-use crate::flame::FlameGraph;
+use crate::flame::{FlameGraph, StackInfo};
 use crate::state::FlameGraphState;
 use std::error;
 
@@ -40,9 +40,12 @@ impl App {
     pub fn to_child_stack(&mut self) {
         if let Some(stack) = self.flamegraph.get_stack(&self.flamegraph_state.selected) {
             for child in &stack.children {
-                if let Some(stack) = self.flamegraph.get_stack(child) {
-                    if stack.is_visible() {
+                if let Some(child_stack) = self.flamegraph.get_stack(child) {
+                    if child_stack.is_visible() {
                         self.flamegraph_state.select_id(child);
+                        if !self.is_stack_in_view_port(child_stack) {
+                            self.flamegraph_state.level_offset += 1;
+                        }
                         return;
                     }
                 }
@@ -56,10 +59,25 @@ impl App {
         // TODO: maybe also check parent visibility to handle resizing / edge cases
         if let Some(stack) = self.flamegraph.get_stack(&self.flamegraph_state.selected) {
             if let Some(parent) = &stack.parent {
-                self.flamegraph_state.select_id(parent);
+                if let Some(parent_stack) = self.flamegraph.get_stack(parent) {
+                    self.flamegraph_state.select_id(parent);
+                    if !self.is_stack_in_view_port(parent_stack) {
+                        self.flamegraph_state.level_offset -= 1;
+                    }
+                }
             }
         } else {
             self.flamegraph_state.select_root();
+        }
+    }
+
+    fn is_stack_in_view_port(&self, stack: &StackInfo) -> bool {
+        if let Some(frame_height) = self.flamegraph_state.frame_height {
+            let min_level = self.flamegraph_state.level_offset;
+            let max_level = min_level + frame_height as usize - 1;
+            min_level <= stack.level && stack.level <= max_level
+        } else {
+            true
         }
     }
 
