@@ -3,12 +3,14 @@ use crate::flame::{StackIdentifier, StackInfo, ROOT};
 #[derive(Debug, Clone)]
 pub struct FlameGraphState {
     pub selected: StackIdentifier,
+    pub level_offset: usize,
 }
 
 impl Default for FlameGraphState {
     fn default() -> Self {
         Self {
             selected: ROOT.into(),
+            level_offset: 0,
         }
     }
 }

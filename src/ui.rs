@@ -21,6 +21,7 @@ pub struct FlamelensWidgetState {
 impl FlamelensWidgetState {
     pub fn new(fg: &FlameGraph) -> Self {
         let mut stack_states = HashMap::new();
+        // TODO: probably no longer needed as all stacks will be traversed on render
         for stack_id in fg.get_stack_identifiers() {
             stack_states.insert(stack_id, StackUIState { visible: false });
         }
@@ -78,36 +79,36 @@ impl<'a> FlamelensWidget<'a> {
         x_budget: u16,
         y_max: u16,
     ) {
-        if y >= y_max || x_budget == 0 {
-            state
-                .stack_states
-                .entry(stack.full_name.clone())
-                .and_modify(|e| e.visible = false)
-                .or_insert(StackUIState { visible: false });
-            return;
-        }
-
         state
             .stack_states
             .entry(stack.full_name.clone())
-            .and_modify(|e| e.visible = true)
-            .or_insert(StackUIState { visible: true });
+            .and_modify(|e| e.visible = x_budget > 0)
+            .or_insert(StackUIState {
+                visible: x_budget > 0,
+            });
 
-        let stack_color = self.get_stack_color(stack);
-        let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
-        buf.set_span(
-            x,
-            y,
-            &Span::styled(
-                &format!(
-                    " {:width$}",
-                    stack.short_name,
-                    width = x_budget.saturating_sub(1) as usize,
+        let after_level_offset = stack.level >= self.app.flamegraph_state.level_offset;
+
+        // Only render if the stack is within view port
+        if after_level_offset && y < y_max {
+            let stack_color = self.get_stack_color(stack);
+            let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
+            buf.set_span(
+                x,
+                y,
+                &Span::styled(
+                    &format!(
+                        " {:width$}",
+                        stack.short_name,
+                        width = x_budget.saturating_sub(1) as usize,
+                    ),
+                    Style::default().fg(text_color).bg(stack_color),
                 ),
-                Style::default().fg(text_color).bg(stack_color),
-            ),
-            x_budget,
-        );
+                x_budget,
+            );
+        }
+
+        // Always traverse to children to update their state even if they are out of view port
         let mut x_offset = 0;
         for child in &stack.children {
             let child_stack = self.app.flamegraph.get_stack(child).unwrap();
@@ -119,7 +120,7 @@ impl<'a> FlamelensWidget<'a> {
                 buf,
                 state,
                 x + x_offset,
-                y + 1,
+                y + if after_level_offset { 1 } else { 0 },
                 child_x_budget,
                 y_max,
             );
