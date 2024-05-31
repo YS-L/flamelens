@@ -1,4 +1,4 @@
-use crate::flame::{FlameGraph, StackIdentifier, StackUIState};
+use crate::flame::{StackIdentifier, StackUIState};
 use crate::{app::App, flame::StackInfo};
 use ratatui::{
     buffer::Buffer,
@@ -14,19 +14,9 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+#[derive(Debug, Clone, Default)]
 pub struct FlamelensWidgetState {
     stack_states: HashMap<StackIdentifier, StackUIState>,
-}
-
-impl FlamelensWidgetState {
-    pub fn new(fg: &FlameGraph) -> Self {
-        let mut stack_states = HashMap::new();
-        // TODO: probably no longer needed as all stacks will be traversed on render
-        for stack_id in fg.get_stack_identifiers() {
-            stack_states.insert(stack_id, StackUIState { visible: false });
-        }
-        Self { stack_states }
-    }
 }
 
 pub struct FlamelensWidget<'a> {
@@ -186,7 +176,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     // - https://docs.rs/ratatui/latest/ratatui/widgets/index.html
     // - https://github.com/ratatui-org/ratatui/tree/master/examples
     let flamelens_widget = FlamelensWidget::new(app);
-    let mut flamelens_state = FlamelensWidgetState::new(&app.flamegraph);
+    let mut flamelens_state = FlamelensWidgetState::default();
     frame.render_stateful_widget(flamelens_widget, frame.size(), &mut flamelens_state);
     for (stack_id, stack_state) in &flamelens_state.stack_states {
         app.flamegraph.set_ui_state(stack_id, stack_state.clone());
