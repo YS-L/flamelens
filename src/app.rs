@@ -81,6 +81,30 @@ impl App {
         }
     }
 
+    fn select_stack_in_view_port(&mut self) {
+        if let Some(stacks) = self
+            .flamegraph
+            .get_stacks_at_level(self.flamegraph_state.level_offset)
+        {
+            for stack_id in stacks {
+                if let Some(stack) = self.flamegraph.get_stack(stack_id) {
+                    if stack.is_visible() {
+                        self.flamegraph_state.select_id(stack_id);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    fn keep_selected_stack_in_view_port(&mut self) {
+        if let Some(stack) = self.flamegraph.get_stack(&self.flamegraph_state.selected) {
+            if !self.is_stack_in_view_port(stack) {
+                self.select_stack_in_view_port();
+            }
+        }
+    }
+
     pub fn to_previous_sibling(&mut self) {
         if let Some(stack) = self
             .flamegraph
@@ -97,5 +121,21 @@ impl App {
         {
             self.flamegraph_state.select(stack)
         }
+    }
+
+    pub fn scroll_bottom(&mut self) {
+        if let Some(frame_height) = self.flamegraph_state.frame_height {
+            let bottom_level_offset = self
+                .flamegraph
+                .get_num_levels()
+                .saturating_sub(frame_height as usize);
+            self.flamegraph_state.level_offset = bottom_level_offset;
+            self.keep_selected_stack_in_view_port();
+        }
+    }
+
+    pub fn scroll_top(&mut self) {
+        self.flamegraph_state.level_offset = 0;
+        self.keep_selected_stack_in_view_port();
     }
 }

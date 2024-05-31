@@ -129,6 +129,10 @@ impl FlameGraph {
         self.stacks.get(stack_id)
     }
 
+    pub fn get_stacks_at_level(&self, level: usize) -> Option<&Vec<StackIdentifier>> {
+        self.levels.get(level)
+    }
+
     pub fn root(&self) -> &StackInfo {
         // TODO: weird
         self.get_stack(&ROOT.to_string()).unwrap()
@@ -168,6 +172,10 @@ impl FlameGraph {
 
     pub fn get_stack_identifiers(&self) -> Vec<StackIdentifier> {
         self.stacks.keys().cloned().collect()
+    }
+
+    pub fn get_num_levels(&self) -> usize {
+        self.levels.len()
     }
 
     pub fn set_ui_state(&mut self, stack_id: &StackIdentifier, state: StackUIState) {

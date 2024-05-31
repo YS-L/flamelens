@@ -27,6 +27,12 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         KeyCode::Up | KeyCode::Char('k') => {
             app.to_parent_stack();
         }
+        KeyCode::Char('G') => {
+            app.scroll_bottom();
+        }
+        KeyCode::Char('g') => {
+            app.scroll_top();
+        }
         // Other handlers you could add here.
         _ => {}
     }
