@@ -16,3 +16,5 @@ pub mod handler;
 pub mod flame;
 
 pub mod state;
+
+pub mod view;
