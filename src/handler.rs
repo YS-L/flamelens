@@ -33,6 +33,12 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         KeyCode::Char('g') => {
             app.flamegraph_view.scroll_top();
         }
+        KeyCode::Char('f') => {
+            app.flamegraph_view.page_down();
+        }
+        KeyCode::Char('b') => {
+            app.flamegraph_view.page_up();
+        }
         // Other handlers you could add here.
         _ => {}
     }

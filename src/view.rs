@@ -29,7 +29,10 @@ impl FlameGraphView {
     }
 
     pub fn set_level_offset(&mut self, level_offset: usize) {
-        let max_level_offset = self.flamegraph.get_num_levels().saturating_sub(1);
+        let max_level_offset = self
+            .flamegraph
+            .get_num_levels()
+            .saturating_sub(self.state.frame_height.unwrap_or(1) as usize);
         self.state.level_offset = min(level_offset, max_level_offset);
     }
 
@@ -124,5 +127,23 @@ impl FlameGraphView {
     pub fn scroll_top(&mut self) {
         self.state.level_offset = 0;
         self.keep_selected_stack_in_view_port();
+    }
+
+    pub fn page_down(&mut self) {
+        if let Some(frame_height) = self.state.frame_height {
+            self.set_level_offset(self.state.level_offset + frame_height as usize);
+            self.keep_selected_stack_in_view_port();
+        }
+    }
+
+    pub fn page_up(&mut self) {
+        if let Some(frame_height) = self.state.frame_height {
+            self.set_level_offset(
+                self.state
+                    .level_offset
+                    .saturating_sub(frame_height as usize),
+            );
+            self.keep_selected_stack_in_view_port();
+        }
     }
 }
