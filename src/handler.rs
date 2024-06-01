@@ -16,22 +16,22 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         }
         // Counter handlers
         KeyCode::Right | KeyCode::Char('l') => {
-            app.to_next_sibling();
+            app.flamegraph_view.to_next_sibling();
         }
         KeyCode::Left | KeyCode::Char('h') => {
-            app.to_previous_sibling();
+            app.flamegraph_view.to_previous_sibling();
         }
         KeyCode::Down | KeyCode::Char('j') => {
-            app.to_child_stack();
+            app.flamegraph_view.to_child_stack();
         }
         KeyCode::Up | KeyCode::Char('k') => {
-            app.to_parent_stack();
+            app.flamegraph_view.to_parent_stack();
         }
         KeyCode::Char('G') => {
-            app.scroll_bottom();
+            app.flamegraph_view.scroll_bottom();
         }
         KeyCode::Char('g') => {
-            app.scroll_top();
+            app.flamegraph_view.scroll_top();
         }
         // Other handlers you could add here.
         _ => {}

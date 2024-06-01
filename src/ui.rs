@@ -43,7 +43,7 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
         let flamegraph_area = layout[0];
         state.frame_height = flamegraph_area.height;
         self.render_stacks(
-            self.app.flamegraph.root(),
+            self.app.flamegraph().root(),
             buf,
             state,
             flamegraph_area.x,
@@ -79,7 +79,7 @@ impl<'a> FlamelensWidget<'a> {
                 visible: x_budget > 0,
             });
 
-        let after_level_offset = stack.level >= self.app.flamegraph_state.level_offset;
+        let after_level_offset = stack.level >= self.app.flamegraph_state().level_offset;
 
         // Only render if the stack is within view port
         if after_level_offset && y < y_max {
@@ -103,7 +103,7 @@ impl<'a> FlamelensWidget<'a> {
         // Always traverse to children to update their state even if they are out of view port
         let mut x_offset = 0;
         for child in &stack.children {
-            let child_stack = self.app.flamegraph.get_stack(child).unwrap();
+            let child_stack = self.app.flamegraph().get_stack(child).unwrap();
             let child_x_budget = (x_budget as f64
                 * (child_stack.total_count as f64 / stack.total_count as f64))
                 as u16;
@@ -121,7 +121,7 @@ impl<'a> FlamelensWidget<'a> {
     }
 
     fn get_stack_color(&self, stack: &'a StackInfo) -> Color {
-        if self.app.flamegraph_state.selected == stack.full_name {
+        if self.app.flamegraph_state().selected == stack.full_name {
             return Color::Rgb(250, 250, 250);
         }
         // Roughly based on flamegraph.pl
@@ -155,16 +155,17 @@ impl<'a> FlamelensWidget<'a> {
     fn get_status_text(&self) -> String {
         let stack = self
             .app
-            .flamegraph
-            .get_stack(&self.app.flamegraph_state.selected);
+            .flamegraph()
+            .get_stack(&self.app.flamegraph_state().selected);
+        let root_total_count = self.app.flamegraph().root().total_count;
         match stack {
             Some(stack) => format!(
                 "Current: {} [Total: {}, {:.2}%] [Self: {}, {:.2}%]",
                 stack.short_name,
                 stack.total_count,
-                (stack.total_count as f64 / self.app.flamegraph.root().total_count as f64) * 100.0,
+                (stack.total_count as f64 / root_total_count as f64) * 100.0,
                 stack.self_count,
-                (stack.self_count as f64 / self.app.flamegraph.root().total_count as f64) * 100.0,
+                (stack.self_count as f64 / root_total_count as f64) * 100.0,
             ),
             None => "No stack selected".to_string(),
         }
@@ -181,7 +182,9 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let mut flamelens_state = FlamelensWidgetState::default();
     frame.render_stateful_widget(flamelens_widget, frame.size(), &mut flamelens_state);
     for (stack_id, stack_state) in &flamelens_state.stack_states {
-        app.flamegraph.set_ui_state(stack_id, stack_state.clone());
+        app.flamegraph_view
+            .set_ui_state(stack_id, stack_state.clone());
     }
-    app.flamegraph_state.frame_height = Some(flamelens_state.frame_height);
+    app.flamegraph_view
+        .set_frame_height(flamelens_state.frame_height);
 }
