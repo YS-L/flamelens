@@ -59,7 +59,7 @@ impl FlameGraph {
             let (line, count) = line.rsplit_once(' ').unwrap();
             let count = count.parse::<u64>().unwrap();
 
-            stacks.get_mut(&ROOT.to_string()).unwrap().total_count += count;
+            stacks.get_mut(ROOT).unwrap().total_count += count;
             let mut leading = "".to_string();
             let mut level = 1;
             for part in line.split(';') {
@@ -68,7 +68,7 @@ impl FlameGraph {
                 } else {
                     format!("{};{}", leading, part)
                 };
-                if stacks.get(&full_name).is_none() {
+                if !stacks.contains_key(&full_name) {
                     stacks.insert(
                         full_name.clone(),
                         StackInfo {

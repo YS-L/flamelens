@@ -23,10 +23,10 @@ impl FlameGraphState {
     }
 
     pub fn select(&mut self, stack: &StackInfo) {
-        self.selected = stack.full_name.clone();
+        self.selected.clone_from(&stack.full_name);
     }
 
     pub fn select_id(&mut self, stack_id: &StackIdentifier) {
-        self.selected = stack_id.clone();
+        self.selected.clone_from(stack_id);
     }
 }
