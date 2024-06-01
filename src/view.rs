@@ -1,7 +1,7 @@
 use std::cmp::min;
 
 use crate::{
-    flame::{FlameGraph, StackIdentifier, StackInfo, StackUIState},
+    flame::{FlameGraph, StackIdentifier, StackInfo},
     state::FlameGraphState,
 };
 
@@ -24,8 +24,8 @@ impl FlameGraphView {
         self.keep_selected_stack_in_view_port();
     }
 
-    pub fn set_ui_state(&mut self, stack_id: &StackIdentifier, state: StackUIState) {
-        self.flamegraph.set_ui_state(stack_id, state);
+    pub fn set_frame_width(&mut self, frame_width: u16) {
+        self.state.frame_width = Some(frame_width);
     }
 
     pub fn set_level_offset(&mut self, level_offset: usize) {
@@ -40,7 +40,7 @@ impl FlameGraphView {
         if let Some(stack) = self.flamegraph.get_stack(&self.state.selected) {
             for child in &stack.children {
                 if let Some(child_stack) = self.flamegraph.get_stack(child) {
-                    if child_stack.is_visible() {
+                    if self.is_stack_visibly_wide(child_stack) {
                         self.state.select_id(child);
                         if !self.is_stack_in_view_port(child_stack) {
                             self.state.level_offset += 1;
@@ -80,11 +80,19 @@ impl FlameGraphView {
         }
     }
 
+    fn is_stack_visibly_wide(&self, stack: &StackInfo) -> bool {
+        if let Some(frame_width) = self.state.frame_width {
+            (stack.width_factor * frame_width as f64) >= 1.0
+        } else {
+            true
+        }
+    }
+
     fn select_stack_in_view_port(&mut self) {
         if let Some(stacks) = self.flamegraph.get_stacks_at_level(self.state.level_offset) {
             for stack_id in stacks {
                 if let Some(stack) = self.flamegraph.get_stack(stack_id) {
-                    if stack.is_visible() {
+                    if self.is_stack_visibly_wide(stack) {
                         self.state.select_id(stack_id);
                         break;
                     }
@@ -101,15 +109,43 @@ impl FlameGraphView {
         }
     }
 
+    pub fn get_next_sibling(&self, stack_id: &StackIdentifier) -> Option<StackIdentifier> {
+        let stack = self.flamegraph.get_stack(stack_id)?;
+        let level = self.flamegraph.get_stacks_at_level(stack.level)?;
+        let level_idx = level.iter().position(|x| x == stack_id)?;
+        for sibling_id in level[level_idx + 1..].iter() {
+            if let Some(stack) = self.flamegraph.get_stack(sibling_id) {
+                if self.is_stack_visibly_wide(stack) {
+                    return Some(sibling_id).cloned();
+                }
+            }
+        }
+        None
+    }
+
+    pub fn get_previous_sibling(&self, stack_id: &StackIdentifier) -> Option<StackIdentifier> {
+        let stack = self.flamegraph.get_stack(stack_id)?;
+        let level = self.flamegraph.get_stacks_at_level(stack.level)?;
+        let level_idx = level.iter().position(|x| x == stack_id)?;
+        for sibling_id in level[..level_idx].iter().rev() {
+            if let Some(stack) = self.flamegraph.get_stack(sibling_id) {
+                if self.is_stack_visibly_wide(stack) {
+                    return Some(sibling_id).cloned();
+                }
+            }
+        }
+        None
+    }
+
     pub fn to_previous_sibling(&mut self) {
-        if let Some(stack) = self.flamegraph.get_previous_sibling(&self.state.selected) {
-            self.state.select(stack)
+        if let Some(stack_id) = self.get_previous_sibling(&self.state.selected) {
+            self.state.select_id(&stack_id)
         }
     }
 
     pub fn to_next_sibling(&mut self) {
-        if let Some(stack) = self.flamegraph.get_next_sibling(&self.state.selected) {
-            self.state.select(stack)
+        if let Some(stack_id) = self.get_next_sibling(&self.state.selected) {
+            self.state.select_id(&stack_id)
         }
     }
 
@@ -145,5 +181,51 @@ impl FlameGraphView {
             );
             self.keep_selected_stack_in_view_port();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::flame::ROOT;
+
+    use super::*;
+
+    #[test]
+    fn test_get_next_sibling() {
+        let fg = FlameGraph::from_file("tests/data/py-spy-simple.txt");
+        let view = FlameGraphView::new(fg);
+
+        let result = view.get_next_sibling(&ROOT.to_string());
+        assert_eq!(result, None);
+
+        let result = view.get_next_sibling(&"<module> (long_running.py:24)".into());
+        assert_eq!(result.unwrap(), "<module> (long_running.py:25)");
+
+        let result = view.get_next_sibling(
+            &"<module> (long_running.py:24);quick_work (long_running.py:17)".into(),
+        );
+        assert_eq!(
+            result.unwrap(),
+            "<module> (long_running.py:25);work (long_running.py:8)"
+        );
+    }
+
+    #[test]
+    fn test_get_previous_sibling() {
+        let fg = FlameGraph::from_file("tests/data/py-spy-simple.txt");
+        let view = FlameGraphView::new(fg);
+
+        let result = view.get_previous_sibling(&ROOT.to_string());
+        assert_eq!(result, None);
+
+        let result = view.get_previous_sibling(&"<module> (long_running.py:25)".into());
+        assert_eq!(result.unwrap(), "<module> (long_running.py:24)");
+
+        let result = view
+            .get_previous_sibling(&"<module> (long_running.py:25);work (long_running.py:8)".into());
+        assert_eq!(
+            result.unwrap(),
+            "<module> (long_running.py:24);quick_work (long_running.py:17)"
+        );
     }
 }

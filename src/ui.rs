@@ -1,4 +1,3 @@
-use crate::flame::{StackIdentifier, StackUIState};
 use crate::{app::App, flame::StackInfo};
 use ratatui::{
     buffer::Buffer,
@@ -8,7 +7,6 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph, StatefulWidget, Widget},
     Frame,
 };
-use std::collections::HashMap;
 use std::time::Duration;
 use std::{
     collections::hash_map::DefaultHasher,
@@ -17,8 +15,8 @@ use std::{
 
 #[derive(Debug, Clone, Default)]
 pub struct FlamelensWidgetState {
-    stack_states: HashMap<StackIdentifier, StackUIState>,
     frame_height: u16,
+    frame_width: u16,
 }
 
 pub struct FlamelensWidget<'a> {
@@ -44,13 +42,13 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
         let tic = std::time::Instant::now();
         let flamegraph_area = layout[0];
         state.frame_height = flamegraph_area.height;
+        state.frame_width = flamegraph_area.width;
         self.render_stacks(
             self.app.flamegraph().root(),
             buf,
-            state,
             flamegraph_area.x,
             flamegraph_area.y,
-            flamegraph_area.width,
+            flamegraph_area.width as f64,
             flamegraph_area.bottom(),
         );
         let flamegraph_render_time = tic.elapsed();
@@ -68,24 +66,16 @@ impl<'a> FlamelensWidget<'a> {
         &self,
         stack: &'a StackInfo,
         buf: &mut Buffer,
-        state: &mut FlamelensWidgetState,
         x: u16,
         y: u16,
-        x_budget: u16,
+        x_budget: f64,
         y_max: u16,
     ) {
-        state
-            .stack_states
-            .entry(stack.full_name.clone())
-            .and_modify(|e| e.visible = x_budget > 0)
-            .or_insert(StackUIState {
-                visible: x_budget > 0,
-            });
-
         let after_level_offset = stack.level >= self.app.flamegraph_state().level_offset;
 
         // Only render if the stack is within view port
-        if after_level_offset && y < y_max && x_budget > 0 {
+        let effective_x_budget = x_budget as u16;
+        if after_level_offset && y < y_max && effective_x_budget > 0 {
             let stack_color = self.get_stack_color(stack);
             let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
             buf.set_span(
@@ -95,11 +85,11 @@ impl<'a> FlamelensWidget<'a> {
                     &format!(
                         " {:width$}",
                         stack.short_name,
-                        width = x_budget.saturating_sub(1) as usize,
+                        width = effective_x_budget.saturating_sub(1) as usize,
                     ),
                     Style::default().fg(text_color).bg(stack_color),
                 ),
-                x_budget,
+                effective_x_budget,
             );
         }
 
@@ -107,19 +97,17 @@ impl<'a> FlamelensWidget<'a> {
         let mut x_offset = 0;
         for child in &stack.children {
             let child_stack = self.app.flamegraph().get_stack(child).unwrap();
-            let child_x_budget = (x_budget as f64
-                * (child_stack.total_count as f64 / stack.total_count as f64))
-                as u16;
+            let child_x_budget =
+                x_budget * (child_stack.total_count as f64 / stack.total_count as f64);
             self.render_stacks(
                 child_stack,
                 buf,
-                state,
                 x + x_offset,
                 y + if after_level_offset { 1 } else { 0 },
                 child_x_budget,
                 y_max,
             );
-            x_offset += child_x_budget;
+            x_offset += child_x_budget as u16;
         }
     }
 
@@ -195,10 +183,8 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let flamelens_widget = FlamelensWidget::new(app);
     let mut flamelens_state = FlamelensWidgetState::default();
     frame.render_stateful_widget(flamelens_widget, frame.size(), &mut flamelens_state);
-    for (stack_id, stack_state) in &flamelens_state.stack_states {
-        app.flamegraph_view
-            .set_ui_state(stack_id, stack_state.clone());
-    }
     app.flamegraph_view
         .set_frame_height(flamelens_state.frame_height);
+    app.flamegraph_view
+        .set_frame_width(flamelens_state.frame_width);
 }

@@ -3,12 +3,7 @@ use std::collections::HashMap;
 pub type StackIdentifier = String;
 pub static ROOT: &str = "root";
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct StackUIState {
-    pub visible: bool,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StackInfo {
     pub short_name: String,
     pub full_name: StackIdentifier,
@@ -17,17 +12,7 @@ pub struct StackInfo {
     pub parent: Option<StackIdentifier>,
     pub children: Vec<StackIdentifier>,
     pub level: usize,
-    pub state: Option<StackUIState>,
-}
-
-impl StackInfo {
-    pub fn is_visible(&self) -> bool {
-        if let Some(state) = &self.state {
-            state.visible
-        } else {
-            true
-        }
-    }
+    pub width_factor: f64,
 }
 
 #[derive(Debug, Clone)]
@@ -46,10 +31,10 @@ impl FlameGraph {
                 full_name: ROOT.to_string(),
                 total_count: 0,
                 self_count: 0,
+                width_factor: 0.0,
                 parent: None,
                 children: Vec::<StackIdentifier>::new(),
                 level: 0,
-                state: None,
             },
         );
         for line in std::fs::read_to_string(filename)
@@ -76,6 +61,7 @@ impl FlameGraph {
                             full_name: full_name.clone(),
                             total_count: 0,
                             self_count: 0,
+                            width_factor: 0.0,
                             parent: if leading.is_empty() {
                                 Some(ROOT.to_string())
                             } else {
@@ -83,7 +69,6 @@ impl FlameGraph {
                             },
                             children: Vec::<StackIdentifier>::new(),
                             level,
-                            state: None,
                         },
                     );
                 }
@@ -104,24 +89,37 @@ impl FlameGraph {
             }
         }
 
-        let mut levels: Vec<Vec<StackIdentifier>> = vec![];
-        FlameGraph::populate_levels(&mut levels, &stacks, &ROOT.to_string(), 0);
-
-        Self { stacks, levels }
+        let mut out = Self {
+            stacks,
+            levels: vec![],
+        };
+        out.populate_levels(&ROOT.to_string(), 0, None);
+        out
     }
 
     fn populate_levels(
-        levels: &mut Vec<Vec<StackIdentifier>>,
-        stacks: &HashMap<StackIdentifier, StackInfo>,
+        &mut self,
         stack_id: &StackIdentifier,
         level: usize,
+        parent_total_count_and_width_factor: Option<(u64, f64)>,
     ) {
-        if levels.len() <= level {
-            levels.push(vec![]);
+        if self.levels.len() <= level {
+            self.levels.push(vec![]);
         }
-        levels[level].push(stack_id.clone());
-        for child_id in stacks.get(stack_id).unwrap().children.iter() {
-            FlameGraph::populate_levels(levels, stacks, child_id, level + 1);
+        self.levels[level].push(stack_id.clone());
+        let stack = self.stacks.get_mut(stack_id).unwrap();
+        let total_count = stack.total_count;
+        let width_factor = if let Some((parent_total_count, parent_width_factor)) =
+            parent_total_count_and_width_factor
+        {
+            parent_width_factor * (total_count as f64 / parent_total_count as f64)
+        } else {
+            1.0
+        };
+        stack.width_factor = width_factor;
+        let children = stack.children.clone();
+        for child_id in children.iter() {
+            self.populate_levels(child_id, level + 1, Some((total_count, width_factor)));
         }
     }
 
@@ -142,46 +140,12 @@ impl FlameGraph {
         self.root().total_count
     }
 
-    pub fn get_next_sibling(&self, stack_id: &StackIdentifier) -> Option<&StackInfo> {
-        let stack = self.get_stack(stack_id)?;
-        let level = self.levels.get(stack.level)?;
-        let level_idx = level.iter().position(|x| x == stack_id)?;
-        for sibiling_idx in level[level_idx + 1..].iter() {
-            if let Some(stack) = self.get_stack(sibiling_idx) {
-                if stack.is_visible() {
-                    return Some(stack);
-                }
-            }
-        }
-        None
-    }
-
-    pub fn get_previous_sibling(&self, stack_id: &StackIdentifier) -> Option<&StackInfo> {
-        let stack = self.get_stack(stack_id)?;
-        let level = self.levels.get(stack.level)?;
-        let level_idx = level.iter().position(|x| x == stack_id)?;
-        for sibiling_idx in level[..level_idx].iter().rev() {
-            if let Some(stack) = self.get_stack(sibiling_idx) {
-                if stack.is_visible() {
-                    return Some(stack);
-                }
-            }
-        }
-        None
-    }
-
     pub fn get_stack_identifiers(&self) -> Vec<StackIdentifier> {
         self.stacks.keys().cloned().collect()
     }
 
     pub fn get_num_levels(&self) -> usize {
         self.levels.len()
-    }
-
-    pub fn set_ui_state(&mut self, stack_id: &StackIdentifier, state: StackUIState) {
-        if let Some(stack) = self.stacks.get_mut(stack_id) {
-            stack.state = Some(state);
-        }
     }
 }
 
@@ -194,6 +158,12 @@ mod tests {
     fn _print_stacks(fg: &FlameGraph) {
         let mut sorted_stacks = fg.stacks.iter().collect::<Vec<_>>();
         sorted_stacks.sort_by_key(|x| Reverse(&x.1.total_count));
+        for (_k, v) in sorted_stacks.iter() {
+            println!(
+                "full_name: {} width_factor: {}",
+                v.full_name, v.width_factor,
+            );
+        }
         println!("{:?}", sorted_stacks);
     }
 
@@ -209,6 +179,7 @@ mod tests {
                     full_name: "root".into(),
                     total_count: 657,
                     self_count: 0,
+                    width_factor: 1.0,
                     parent: None,
                     children: vec![
                         "<module> (long_running.py:24)".into(),
@@ -216,7 +187,6 @@ mod tests {
                         "<module> (long_running.py:26)".into(),
                     ],
                     level: 0,
-                    state: None,
                 },
             ),
             (
@@ -226,13 +196,13 @@ mod tests {
                     full_name: "<module> (long_running.py:25)".into(),
                     total_count: 639,
                     self_count: 0,
+                    width_factor: 0.9726027397260274,
                     parent: Some("root".into()),
                     children: vec![
                         "<module> (long_running.py:25);work (long_running.py:8)".into(),
                         "<module> (long_running.py:25);work (long_running.py:7)".into(),
                     ],
                     level: 1,
-                    state: None,
                 },
             ),
             (
@@ -242,10 +212,10 @@ mod tests {
                     full_name: "<module> (long_running.py:25);work (long_running.py:8)".into(),
                     total_count: 421,
                     self_count: 421,
+                    width_factor: 0.6407914764079147,
                     parent: Some("<module> (long_running.py:25)".into()),
                     children: vec![],
                     level: 2,
-                    state: None,
                 },
             ),
             (
@@ -255,10 +225,10 @@ mod tests {
                     full_name: "<module> (long_running.py:25);work (long_running.py:7)".into(),
                     total_count: 218,
                     self_count: 218,
+                    width_factor: 0.3318112633181126,
                     parent: Some("<module> (long_running.py:25)".into()),
                     children: vec![],
                     level: 2,
-                    state: None,
                 },
             ),
             (
@@ -268,13 +238,13 @@ mod tests {
                     full_name: "<module> (long_running.py:24)".into(),
                     total_count: 17,
                     self_count: 0,
+                    width_factor: 0.0258751902587519,
                     parent: Some("root".into()),
                     children: vec![
                         "<module> (long_running.py:24);quick_work (long_running.py:16)".into(),
                         "<module> (long_running.py:24);quick_work (long_running.py:17)".into(),
                     ],
                     level: 1,
-                    state: None,
                 },
             ),
             (
@@ -285,10 +255,10 @@ mod tests {
                         .into(),
                     total_count: 10,
                     self_count: 10,
+                    width_factor: 0.015220700152207,
                     parent: Some("<module> (long_running.py:24)".into()),
                     children: vec![],
                     level: 2,
-                    state: None,
                 },
             ),
             (
@@ -299,10 +269,10 @@ mod tests {
                         .into(),
                     total_count: 7,
                     self_count: 7,
+                    width_factor: 0.0106544901065449,
                     parent: Some("<module> (long_running.py:24)".into()),
                     children: vec![],
                     level: 2,
-                    state: None,
                 },
             ),
             (
@@ -312,10 +282,10 @@ mod tests {
                     full_name: "<module> (long_running.py:26)".into(),
                     total_count: 1,
                     self_count: 1,
+                    width_factor: 0.0015220700152207,
                     parent: Some("root".into()),
                     children: vec![],
                     level: 1,
-                    state: None,
                 },
             ),
         ];
@@ -331,6 +301,7 @@ mod tests {
                 full_name: "root".into(),
                 total_count: 657,
                 self_count: 0,
+                width_factor: 1.0,
                 parent: None,
                 children: vec![
                     "<module> (long_running.py:24)".into(),
@@ -338,45 +309,7 @@ mod tests {
                     "<module> (long_running.py:26)".into()
                 ],
                 level: 0,
-                state: None,
             }
-        );
-    }
-
-    #[test]
-    fn test_get_next_sibling() {
-        let fg = FlameGraph::from_file("tests/data/py-spy-simple.txt");
-
-        let result = fg.get_next_sibling(&ROOT.to_string());
-        assert_eq!(result, None);
-
-        let result = fg.get_next_sibling(&"<module> (long_running.py:24)".into());
-        assert_eq!(result.unwrap().full_name, "<module> (long_running.py:25)");
-
-        let result = fg.get_next_sibling(
-            &"<module> (long_running.py:24);quick_work (long_running.py:17)".into(),
-        );
-        assert_eq!(
-            result.unwrap().full_name,
-            "<module> (long_running.py:25);work (long_running.py:8)"
-        );
-    }
-
-    #[test]
-    fn test_get_previous_sibling() {
-        let fg = FlameGraph::from_file("tests/data/py-spy-simple.txt");
-
-        let result = fg.get_previous_sibling(&ROOT.to_string());
-        assert_eq!(result, None);
-
-        let result = fg.get_previous_sibling(&"<module> (long_running.py:25)".into());
-        assert_eq!(result.unwrap().full_name, "<module> (long_running.py:24)");
-
-        let result = fg
-            .get_previous_sibling(&"<module> (long_running.py:25);work (long_running.py:8)".into());
-        assert_eq!(
-            result.unwrap().full_name,
-            "<module> (long_running.py:24);quick_work (long_running.py:17)"
         );
     }
 }
