@@ -9,6 +9,7 @@ use ratatui::{
     Frame,
 };
 use std::collections::HashMap;
+use std::time::Duration;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
@@ -40,6 +41,7 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
             .split(area);
 
         // Framegraph area
+        let tic = std::time::Instant::now();
         let flamegraph_area = layout[0];
         state.frame_height = flamegraph_area.height;
         self.render_stacks(
@@ -51,10 +53,11 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
             flamegraph_area.width,
             flamegraph_area.bottom(),
         );
+        let flamegraph_render_time = tic.elapsed();
 
         // Status bar
-        let status_bar =
-            Paragraph::new(self.get_status_text()).block(Block::new().borders(Borders::TOP));
+        let status_bar = Paragraph::new(self.get_status_text(flamegraph_render_time))
+            .block(Block::new().borders(Borders::TOP));
         status_bar.render(layout[1], buf)
     }
 }
@@ -82,7 +85,7 @@ impl<'a> FlamelensWidget<'a> {
         let after_level_offset = stack.level >= self.app.flamegraph_state().level_offset;
 
         // Only render if the stack is within view port
-        if after_level_offset && y < y_max {
+        if after_level_offset && y < y_max && x_budget > 0 {
             let stack_color = self.get_stack_color(stack);
             let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
             buf.set_span(
@@ -152,20 +155,31 @@ impl<'a> FlamelensWidget<'a> {
         }
     }
 
-    fn get_status_text(&self) -> String {
+    fn get_status_text(&self, flamegraph_render_time: Duration) -> String {
         let stack = self
             .app
             .flamegraph()
             .get_stack(&self.app.flamegraph_state().selected);
         let root_total_count = self.app.flamegraph().root().total_count;
+        let render_ms = flamegraph_render_time.as_micros() as f64 / 1000.0;
+        let render_str = format!(
+            "[Render {:.2}ms / {}fps]",
+            render_ms,
+            if render_ms > 0.0 {
+                (1000.0 / render_ms) as u32
+            } else {
+                0
+            }
+        );
         match stack {
             Some(stack) => format!(
-                "Current: {} [Total: {}, {:.2}%] [Self: {}, {:.2}%]",
+                "Current: {} [Total: {}, {:.2}%] [Self: {}, {:.2}%] {}",
                 stack.short_name,
                 stack.total_count,
                 (stack.total_count as f64 / root_total_count as f64) * 100.0,
                 stack.self_count,
                 (stack.self_count as f64 / root_total_count as f64) * 100.0,
+                render_str,
             ),
             None => "No stack selected".to_string(),
         }
