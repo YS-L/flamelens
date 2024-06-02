@@ -186,27 +186,41 @@ impl FlameGraphView {
 
 #[cfg(test)]
 mod tests {
-    use crate::flame::ROOT;
+    use crate::flame::ROOT_ID;
 
     use super::*;
+
+    fn get_id(view: &FlameGraphView, full_name: &str) -> StackIdentifier {
+        view.flamegraph
+            .get_stack_by_full_name(full_name)
+            .unwrap()
+            .id
+    }
 
     #[test]
     fn test_get_next_sibling() {
         let fg = FlameGraph::from_file("tests/data/py-spy-simple.txt");
         let view = FlameGraphView::new(fg);
 
-        let result = view.get_next_sibling(&ROOT.to_string());
+        let result = view.get_next_sibling(&ROOT_ID);
         assert_eq!(result, None);
 
-        let result = view.get_next_sibling(&"<module> (long_running.py:24)".into());
-        assert_eq!(result.unwrap(), "<module> (long_running.py:25)");
-
-        let result = view.get_next_sibling(
-            &"<module> (long_running.py:24);quick_work (long_running.py:17)".into(),
-        );
+        let result = view.get_next_sibling(&get_id(&view, "<module> (long_running.py:24)"));
         assert_eq!(
             result.unwrap(),
-            "<module> (long_running.py:25);work (long_running.py:8)"
+            get_id(&view, "<module> (long_running.py:25)")
+        );
+
+        let result = view.get_next_sibling(&get_id(
+            &view,
+            "<module> (long_running.py:24);quick_work (long_running.py:17)",
+        ));
+        assert_eq!(
+            result.unwrap(),
+            get_id(
+                &view,
+                "<module> (long_running.py:25);work (long_running.py:8)"
+            ),
         );
     }
 
@@ -215,17 +229,25 @@ mod tests {
         let fg = FlameGraph::from_file("tests/data/py-spy-simple.txt");
         let view = FlameGraphView::new(fg);
 
-        let result = view.get_previous_sibling(&ROOT.to_string());
+        let result = view.get_previous_sibling(&ROOT_ID);
         assert_eq!(result, None);
 
-        let result = view.get_previous_sibling(&"<module> (long_running.py:25)".into());
-        assert_eq!(result.unwrap(), "<module> (long_running.py:24)");
-
-        let result = view
-            .get_previous_sibling(&"<module> (long_running.py:25);work (long_running.py:8)".into());
+        let result = view.get_previous_sibling(&get_id(&view, "<module> (long_running.py:25)"));
         assert_eq!(
             result.unwrap(),
-            "<module> (long_running.py:24);quick_work (long_running.py:17)"
+            get_id(&view, "<module> (long_running.py:24)")
+        );
+
+        let result = view.get_previous_sibling(&get_id(
+            &view,
+            "<module> (long_running.py:25);work (long_running.py:8)".into(),
+        ));
+        assert_eq!(
+            result.unwrap(),
+            get_id(
+                &view,
+                "<module> (long_running.py:24);quick_work (long_running.py:17)"
+            ),
         );
     }
 }

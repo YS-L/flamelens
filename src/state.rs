@@ -1,4 +1,4 @@
-use crate::flame::{StackIdentifier, StackInfo, ROOT};
+use crate::flame::{StackIdentifier, ROOT_ID};
 
 #[derive(Debug, Clone)]
 pub struct FlameGraphState {
@@ -11,7 +11,7 @@ pub struct FlameGraphState {
 impl Default for FlameGraphState {
     fn default() -> Self {
         Self {
-            selected: ROOT.into(),
+            selected: ROOT_ID,
             level_offset: 0,
             frame_height: None,
             frame_width: None,
@@ -21,11 +21,7 @@ impl Default for FlameGraphState {
 
 impl FlameGraphState {
     pub fn select_root(&mut self) {
-        self.selected = ROOT.into();
-    }
-
-    pub fn select(&mut self, stack: &StackInfo) {
-        self.selected.clone_from(&stack.full_name);
+        self.selected = ROOT_ID;
     }
 
     pub fn select_id(&mut self, stack_id: &StackIdentifier) {

@@ -112,7 +112,7 @@ impl<'a> FlamelensWidget<'a> {
     }
 
     fn get_stack_color(&self, stack: &'a StackInfo) -> Color {
-        if self.app.flamegraph_state().selected == stack.full_name {
+        if self.app.flamegraph_state().selected == stack.id {
             return Color::Rgb(250, 250, 250);
         }
         // Roughly based on flamegraph.pl
