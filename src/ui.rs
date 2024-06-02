@@ -151,7 +151,7 @@ impl<'a> FlamelensWidget<'a> {
         let root_total_count = self.app.flamegraph().root().total_count;
         let render_ms = flamegraph_render_time.as_micros() as f64 / 1000.0;
         let render_str = format!(
-            "[Render {:.2}ms / {}fps]",
+            "[Render: {:.2}ms / {}fps]",
             render_ms,
             if render_ms > 0.0 {
                 (1000.0 / render_ms) as u32
@@ -159,16 +159,29 @@ impl<'a> FlamelensWidget<'a> {
                 0
             }
         );
+        let zoom_str = if let Some(stack_id) = self.app.flamegraph_state().zoom {
+            let zoom_stack = self.app.flamegraph().get_stack(&stack_id).unwrap();
+            Some(format!("[Zoom: {}]", zoom_stack.short_name.clone()))
+        } else {
+            None
+        };
         match stack {
-            Some(stack) => format!(
-                "Current: {} [Total: {}, {:.2}%] [Self: {}, {:.2}%] {}",
-                stack.short_name,
-                stack.total_count,
-                (stack.total_count as f64 / root_total_count as f64) * 100.0,
-                stack.self_count,
-                (stack.self_count as f64 / root_total_count as f64) * 100.0,
-                render_str,
-            ),
+            Some(stack) => {
+                let status_text = format!(
+                    "Current: {} [Total: {}, {:.2}%] [Self: {}, {:.2}%] {}",
+                    stack.short_name,
+                    stack.total_count,
+                    (stack.total_count as f64 / root_total_count as f64) * 100.0,
+                    stack.self_count,
+                    (stack.self_count as f64 / root_total_count as f64) * 100.0,
+                    render_str,
+                );
+                if let Some(zoom_str) = zoom_str {
+                    format!("{} {}", status_text, zoom_str)
+                } else {
+                    status_text
+                }
+            }
             None => "No stack selected".to_string(),
         }
     }

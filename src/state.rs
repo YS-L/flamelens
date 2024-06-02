@@ -6,6 +6,7 @@ pub struct FlameGraphState {
     pub level_offset: usize,
     pub frame_height: Option<u16>,
     pub frame_width: Option<u16>,
+    pub zoom: Option<StackIdentifier>,
 }
 
 impl Default for FlameGraphState {
@@ -15,6 +16,7 @@ impl Default for FlameGraphState {
             level_offset: 0,
             frame_height: None,
             frame_width: None,
+            zoom: None,
         }
     }
 }
@@ -26,5 +28,9 @@ impl FlameGraphState {
 
     pub fn select_id(&mut self, stack_id: &StackIdentifier) {
         self.selected.clone_from(stack_id);
+    }
+
+    pub fn set_zoom(&mut self) {
+        self.zoom = Some(self.selected);
     }
 }

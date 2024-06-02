@@ -182,6 +182,10 @@ impl FlameGraphView {
             self.keep_selected_stack_in_view_port();
         }
     }
+
+    pub fn set_zoom(&mut self) {
+        self.state.set_zoom();
+    }
 }
 
 #[cfg(test)]
