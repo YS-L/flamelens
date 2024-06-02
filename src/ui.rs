@@ -1,4 +1,7 @@
-use crate::{app::App, flame::StackInfo};
+use crate::{
+    app::App,
+    flame::{StackIdentifier, StackInfo},
+};
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Direction, Layout, Rect},
@@ -17,6 +20,11 @@ use std::{
 pub struct FlamelensWidgetState {
     frame_height: u16,
     frame_width: u16,
+}
+
+pub struct ZoomState {
+    pub zoom_stack: StackIdentifier,
+    pub ancestors: Vec<StackIdentifier>,
 }
 
 pub struct FlamelensWidget<'a> {
@@ -41,8 +49,15 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
         // Framegraph area
         let tic = std::time::Instant::now();
         let flamegraph_area = layout[0];
-        state.frame_height = flamegraph_area.height;
-        state.frame_width = flamegraph_area.width;
+        let zoom_state = self
+            .app
+            .flamegraph_state()
+            .zoom
+            .as_ref()
+            .map(|zoom_stack| ZoomState {
+                zoom_stack: *zoom_stack,
+                ancestors: self.app.flamegraph().get_ancestors(zoom_stack),
+            });
         self.render_stacks(
             self.app.flamegraph().root(),
             buf,
@@ -50,13 +65,18 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
             flamegraph_area.y,
             flamegraph_area.width as f64,
             flamegraph_area.bottom(),
+            &zoom_state,
         );
         let flamegraph_render_time = tic.elapsed();
 
         // Status bar
         let status_bar = Paragraph::new(self.get_status_text(flamegraph_render_time))
             .block(Block::new().borders(Borders::TOP));
-        status_bar.render(layout[1], buf)
+        status_bar.render(layout[1], buf);
+
+        // Update widget state
+        state.frame_height = flamegraph_area.height;
+        state.frame_width = flamegraph_area.width;
     }
 }
 
@@ -70,6 +90,7 @@ impl<'a> FlamelensWidget<'a> {
         y: u16,
         x_budget: f64,
         y_max: u16,
+        zoom_state: &Option<ZoomState>,
     ) {
         let after_level_offset = stack.level >= self.app.flamegraph_state().level_offset;
 
@@ -93,12 +114,32 @@ impl<'a> FlamelensWidget<'a> {
             );
         }
 
+        // TODO: probably not needed now
         // Always traverse to children to update their state even if they are out of view port
         let mut x_offset = 0;
+        let zoomed_child = stack
+            .children
+            .iter()
+            .position(|child_id| {
+                if let Some(zoom_state) = zoom_state {
+                    *child_id == zoom_state.zoom_stack || zoom_state.ancestors.contains(child_id)
+                } else {
+                    false
+                }
+            })
+            .map(|idx| stack.children[idx]);
         for child in &stack.children {
             let child_stack = self.app.flamegraph().get_stack(child).unwrap();
-            let child_x_budget =
-                x_budget * (child_stack.total_count as f64 / stack.total_count as f64);
+            let child_x_budget = if let Some(zoomed_child_id) = zoomed_child {
+                // Zoomer takes all
+                if zoomed_child_id == *child {
+                    x_budget
+                } else {
+                    0.0
+                }
+            } else {
+                x_budget * (child_stack.total_count as f64 / stack.total_count as f64)
+            };
             self.render_stacks(
                 child_stack,
                 buf,
@@ -106,6 +147,7 @@ impl<'a> FlamelensWidget<'a> {
                 y + if after_level_offset { 1 } else { 0 },
                 child_x_budget,
                 y_max,
+                zoom_state,
             );
             x_offset += child_x_budget as u16;
         }

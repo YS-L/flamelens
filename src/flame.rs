@@ -149,6 +149,20 @@ impl FlameGraph {
     pub fn get_num_levels(&self) -> usize {
         self.levels.len()
     }
+
+    pub fn get_ancestors(&self, stack_id: &StackIdentifier) -> Vec<StackIdentifier> {
+        let mut ancestors = vec![];
+        let mut current_id = *stack_id;
+        while let Some(stack) = self.get_stack(&current_id) {
+            ancestors.push(current_id);
+            if let Some(parent_id) = stack.parent {
+                current_id = parent_id;
+            } else {
+                break;
+            }
+        }
+        ancestors
+    }
 }
 
 #[cfg(test)]
