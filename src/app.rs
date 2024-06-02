@@ -1,8 +1,8 @@
 use crate::flame::FlameGraph;
 use crate::state::FlameGraphState;
 use crate::view::FlameGraphView;
-use std::error;
 use std::sync::{Arc, Mutex};
+use std::{error, thread};
 
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -22,12 +22,37 @@ pub struct App {
 
 impl App {
     /// Constructs a new instance of [`App`].
-    pub fn new(flamegraph: FlameGraph) -> Self {
+    pub fn with_flamegraph(flamegraph: FlameGraph) -> Self {
         Self {
             running: true,
             counter: 0,
             flamegraph_view: FlameGraphView::new(flamegraph),
             next_flamegraph: Arc::new(Mutex::new(None)),
+        }
+    }
+
+    pub fn with_pid(_pid: u64) -> Self {
+        let next_flamegraph: Arc<Mutex<Option<FlameGraph>>> = Arc::new(Mutex::new(None));
+        let pyspy_data: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
+
+        {
+            let next_flamegraph = next_flamegraph.clone();
+            let pyspy_data = pyspy_data.clone();
+            let _handle = thread::spawn(move || loop {
+                if let Some(data) = pyspy_data.lock().unwrap().take() {
+                    let flamegraph = FlameGraph::from_string(&data);
+                    *next_flamegraph.lock().unwrap() = Some(flamegraph);
+                }
+                thread::sleep(std::time::Duration::from_millis(250));
+            });
+        }
+
+        let flamegraph = FlameGraph::from_string("");
+        Self {
+            running: true,
+            counter: 0,
+            flamegraph_view: FlameGraphView::new(flamegraph),
+            next_flamegraph: next_flamegraph.clone(),
         }
     }
 

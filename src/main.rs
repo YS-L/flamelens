@@ -1,3 +1,4 @@
+use clap::{command, Parser};
 use flamelens::app::{App, AppResult};
 use flamelens::event::{Event, EventHandler};
 use flamelens::flame::FlameGraph;
@@ -7,17 +8,40 @@ use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
 use std::io;
 
-fn main() -> AppResult<()> {
-    // flamelens::flame::run();
-    main_tui()
+#[derive(Parser, Debug)]
+#[command(version)]
+struct Args {
+    /// Profile data filename
+    filename: Option<String>,
+
+    /// Pid for live flamegraph
+    #[clap(long, value_name = "pid")]
+    pid: Option<String>,
+
+    /// Show debug info
+    #[clap(long)]
+    debug: bool,
 }
 
-fn main_tui() -> AppResult<()> {
+fn main() -> AppResult<()> {
+    let args = Args::parse();
+
     // Create an application.
-    let filename = std::env::args().nth(1).expect("No filename given");
-    let content = std::fs::read_to_string(filename).expect("Could not read file");
-    let flamegraph = FlameGraph::from_string(&content);
-    let mut app = App::new(flamegraph);
+    let app = if let Some(filename) = args.filename {
+        let content = std::fs::read_to_string(filename).expect("Could not read file");
+        let flamegraph = FlameGraph::from_string(&content);
+        Some(App::with_flamegraph(flamegraph))
+    } else {
+        args.pid
+            .map(|pid| App::with_pid(pid.parse().expect("Could not parse pid")))
+    };
+    let mut app = match app {
+        Some(app) => app,
+        None => {
+            eprintln!("No filename or pid provided");
+            std::process::exit(1);
+        }
+    };
 
     // Initialize the terminal user interface.
     let backend = CrosstermBackend::new(io::stderr());
