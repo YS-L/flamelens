@@ -25,7 +25,7 @@ pub struct FlameGraph {
 }
 
 impl FlameGraph {
-    pub fn from_file(filename: &str) -> Self {
+    pub fn from_string(content: &str) -> Self {
         let mut stacks = Vec::<StackInfo>::new();
         let mut full_name_to_stack_id = HashMap::<String, StackIdentifier>::new();
         stacks.push(StackInfo {
@@ -40,10 +40,7 @@ impl FlameGraph {
             level: 0,
         });
         full_name_to_stack_id.insert(ROOT.to_string(), ROOT_ID);
-        for line in std::fs::read_to_string(filename)
-            .expect("Could not read file")
-            .lines()
-        {
+        for line in content.lines() {
             #[allow(clippy::unnecessary_unwrap)]
             let line_and_count = match line.rsplit_once(' ') {
                 Some((line, count)) => {
@@ -218,7 +215,8 @@ mod tests {
 
     #[test]
     fn test_simple() {
-        let fg = FlameGraph::from_file("tests/data/py-spy-simple.txt");
+        let content = std::fs::read_to_string("tests/data/py-spy-simple.txt").unwrap();
+        let fg = FlameGraph::from_string(&content);
         // _print_stacks(&fg);
         let items: Vec<StackInfo> = vec![
             StackInfo {

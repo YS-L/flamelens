@@ -15,7 +15,8 @@ fn main() -> AppResult<()> {
 fn main_tui() -> AppResult<()> {
     // Create an application.
     let filename = std::env::args().nth(1).expect("No filename given");
-    let flamegraph = FlameGraph::from_file(&filename);
+    let content = std::fs::read_to_string(filename).expect("Could not read file");
+    let flamegraph = FlameGraph::from_string(&content);
     let mut app = App::new(flamegraph);
 
     // Initialize the terminal user interface.
