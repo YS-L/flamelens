@@ -97,7 +97,7 @@ impl<'a> FlamelensWidget<'a> {
         // Only render if the stack is within view port
         let effective_x_budget = x_budget as u16;
         if after_level_offset && y < y_max && effective_x_budget > 0 {
-            let stack_color = self.get_stack_color(stack);
+            let stack_color = self.get_stack_color(stack, zoom_state);
             let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
             buf.set_span(
                 x,
@@ -153,7 +153,7 @@ impl<'a> FlamelensWidget<'a> {
         }
     }
 
-    fn get_stack_color(&self, stack: &'a StackInfo) -> Color {
+    fn get_stack_color(&self, stack: &StackInfo, zoom_state: &Option<ZoomState>) -> Color {
         if self.app.flamegraph_state().selected == stack.id {
             return Color::Rgb(250, 250, 250);
         }
@@ -165,9 +165,16 @@ impl<'a> FlamelensWidget<'a> {
         }
         let v1 = hash_name(&stack.full_name);
         let v2 = hash_name(&stack.full_name.chars().rev().collect::<String>());
-        let r = 205 + (50.0 * v2) as u8;
-        let g = (230.0 * v1) as u8;
-        let b = (55.0 * v2) as u8;
+        let mut r = 205 + (50.0 * v2) as u8;
+        let mut g = (230.0 * v1) as u8;
+        let mut b = (55.0 * v2) as u8;
+        if let Some(zoom_state) = zoom_state {
+            if zoom_state.ancestors.contains(&stack.id) {
+                r = (r as f64 / 2.5) as u8;
+                g = (g as f64 / 2.5) as u8;
+                b = (b as f64 / 2.5) as u8;
+            }
+        }
         Color::Rgb(r, g, b)
     }
 
