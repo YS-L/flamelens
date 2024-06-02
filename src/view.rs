@@ -9,6 +9,7 @@ use crate::{
 pub struct FlameGraphView {
     pub flamegraph: FlameGraph,
     pub state: FlameGraphState,
+    pub updated_at: std::time::Instant,
 }
 
 impl FlameGraphView {
@@ -16,7 +17,13 @@ impl FlameGraphView {
         Self {
             flamegraph,
             state: FlameGraphState::default(),
+            updated_at: std::time::Instant::now(),
         }
+    }
+
+    pub fn set_flamegraph(&mut self, flamegraph: FlameGraph) {
+        self.flamegraph = flamegraph;
+        self.updated_at = std::time::Instant::now();
     }
 
     pub fn set_frame_height(&mut self, frame_height: u16) {
