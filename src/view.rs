@@ -82,7 +82,20 @@ impl FlameGraphView {
 
     fn is_stack_visibly_wide(&self, stack: &StackInfo) -> bool {
         if let Some(frame_width) = self.state.frame_width {
-            (stack.width_factor * frame_width as f64) >= 1.0
+            let mut expected_frame_width = stack.width_factor * frame_width as f64;
+            if let Some(zoom) = &self.state.zoom {
+                // This is expensive, but this is only called on a small number of candidate stacks
+                // on navigation
+                if self
+                    .flamegraph
+                    .is_ancenstor_or_descendant(&zoom.stack_id, &stack.id)
+                {
+                    expected_frame_width *= zoom.zoom_factor;
+                } else {
+                    return false;
+                }
+            }
+            expected_frame_width >= 1.0
         } else {
             true
         }
@@ -184,7 +197,12 @@ impl FlameGraphView {
     }
 
     pub fn set_zoom(&mut self) {
-        self.state.set_zoom();
+        let selected = self.state.selected;
+        if let Some(selected_stack) = self.flamegraph.get_stack(&selected) {
+            let zoom_factor =
+                self.flamegraph.total_count() as f64 / selected_stack.total_count as f64;
+            self.state.set_zoom(zoom_factor);
+        }
     }
 
     pub fn reset(&mut self) {

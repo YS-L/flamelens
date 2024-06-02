@@ -54,9 +54,9 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
             .flamegraph_state()
             .zoom
             .as_ref()
-            .map(|zoom_stack| ZoomState {
-                zoom_stack: *zoom_stack,
-                ancestors: self.app.flamegraph().get_ancestors(zoom_stack),
+            .map(|zoom| ZoomState {
+                zoom_stack: zoom.stack_id,
+                ancestors: self.app.flamegraph().get_ancestors(&zoom.stack_id),
             });
         self.render_stacks(
             self.app.flamegraph().root(),
@@ -210,18 +210,13 @@ impl<'a> FlamelensWidget<'a> {
         );
         match stack {
             Some(stack) => {
-                let zoom_total_count =
+                let zoom_total_count = self.app.flamegraph_state().zoom.as_ref().map(|zoom| {
                     self.app
-                        .flamegraph_state()
-                        .zoom
-                        .as_ref()
-                        .map(|zoom_stack_id| {
-                            self.app
-                                .flamegraph()
-                                .get_stack(zoom_stack_id)
-                                .unwrap()
-                                .total_count
-                        });
+                        .flamegraph()
+                        .get_stack(&zoom.stack_id)
+                        .unwrap()
+                        .total_count
+                });
                 let mut status_text = format!(
                     "Current: {} {} {}",
                     stack.short_name,

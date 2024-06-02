@@ -163,6 +163,27 @@ impl FlameGraph {
         }
         ancestors
     }
+
+    pub fn get_descendants(&self, stack_id: &StackIdentifier) -> Vec<StackIdentifier> {
+        let mut descendants = vec![];
+        let mut stack_ids = vec![*stack_id];
+        while let Some(stack_id) = stack_ids.pop() {
+            descendants.push(stack_id);
+            if let Some(stack) = self.get_stack(&stack_id) {
+                stack_ids.extend(stack.children.iter().copied());
+            }
+        }
+        descendants
+    }
+
+    pub fn is_ancenstor_or_descendant(
+        &self,
+        stack_id: &StackIdentifier,
+        other_id: &StackIdentifier,
+    ) -> bool {
+        self.get_ancestors(stack_id).contains(other_id)
+            || self.get_descendants(stack_id).contains(other_id)
+    }
 }
 
 #[cfg(test)]

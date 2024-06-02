@@ -1,12 +1,18 @@
 use crate::flame::{StackIdentifier, ROOT_ID};
 
 #[derive(Debug, Clone)]
+pub struct ZoomState {
+    pub stack_id: StackIdentifier,
+    pub zoom_factor: f64,
+}
+
+#[derive(Debug, Clone)]
 pub struct FlameGraphState {
     pub selected: StackIdentifier,
     pub level_offset: usize,
     pub frame_height: Option<u16>,
     pub frame_width: Option<u16>,
-    pub zoom: Option<StackIdentifier>,
+    pub zoom: Option<ZoomState>,
 }
 
 impl Default for FlameGraphState {
@@ -30,11 +36,14 @@ impl FlameGraphState {
         self.selected.clone_from(stack_id);
     }
 
-    pub fn set_zoom(&mut self) {
+    pub fn set_zoom(&mut self, zoom_factor: f64) {
         if self.selected == ROOT_ID {
             self.unset_zoom();
         } else {
-            self.zoom = Some(self.selected);
+            self.zoom = Some(ZoomState {
+                stack_id: self.selected,
+                zoom_factor,
+            });
         }
     }
 
