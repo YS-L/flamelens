@@ -42,6 +42,9 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         KeyCode::Enter => {
             app.flamegraph_view.set_zoom();
         }
+        KeyCode::Char('r') => {
+            app.flamegraph_view.reset();
+        }
         // Other handlers you could add here.
         _ => {}
     }

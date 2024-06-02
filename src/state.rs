@@ -31,6 +31,14 @@ impl FlameGraphState {
     }
 
     pub fn set_zoom(&mut self) {
-        self.zoom = Some(self.selected);
+        if self.selected == ROOT_ID {
+            self.unset_zoom();
+        } else {
+            self.zoom = Some(self.selected);
+        }
+    }
+
+    pub fn unset_zoom(&mut self) {
+        self.zoom = None;
     }
 }

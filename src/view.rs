@@ -186,6 +186,12 @@ impl FlameGraphView {
     pub fn set_zoom(&mut self) {
         self.state.set_zoom();
     }
+
+    pub fn reset(&mut self) {
+        self.state.select_root();
+        self.state.level_offset = 0;
+        self.state.unset_zoom();
+    }
 }
 
 #[cfg(test)]
