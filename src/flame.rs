@@ -44,8 +44,22 @@ impl FlameGraph {
             .expect("Could not read file")
             .lines()
         {
-            let (line, count) = line.rsplit_once(' ').unwrap();
-            let count = count.parse::<u64>().unwrap();
+            #[allow(clippy::unnecessary_unwrap)]
+            let line_and_count = match line.rsplit_once(' ') {
+                Some((line, count)) => {
+                    let parsed_count = count.parse::<u64>();
+                    if line.is_empty() || parsed_count.is_err() {
+                        None
+                    } else {
+                        Some((line, parsed_count.unwrap()))
+                    }
+                }
+                _ => None,
+            };
+            if line_and_count.is_none() {
+                continue;
+            }
+            let (line, count) = line_and_count.unwrap();
 
             stacks[ROOT_ID].total_count += count;
             let mut leading = "".to_string();
