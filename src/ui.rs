@@ -94,7 +94,7 @@ impl<'a> FlamelensWidget<'a> {
     ) {
         let after_level_offset = stack.level >= self.app.flamegraph_state().level_offset;
 
-        // Only render if the stack is within view port
+        // Only render if the stack is visible
         let effective_x_budget = x_budget as u16;
         if after_level_offset && y < y_max && effective_x_budget > 0 {
             let stack_color = self.get_stack_color(stack, zoom_state);
@@ -112,10 +112,12 @@ impl<'a> FlamelensWidget<'a> {
                 ),
                 effective_x_budget,
             );
+        } else {
+            // Can skip rendering children if the stack is already not visible
+            return;
         }
 
-        // TODO: probably not needed now
-        // Always traverse to children to update their state even if they are out of view port
+        // Render children
         let mut x_offset = 0;
         let zoomed_child = stack
             .children
