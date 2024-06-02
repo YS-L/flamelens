@@ -208,31 +208,64 @@ impl<'a> FlamelensWidget<'a> {
                 0
             }
         );
-        let zoom_str = if let Some(stack_id) = self.app.flamegraph_state().zoom {
-            let zoom_stack = self.app.flamegraph().get_stack(&stack_id).unwrap();
-            Some(format!("[Zoom: {}]", zoom_stack.short_name.clone()))
-        } else {
-            None
-        };
         match stack {
             Some(stack) => {
-                let status_text = format!(
-                    "Current: {} [Total: {}, {:.2}%] [Self: {}, {:.2}%] {}",
+                let zoom_total_count =
+                    self.app
+                        .flamegraph_state()
+                        .zoom
+                        .as_ref()
+                        .map(|zoom_stack_id| {
+                            self.app
+                                .flamegraph()
+                                .get_stack(zoom_stack_id)
+                                .unwrap()
+                                .total_count
+                        });
+                let mut status_text = format!(
+                    "Current: {} {} {}",
                     stack.short_name,
-                    stack.total_count,
-                    (stack.total_count as f64 / root_total_count as f64) * 100.0,
-                    stack.self_count,
-                    (stack.self_count as f64 / root_total_count as f64) * 100.0,
-                    render_str,
+                    FlamelensWidget::get_count_stats_str(
+                        "Total",
+                        stack.total_count,
+                        root_total_count,
+                        zoom_total_count
+                    ),
+                    FlamelensWidget::get_count_stats_str(
+                        "Self",
+                        stack.self_count,
+                        root_total_count,
+                        zoom_total_count
+                    ),
                 );
-                if let Some(zoom_str) = zoom_str {
-                    format!("{} {}", status_text, zoom_str)
-                } else {
-                    status_text
-                }
+                status_text += " ";
+                status_text += render_str.as_str();
+                status_text
             }
             None => "No stack selected".to_string(),
         }
+    }
+
+    fn get_count_stats_str(
+        name: &str,
+        count: u64,
+        total_count: u64,
+        zoomed_total_count: Option<u64>,
+    ) -> String {
+        format!(
+            "[{}: {} samples, {:.2}%{}]",
+            name,
+            count,
+            (count as f64 / total_count as f64) * 100.0,
+            if let Some(zoomed_total_count) = zoomed_total_count {
+                format!(
+                    ", {:.2}% of zoomed",
+                    (count as f64 / zoomed_total_count as f64) * 100.0
+                )
+            } else {
+                "".to_string()
+            }
+        )
     }
 }
 
