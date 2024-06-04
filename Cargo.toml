@@ -6,6 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.86"
 clap = { version = "4.5.4", features = ["derive"] }
 crossterm = "0.27.0"
+py-spy = { git = "https://github.com/benfred/py-spy.git", rev = "8dd5492" }
 ratatui = "0.26.3"
+remoteprocess = "0.4.13"

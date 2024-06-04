@@ -18,3 +18,7 @@ pub mod flame;
 pub mod state;
 
 pub mod view;
+
+pub mod py_spy;
+
+pub mod py_spy_flamegraph;

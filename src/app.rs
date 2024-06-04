@@ -1,6 +1,8 @@
 use crate::flame::FlameGraph;
+use crate::py_spy::record_samples;
 use crate::state::FlameGraphState;
 use crate::view::FlameGraphView;
+use remoteprocess;
 use std::sync::{Arc, Mutex};
 use std::{error, thread};
 
@@ -31,7 +33,7 @@ impl App {
         }
     }
 
-    pub fn with_pid(_pid: u64) -> Self {
+    pub fn with_pid(pid: u64) -> Self {
         let next_flamegraph: Arc<Mutex<Option<FlameGraph>>> = Arc::new(Mutex::new(None));
         let pyspy_data: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
 
@@ -44,6 +46,15 @@ impl App {
                     *next_flamegraph.lock().unwrap() = Some(flamegraph);
                 }
                 thread::sleep(std::time::Duration::from_millis(250));
+            });
+        }
+
+        {
+            let pyspy_data = pyspy_data.clone();
+            let _handle = thread::spawn(move || {
+                let config = py_spy::Config::default();
+                let pid = pid as remoteprocess::Pid;
+                record_samples(pid, &config, pyspy_data).unwrap();
             });
         }
 
