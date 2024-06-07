@@ -114,8 +114,7 @@ impl<'a> FlamelensWidget<'a> {
                     effective_x_budget,
                 );
             }
-        }
-        else {
+        } else {
             // Can skip rendering children if the stack is already not visible
             return;
         }

@@ -136,6 +136,8 @@ pub fn record_samples(
         if should_dump {
             last_data_dump = Some(Instant::now());
             let data = output.get_data();
+            // let mut file = std::fs::File::create("data.txt")?;
+            // std::io::Write::write_all(&mut file, data.as_bytes())?;
             output_data.lock().unwrap().replace(data);
         }
     }

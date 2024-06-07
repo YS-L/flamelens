@@ -52,7 +52,17 @@ impl App {
         {
             let pyspy_data = pyspy_data.clone();
             let _handle = thread::spawn(move || {
-                let config = py_spy::Config::default();
+                // Note: mimic a record command's invocation vs simply getting default Config as
+                // from_args does a lot of heavy lifting
+                let args = vec![
+                    "py-spy".to_owned(),
+                    "record".to_string(),
+                    "--pid".to_string(),
+                    format!("{}", pid),
+                    "--format".to_string(),
+                    "raw".to_string(),
+                ];
+                let config = py_spy::Config::from_args(&args).unwrap();
                 let pid = pid as remoteprocess::Pid;
                 record_samples(pid, &config, pyspy_data).unwrap();
             });
