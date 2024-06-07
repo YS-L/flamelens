@@ -96,23 +96,26 @@ impl<'a> FlamelensWidget<'a> {
 
         // Only render if the stack is visible
         let effective_x_budget = x_budget as u16;
-        if after_level_offset && y < y_max && effective_x_budget > 0 {
-            let stack_color = self.get_stack_color(stack, zoom_state);
-            let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
-            buf.set_span(
-                x,
-                y,
-                &Span::styled(
-                    &format!(
-                        " {:width$}",
-                        stack.short_name,
-                        width = effective_x_budget.saturating_sub(1) as usize,
+        if y < y_max && effective_x_budget > 0 {
+            if after_level_offset {
+                let stack_color = self.get_stack_color(stack, zoom_state);
+                let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
+                buf.set_span(
+                    x,
+                    y,
+                    &Span::styled(
+                        &format!(
+                            " {:width$}",
+                            stack.short_name,
+                            width = effective_x_budget.saturating_sub(1) as usize,
+                        ),
+                        Style::default().fg(text_color).bg(stack_color),
                     ),
-                    Style::default().fg(text_color).bg(stack_color),
-                ),
-                effective_x_budget,
-            );
-        } else {
+                    effective_x_budget,
+                );
+            }
+        }
+        else {
             // Can skip rendering children if the stack is already not visible
             return;
         }
