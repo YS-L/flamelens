@@ -80,7 +80,7 @@ impl App {
     /// Handles the tick event of the terminal.
     pub fn tick(&mut self) {
         if let Some(fg) = self.next_flamegraph.lock().unwrap().take() {
-            self.flamegraph_view.set_flamegraph(fg);
+            self.flamegraph_view.replace_flamegraph(fg);
         }
     }
 

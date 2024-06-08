@@ -1,4 +1,4 @@
-use crate::flame::{StackIdentifier, ROOT_ID};
+use crate::flame::{FlameGraph, StackIdentifier, ROOT_ID};
 
 #[derive(Debug, Clone)]
 pub struct ZoomState {
@@ -49,5 +49,34 @@ impl FlameGraphState {
 
     pub fn unset_zoom(&mut self) {
         self.zoom = None;
+    }
+
+    /// Update StackIdentifiers to point to the correct ones in the new flamegraph
+    pub fn handle_flamegraph_replacement(&mut self, old: &FlameGraph, new: &FlameGraph) {
+        if self.selected != ROOT_ID {
+            if let Some(new_stack_id) = Self::get_new_stack_id(&self.selected, old, new) {
+                self.selected = new_stack_id;
+            } else {
+                self.select_root();
+            }
+        }
+        if let Some(zoom) = &mut self.zoom {
+            if let Some(new_stack_id) = Self::get_new_stack_id(&zoom.stack_id, old, new) {
+                zoom.stack_id = new_stack_id;
+            } else {
+                self.unset_zoom();
+            }
+        }
+    }
+
+    fn get_new_stack_id(
+        stack_id: &StackIdentifier,
+        old: &FlameGraph,
+        new: &FlameGraph,
+    ) -> Option<StackIdentifier> {
+        old.get_stack(stack_id).and_then(|stack| {
+            new.get_stack_by_full_name(&stack.full_name)
+                .map(|stack| stack.id)
+        })
     }
 }

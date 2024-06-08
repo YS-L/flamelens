@@ -21,8 +21,10 @@ impl FlameGraphView {
         }
     }
 
-    pub fn set_flamegraph(&mut self, flamegraph: FlameGraph) {
-        self.flamegraph = flamegraph;
+    pub fn replace_flamegraph(&mut self, new_flamegraph: FlameGraph) {
+        self.state
+            .handle_flamegraph_replacement(&self.flamegraph, &new_flamegraph);
+        self.flamegraph = new_flamegraph;
         self.updated_at = std::time::Instant::now();
     }
 
