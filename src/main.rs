@@ -28,9 +28,9 @@ fn main() -> AppResult<()> {
 
     // Create an application.
     let app = if let Some(filename) = args.filename {
-        let content = std::fs::read_to_string(filename).expect("Could not read file");
+        let content = std::fs::read_to_string(&filename).expect("Could not read file");
         let flamegraph = FlameGraph::from_string(&content);
-        Some(App::with_flamegraph(flamegraph))
+        Some(App::with_flamegraph(&filename, flamegraph))
     } else {
         args.pid
             .map(|pid| App::with_pid(pid.parse().expect("Could not parse pid")))

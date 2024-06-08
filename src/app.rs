@@ -9,6 +9,12 @@ use std::{error, thread};
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
+#[derive(Debug)]
+pub enum FlameGraphInput {
+    File(String),
+    Pid(u64, Option<String>),
+}
+
 /// Application.
 #[derive(Debug)]
 pub struct App {
@@ -18,17 +24,20 @@ pub struct App {
     pub counter: u8,
     /// Flamegraph view
     pub flamegraph_view: FlameGraphView,
+    /// Flamegraph input information
+    pub flamegraph_input: FlameGraphInput,
     /// Next flamegraph to swap in
     next_flamegraph: Arc<Mutex<Option<FlameGraph>>>,
 }
 
 impl App {
     /// Constructs a new instance of [`App`].
-    pub fn with_flamegraph(flamegraph: FlameGraph) -> Self {
+    pub fn with_flamegraph(filename: &str, flamegraph: FlameGraph) -> Self {
         Self {
             running: true,
             counter: 0,
             flamegraph_view: FlameGraphView::new(flamegraph),
+            flamegraph_input: FlameGraphInput::File(filename.to_string()),
             next_flamegraph: Arc::new(Mutex::new(None)),
         }
     }
@@ -69,10 +78,15 @@ impl App {
         }
 
         let flamegraph = FlameGraph::from_string("");
+        let process_info = remoteprocess::Process::new(pid as remoteprocess::Pid)
+            .and_then(|p| p.cmdline())
+            .ok()
+            .map(|c| c.join(" "));
         Self {
             running: true,
             counter: 0,
             flamegraph_view: FlameGraphView::new(flamegraph),
+            flamegraph_input: FlameGraphInput::Pid(pid, process_info),
             next_flamegraph: next_flamegraph.clone(),
         }
     }

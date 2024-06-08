@@ -1,5 +1,5 @@
 use crate::{
-    app::App,
+    app::{App, FlameGraphInput},
     flame::{StackIdentifier, StackInfo},
 };
 use ratatui::{
@@ -43,12 +43,21 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
     fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
         let layout = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Fill(1), Constraint::Length(2)])
+            .constraints([
+                Constraint::Length(3),
+                Constraint::Fill(1),
+                Constraint::Length(2),
+            ])
             .split(area);
+
+        // Header area
+        let header = Paragraph::new(self.get_header_text())
+            .block(Block::new().borders(Borders::BOTTOM | Borders::TOP));
+        header.render(layout[0], buf);
 
         // Framegraph area
         let tic = std::time::Instant::now();
-        let flamegraph_area = layout[0];
+        let flamegraph_area = layout[1];
         let zoom_state = self
             .app
             .flamegraph_state()
@@ -72,7 +81,7 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
         // Status bar
         let status_bar = Paragraph::new(self.get_status_text(flamegraph_render_time))
             .block(Block::new().borders(Borders::TOP));
-        status_bar.render(layout[1], buf);
+        status_bar.render(layout[2], buf);
 
         // Update widget state
         state.frame_height = flamegraph_area.height;
@@ -193,6 +202,19 @@ impl<'a> FlamelensWidget<'a> {
                 }
             }
             _ => Color::Black,
+        }
+    }
+
+    fn get_header_text(&self) -> String {
+        match &self.app.flamegraph_input {
+            FlameGraphInput::File(path) => format!("File: {}", path),
+            FlameGraphInput::Pid(pid, info) => {
+                let mut out = format!("Process: {}", pid);
+                if let Some(info) = info {
+                    out += format!(" ({})", info).as_str();
+                }
+                out
+            }
         }
     }
 
