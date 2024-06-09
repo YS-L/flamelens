@@ -29,8 +29,11 @@ fn main() -> AppResult<()> {
     // Create an application.
     let app = if let Some(filename) = args.filename {
         let content = std::fs::read_to_string(&filename).expect("Could not read file");
+        let tic = std::time::Instant::now();
         let flamegraph = FlameGraph::from_string(&content);
-        Some(App::with_flamegraph(&filename, flamegraph))
+        let mut app = App::with_flamegraph(&filename, flamegraph);
+        app.add_elapsed("flamegraph", tic.elapsed());
+        Some(app)
     } else {
         args.pid
             .map(|pid| App::with_pid(pid.parse().expect("Could not parse pid")))
@@ -42,6 +45,7 @@ fn main() -> AppResult<()> {
             std::process::exit(1);
         }
     };
+    app.debug = args.debug;
 
     // Initialize the terminal user interface.
     let backend = CrosstermBackend::new(io::stderr());

@@ -21,6 +21,7 @@ use std::{
 pub struct FlamelensWidgetState {
     frame_height: u16,
     frame_width: u16,
+    render_time: Duration,
 }
 
 pub struct ZoomState {
@@ -83,13 +84,14 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
         let flamegraph_render_time = tic.elapsed();
 
         // Status bar
-        let status_bar = Paragraph::new(self.get_status_text(flamegraph_render_time))
-            .block(Block::new().borders(Borders::TOP));
+        let status_bar =
+            Paragraph::new(self.get_status_text()).block(Block::new().borders(Borders::TOP));
         status_bar.render(layout[2], buf);
 
         // Update widget state
         state.frame_height = flamegraph_area.height;
         state.frame_width = flamegraph_area.width;
+        state.render_time = flamegraph_render_time;
     }
 }
 
@@ -229,21 +231,20 @@ impl<'a> FlamelensWidget<'a> {
         }
     }
 
-    fn get_status_text(&self, flamegraph_render_time: Duration) -> String {
+    fn get_status_text(&self) -> String {
         let stack = self
             .app
             .flamegraph()
             .get_stack(&self.app.flamegraph_state().selected);
         let root_total_count = self.app.flamegraph().root().total_count;
-        let render_ms = flamegraph_render_time.as_micros() as f64 / 1000.0;
-        let render_str = format!(
-            "[Render: {:.2}ms / {}fps]",
-            render_ms,
-            if render_ms > 0.0 {
-                (1000.0 / render_ms) as u32
-            } else {
-                0
-            }
+        let elapsed_str = format!(
+            "[{}]",
+            self.app
+                .elapsed
+                .iter()
+                .map(|(k, v)| format!("{}:{:.2}ms", k, v.as_micros() as f64 / 1000.0))
+                .collect::<Vec<String>>()
+                .join(" ")
         );
         match stack {
             Some(stack) => {
@@ -270,8 +271,10 @@ impl<'a> FlamelensWidget<'a> {
                         zoom_total_count
                     ),
                 );
-                status_text += " ";
-                status_text += render_str.as_str();
+                if self.app.debug {
+                    status_text += " ";
+                    status_text += elapsed_str.as_str();
+                }
                 status_text
             }
             None => "No stack selected".to_string(),
@@ -314,4 +317,5 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .set_frame_height(flamelens_state.frame_height);
     app.flamegraph_view
         .set_frame_width(flamelens_state.frame_width);
+    app.add_elapsed("render", flamelens_state.render_time);
 }

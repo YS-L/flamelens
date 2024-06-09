@@ -3,7 +3,9 @@ use crate::py_spy::{record_samples, SamplerStatus};
 use crate::state::FlameGraphState;
 use crate::view::FlameGraphView;
 use remoteprocess;
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 use std::{error, thread};
 
 /// Application result type.
@@ -15,19 +17,27 @@ pub enum FlameGraphInput {
     Pid(u64, Option<String>),
 }
 
+#[derive(Debug)]
+pub struct ParsedFlameGraph {
+    pub flamegraph: FlameGraph,
+    pub elapsed: Duration,
+}
+
 /// Application.
 #[derive(Debug)]
 pub struct App {
     /// Is the application running?
     pub running: bool,
-    /// counter
-    pub counter: u8,
     /// Flamegraph view
     pub flamegraph_view: FlameGraphView,
     /// Flamegraph input information
     pub flamegraph_input: FlameGraphInput,
+    /// Timing information for debugging
+    pub elapsed: HashMap<String, Duration>,
+    /// Debug mode
+    pub debug: bool,
     /// Next flamegraph to swap in
-    next_flamegraph: Arc<Mutex<Option<FlameGraph>>>,
+    next_flamegraph: Arc<Mutex<Option<ParsedFlameGraph>>>,
     sampler_status: Option<Arc<Mutex<SamplerStatus>>>,
 }
 
@@ -36,16 +46,17 @@ impl App {
     pub fn with_flamegraph(filename: &str, flamegraph: FlameGraph) -> Self {
         Self {
             running: true,
-            counter: 0,
             flamegraph_view: FlameGraphView::new(flamegraph),
             flamegraph_input: FlameGraphInput::File(filename.to_string()),
+            elapsed: HashMap::new(),
+            debug: false,
             next_flamegraph: Arc::new(Mutex::new(None)),
             sampler_status: None,
         }
     }
 
     pub fn with_pid(pid: u64) -> Self {
-        let next_flamegraph: Arc<Mutex<Option<FlameGraph>>> = Arc::new(Mutex::new(None));
+        let next_flamegraph: Arc<Mutex<Option<ParsedFlameGraph>>> = Arc::new(Mutex::new(None));
         let pyspy_data: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
         let sampler_status = Arc::new(Mutex::new(SamplerStatus::Running));
 
@@ -55,8 +66,13 @@ impl App {
             let pyspy_data = pyspy_data.clone();
             let _handle = thread::spawn(move || loop {
                 if let Some(data) = pyspy_data.lock().unwrap().take() {
+                    let tic = std::time::Instant::now();
                     let flamegraph = FlameGraph::from_string(&data);
-                    *next_flamegraph.lock().unwrap() = Some(flamegraph);
+                    let parsed = ParsedFlameGraph {
+                        flamegraph,
+                        elapsed: tic.elapsed(),
+                    };
+                    *next_flamegraph.lock().unwrap() = Some(parsed);
                 }
                 thread::sleep(std::time::Duration::from_millis(250));
             });
@@ -90,18 +106,21 @@ impl App {
             .map(|c| c.join(" "));
         Self {
             running: true,
-            counter: 0,
             flamegraph_view: FlameGraphView::new(flamegraph),
             flamegraph_input: FlameGraphInput::Pid(pid, process_info),
             next_flamegraph: next_flamegraph.clone(),
+            elapsed: HashMap::new(),
+            debug: false,
             sampler_status: Some(sampler_status),
         }
     }
 
     /// Handles the tick event of the terminal.
     pub fn tick(&mut self) {
-        if let Some(fg) = self.next_flamegraph.lock().unwrap().take() {
-            self.flamegraph_view.replace_flamegraph(fg);
+        if let Some(parsed) = self.next_flamegraph.lock().unwrap().take() {
+            self.flamegraph_view.replace_flamegraph(parsed.flamegraph);
+            self.elapsed
+                .insert("flamegraph".to_string(), parsed.elapsed);
         }
         if let Some(SamplerStatus::Error(s)) = self
             .sampler_status
@@ -129,5 +148,9 @@ impl App {
         self.sampler_status
             .as_ref()
             .map(|s| s.lock().unwrap().clone())
+    }
+
+    pub fn add_elapsed(&mut self, name: &str, elapsed: Duration) {
+        self.elapsed.insert(name.to_string(), elapsed);
     }
 }
