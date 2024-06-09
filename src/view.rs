@@ -47,15 +47,20 @@ impl FlameGraphView {
 
     pub fn to_child_stack(&mut self) {
         if let Some(stack) = self.flamegraph.get_stack(&self.state.selected) {
-            for child in &stack.children {
-                if let Some(child_stack) = self.flamegraph.get_stack(child) {
-                    if self.is_stack_visibly_wide(child_stack, None) {
-                        self.state.select_id(child);
-                        if !self.is_stack_in_view_port(child_stack) {
-                            self.state.level_offset += 1;
-                        }
-                        return;
+            let mut children_stacks = stack
+                .children
+                .iter()
+                .filter_map(|x| self.flamegraph.get_stack(x))
+                .collect::<Vec<_>>();
+            // Visit the widest child first
+            children_stacks.sort_by_key(|x| x.total_count);
+            for child_stack in children_stacks.iter().rev() {
+                if self.is_stack_visibly_wide(child_stack, None) {
+                    self.state.select_id(&child_stack.id);
+                    if !self.is_stack_in_view_port(child_stack) {
+                        self.state.level_offset += 1;
                     }
+                    return;
                 }
             }
         } else {
