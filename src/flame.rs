@@ -115,11 +115,14 @@ impl FlameGraph {
         level: usize,
         parent_total_count_and_width_factor: Option<(u64, f64)>,
     ) {
+        // Update levels
         if self.levels.len() <= level {
             self.levels.push(vec![]);
         }
         self.levels[level].push(*stack_id);
-        let stack = self.stacks.get_mut(*stack_id).unwrap();
+
+        // Calculate width_factor of the current stack
+        let stack = self.stacks.get(*stack_id).unwrap();
         let total_count = stack.total_count;
         let width_factor = if let Some((parent_total_count, parent_width_factor)) =
             parent_total_count_and_width_factor
@@ -128,9 +131,24 @@ impl FlameGraph {
         } else {
             1.0
         };
+
+        // Sort children
+        let mut sorted_children = stack.children.clone();
+        sorted_children.sort_by_key(|child_id| {
+            self.stacks
+                .get(*child_id)
+                .map(|child| child.total_count)
+                .unwrap_or(0)
+        });
+        sorted_children.reverse();
+
+        // Make the updates to the current stack
+        let stack = self.stacks.get_mut(*stack_id).unwrap();
         stack.width_factor = width_factor;
-        let children = stack.children.clone();
-        for child_id in children.iter() {
+        stack.children = sorted_children;
+
+        // Move on to children
+        for child_id in stack.children.clone().iter() {
             self.populate_levels(child_id, level + 1, Some((total_count, width_factor)));
         }
     }
