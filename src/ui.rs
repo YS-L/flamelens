@@ -7,7 +7,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
     text::Span,
-    widgets::{Block, Borders, Paragraph, StatefulWidget, Widget},
+    widgets::{Block, Borders, Paragraph, StatefulWidget, Widget, Wrap},
     Frame,
 };
 use std::time::Duration;
@@ -41,18 +41,21 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
     type State = FlamelensWidgetState;
 
     fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
+        let header = Paragraph::new(self.get_header_text())
+            .wrap(Wrap { trim: false })
+            .block(Block::new().borders(Borders::BOTTOM | Borders::TOP));
+        let header_line_count_with_borders = header.line_count(area.width) as u16 + 2;
+
         let layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
-                Constraint::Length(3),
+                Constraint::Length(header_line_count_with_borders),
                 Constraint::Fill(1),
                 Constraint::Length(2),
             ])
             .split(area);
 
         // Header area
-        let header = Paragraph::new(self.get_header_text())
-            .block(Block::new().borders(Borders::BOTTOM | Borders::TOP));
         header.render(layout[0], buf);
 
         // Framegraph area
@@ -211,7 +214,7 @@ impl<'a> FlamelensWidget<'a> {
             FlameGraphInput::Pid(pid, info) => {
                 let mut out = format!("Process: {}", pid);
                 if let Some(info) = info {
-                    out += format!(" ({})", info).as_str();
+                    out += format!(" [{}]", info).as_str();
                 }
                 out
             }
