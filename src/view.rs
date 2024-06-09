@@ -1,7 +1,7 @@
 use std::cmp::min;
 
 use crate::{
-    flame::{FlameGraph, StackIdentifier, StackInfo},
+    flame::{FlameGraph, StackIdentifier, StackInfo, ROOT_ID},
     state::FlameGraphState,
 };
 
@@ -49,7 +49,7 @@ impl FlameGraphView {
         if let Some(stack) = self.flamegraph.get_stack(&self.state.selected) {
             for child in &stack.children {
                 if let Some(child_stack) = self.flamegraph.get_stack(child) {
-                    if self.is_stack_visibly_wide(child_stack) {
+                    if self.is_stack_visibly_wide(child_stack, None) {
                         self.state.select_id(child);
                         if !self.is_stack_in_view_port(child_stack) {
                             self.state.level_offset += 1;
@@ -89,10 +89,14 @@ impl FlameGraphView {
         }
     }
 
-    fn is_stack_visibly_wide(&self, stack: &StackInfo) -> bool {
+    fn is_stack_visibly_wide(&self, stack: &StackInfo, zoom_factor: Option<f64>) -> bool {
         if let Some(frame_width) = self.state.frame_width {
             let mut expected_frame_width = stack.width_factor * frame_width as f64;
-            if let Some(zoom) = &self.state.zoom {
+            if let Some(zoom_factor) = zoom_factor {
+                // Use manually specified zoom factor as the descendants / ancentors logic are
+                // handled by the caller
+                expected_frame_width *= zoom_factor;
+            } else if let Some(zoom) = &self.state.zoom {
                 // This is expensive, but this is only called on a small number of candidate stacks
                 // on navigation
                 if self
@@ -114,7 +118,7 @@ impl FlameGraphView {
         if let Some(stacks) = self.flamegraph.get_stacks_at_level(self.state.level_offset) {
             for stack_id in stacks {
                 if let Some(stack) = self.flamegraph.get_stack(stack_id) {
-                    if self.is_stack_visibly_wide(stack) {
+                    if self.is_stack_visibly_wide(stack, None) {
                         self.state.select_id(stack_id);
                         break;
                     }
@@ -137,7 +141,7 @@ impl FlameGraphView {
         let level_idx = level.iter().position(|x| x == stack_id)?;
         for sibling_id in level[level_idx + 1..].iter() {
             if let Some(stack) = self.flamegraph.get_stack(sibling_id) {
-                if self.is_stack_visibly_wide(stack) {
+                if self.is_stack_visibly_wide(stack, None) {
                     return Some(sibling_id).cloned();
                 }
             }
@@ -151,12 +155,40 @@ impl FlameGraphView {
         let level_idx = level.iter().position(|x| x == stack_id)?;
         for sibling_id in level[..level_idx].iter().rev() {
             if let Some(stack) = self.flamegraph.get_stack(sibling_id) {
-                if self.is_stack_visibly_wide(stack) {
+                if self.is_stack_visibly_wide(stack, None) {
                     return Some(sibling_id).cloned();
                 }
             }
         }
         None
+    }
+
+    /// Get number of visible levels in the flamegraph. This prevents scrolling far down to an
+    /// offset with no visible stacks as they are all too tiny.
+    pub fn get_num_visible_levels(&self) -> usize {
+        // Scaling factor to apply
+        let zoom_factor = self
+            .state
+            .zoom
+            .as_ref()
+            .map(|z| z.zoom_factor)
+            .unwrap_or(1.0);
+
+        // Count the number of unique levels that are visible
+        let starting_stack_id = if let Some(zoom) = &self.state.zoom {
+            zoom.stack_id
+        } else {
+            ROOT_ID
+        };
+        self.flamegraph
+            .get_descendants(&starting_stack_id)
+            .iter()
+            .filter_map(|id| self.flamegraph.get_stack(id))
+            .filter(|stack| self.is_stack_visibly_wide(stack, Some(zoom_factor)))
+            .map(|stack| stack.level)
+            .max()
+            .map(|x| x + 1) // e.g. if max level is 0, there is 1 level
+            .unwrap_or_else(|| self.flamegraph.get_num_levels())
     }
 
     pub fn to_previous_sibling(&mut self) {
@@ -174,8 +206,7 @@ impl FlameGraphView {
     pub fn scroll_bottom(&mut self) {
         if let Some(frame_height) = self.state.frame_height {
             let bottom_level_offset = self
-                .flamegraph
-                .get_num_levels()
+                .get_num_visible_levels()
                 .saturating_sub(frame_height as usize);
             self.state.level_offset = bottom_level_offset;
             self.keep_selected_stack_in_view_port();
