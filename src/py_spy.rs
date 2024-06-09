@@ -34,7 +34,32 @@ use remoteprocess;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
+#[derive(Debug, Clone)]
+pub enum SamplerStatus {
+    Running,
+    Error(String),
+    Done,
+}
+
 pub fn record_samples(
+    pid: remoteprocess::Pid,
+    config: &Config,
+    output_data: Arc<Mutex<Option<String>>>,
+    status: Arc<Mutex<SamplerStatus>>,
+) {
+    *status.lock().unwrap() = SamplerStatus::Running;
+    let result = run(pid, config, output_data);
+    match result {
+        Ok(_) => {
+            *status.lock().unwrap() = SamplerStatus::Done;
+        }
+        Err(e) => {
+            *status.lock().unwrap() = SamplerStatus::Error(format!("{:?}", e));
+        }
+    }
+}
+
+pub fn run(
     pid: remoteprocess::Pid,
     config: &Config,
     output_data: Arc<Mutex<Option<String>>>,

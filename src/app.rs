@@ -1,5 +1,5 @@
 use crate::flame::FlameGraph;
-use crate::py_spy::record_samples;
+use crate::py_spy::{record_samples, SamplerStatus};
 use crate::state::FlameGraphState;
 use crate::view::FlameGraphView;
 use remoteprocess;
@@ -28,6 +28,7 @@ pub struct App {
     pub flamegraph_input: FlameGraphInput,
     /// Next flamegraph to swap in
     next_flamegraph: Arc<Mutex<Option<FlameGraph>>>,
+    sampler_status: Option<Arc<Mutex<SamplerStatus>>>,
 }
 
 impl App {
@@ -39,13 +40,16 @@ impl App {
             flamegraph_view: FlameGraphView::new(flamegraph),
             flamegraph_input: FlameGraphInput::File(filename.to_string()),
             next_flamegraph: Arc::new(Mutex::new(None)),
+            sampler_status: None,
         }
     }
 
     pub fn with_pid(pid: u64) -> Self {
         let next_flamegraph: Arc<Mutex<Option<FlameGraph>>> = Arc::new(Mutex::new(None));
         let pyspy_data: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
+        let sampler_status = Arc::new(Mutex::new(SamplerStatus::Running));
 
+        // Thread to poll data from pyspy and construct the next flamegraph
         {
             let next_flamegraph = next_flamegraph.clone();
             let pyspy_data = pyspy_data.clone();
@@ -58,8 +62,10 @@ impl App {
             });
         }
 
+        // pyspy live sampler thread
         {
             let pyspy_data = pyspy_data.clone();
+            let sampler_status = sampler_status.clone();
             let _handle = thread::spawn(move || {
                 // Note: mimic a record command's invocation vs simply getting default Config as
                 // from_args does a lot of heavy lifting
@@ -73,7 +79,7 @@ impl App {
                 ];
                 let config = py_spy::Config::from_args(&args).unwrap();
                 let pid = pid as remoteprocess::Pid;
-                record_samples(pid, &config, pyspy_data).unwrap();
+                record_samples(pid, &config, pyspy_data, sampler_status);
             });
         }
 
@@ -88,6 +94,7 @@ impl App {
             flamegraph_view: FlameGraphView::new(flamegraph),
             flamegraph_input: FlameGraphInput::Pid(pid, process_info),
             next_flamegraph: next_flamegraph.clone(),
+            sampler_status: Some(sampler_status),
         }
     }
 
@@ -95,6 +102,13 @@ impl App {
     pub fn tick(&mut self) {
         if let Some(fg) = self.next_flamegraph.lock().unwrap().take() {
             self.flamegraph_view.replace_flamegraph(fg);
+        }
+        if let Some(SamplerStatus::Error(s)) = self
+            .sampler_status
+            .as_ref()
+            .map(|s| s.lock().unwrap().clone())
+        {
+            panic!("py-spy sampler exited with error: {}\n\nYou likely need to rerun this program with sudo.", s);
         }
     }
 
@@ -109,5 +123,11 @@ impl App {
 
     pub fn flamegraph_state(&self) -> &FlameGraphState {
         &self.flamegraph_view.state
+    }
+
+    pub fn sampler_status(&self) -> Option<SamplerStatus> {
+        self.sampler_status
+            .as_ref()
+            .map(|s| s.lock().unwrap().clone())
     }
 }

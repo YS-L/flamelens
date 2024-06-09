@@ -1,6 +1,7 @@
 use crate::{
     app::{App, FlameGraphInput},
     flame::{StackIdentifier, StackInfo},
+    py_spy::SamplerStatus,
 };
 use ratatui::{
     buffer::Buffer,
@@ -215,6 +216,13 @@ impl<'a> FlamelensWidget<'a> {
                 let mut out = format!("Process: {}", pid);
                 if let Some(info) = info {
                     out += format!(" [{}]", info).as_str();
+                }
+                if let Some(status) = &self.app.sampler_status() {
+                    out += match status {
+                        SamplerStatus::Running => " [Running]".to_string(),
+                        _ => " [Exited]".to_string(),
+                    }
+                    .as_str();
                 }
                 out
             }
