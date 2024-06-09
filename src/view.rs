@@ -196,6 +196,13 @@ impl FlameGraphView {
             .unwrap_or_else(|| self.flamegraph.get_num_levels())
     }
 
+    pub fn get_bottom_level_offset(&self) -> Option<usize> {
+        self.state.frame_height.map(|frame_height| {
+            self.get_num_visible_levels()
+                .saturating_sub(frame_height as usize)
+        })
+    }
+
     pub fn to_previous_sibling(&mut self) {
         if let Some(stack_id) = self.get_previous_sibling(&self.state.selected) {
             self.state.select_id(&stack_id)
@@ -209,11 +216,8 @@ impl FlameGraphView {
     }
 
     pub fn scroll_bottom(&mut self) {
-        if let Some(frame_height) = self.state.frame_height {
-            let bottom_level_offset = self
-                .get_num_visible_levels()
-                .saturating_sub(frame_height as usize);
-            self.state.level_offset = bottom_level_offset;
+        if let Some(bottom_offset) = self.get_bottom_level_offset() {
+            self.state.level_offset = bottom_offset;
             self.keep_selected_stack_in_view_port();
         }
     }
@@ -224,8 +228,13 @@ impl FlameGraphView {
     }
 
     pub fn page_down(&mut self) {
-        if let Some(frame_height) = self.state.frame_height {
-            self.set_level_offset(self.state.level_offset + frame_height as usize);
+        if let (Some(frame_height), Some(bottom_offset)) =
+            (self.state.frame_height, self.get_bottom_level_offset())
+        {
+            self.set_level_offset(min(
+                self.state.level_offset + frame_height as usize,
+                bottom_offset,
+            ));
             self.keep_selected_stack_in_view_port();
         }
     }
