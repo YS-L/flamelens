@@ -307,6 +307,20 @@ impl<'a> FlamelensWidget<'a> {
                         zoom_total_count
                     ),
                 );
+                if let Some(p) = &self.app.flamegraph_state().search_pattern {
+                    if let (true, Some(hit_coverage_count)) =
+                        (p.is_manual, self.app.flamegraph().hit_coverage_count)
+                    {
+                        status_text += " ";
+                        status_text += FlamelensWidget::get_count_stats_str(
+                            format!("\"{}\" hits", p.pattern).as_str(),
+                            hit_coverage_count,
+                            root_total_count,
+                            zoom_total_count,
+                        )
+                        .as_str();
+                    }
+                }
                 if self.app.debug {
                     status_text += " ";
                     status_text += elapsed_str.as_str();

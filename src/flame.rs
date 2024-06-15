@@ -48,6 +48,7 @@ pub struct FlameGraph {
     stacks: Vec<StackInfo>,
     full_name_to_stack_id: HashMap<String, StackIdentifier>,
     levels: Vec<Vec<StackIdentifier>>,
+    pub hit_coverage_count: Option<u64>,
 }
 
 impl FlameGraph {
@@ -132,6 +133,7 @@ impl FlameGraph {
             stacks,
             full_name_to_stack_id,
             levels: vec![],
+            hit_coverage_count: None,
         };
         out.populate_levels(&ROOT_ID, 0, None);
         out
@@ -246,10 +248,24 @@ impl FlameGraph {
         self.stacks.iter_mut().for_each(|stack| {
             stack.hit = p.re.is_match(&stack.short_name);
         });
+        self.hit_coverage_count = Some(self._count_hit_coverage(ROOT_ID));
     }
 
     pub fn clear_hits(&mut self) {
         self.stacks.iter_mut().for_each(|stack| stack.hit = false);
+        self.hit_coverage_count = None;
+    }
+
+    fn _count_hit_coverage(&self, stack_id: StackIdentifier) -> u64 {
+        let stack = self.get_stack(&stack_id).unwrap();
+        if stack.hit {
+            return stack.total_count;
+        }
+        let mut count = 0;
+        for child_id in stack.children.iter() {
+            count += self._count_hit_coverage(*child_id);
+        }
+        count
     }
 }
 
