@@ -19,11 +19,17 @@ pub struct StackInfo {
 }
 
 #[derive(Debug, Clone)]
+pub struct SearchPattern {
+    pub pattern: String,
+    pub is_regex: bool,
+}
+
+#[derive(Debug, Clone)]
 pub struct FlameGraph {
     stacks: Vec<StackInfo>,
     full_name_to_stack_id: HashMap<String, StackIdentifier>,
     levels: Vec<Vec<StackIdentifier>>,
-    search_pattern: Option<String>,
+    search_pattern: Option<SearchPattern>,
 }
 
 impl FlameGraph {
@@ -219,6 +225,10 @@ impl FlameGraph {
             || self.get_descendants(stack_id).contains(other_id)
     }
 
+    pub fn search_pattern(&self) -> &Option<SearchPattern> {
+        &self.search_pattern
+    }
+
     pub fn set_search_pattern(
         &mut self,
         pattern: &str,
@@ -231,7 +241,10 @@ impl FlameGraph {
             format!("^{}$", regex::escape(pattern))
         };
         let re = regex::Regex::new(&_pattern)?;
-        self.search_pattern = Some(pattern.to_string());
+        self.search_pattern = Some(SearchPattern {
+            pattern: pattern.to_string(),
+            is_regex,
+        });
         self.stacks.iter_mut().for_each(|stack| {
             stack.hit = re.is_match(&stack.short_name);
         });
