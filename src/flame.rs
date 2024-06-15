@@ -23,10 +23,11 @@ pub struct SearchPattern {
     pub pattern: String,
     pub is_regex: bool,
     pub re: regex::Regex,
+    pub is_manual: bool,
 }
 
 impl SearchPattern {
-    pub fn new(pattern: &str, is_regex: bool) -> Result<Self, regex::Error> {
+    pub fn new(pattern: &str, is_regex: bool, is_manual: bool) -> Result<Self, regex::Error> {
         let _pattern = if is_regex {
             pattern.to_string()
         } else {
@@ -37,6 +38,7 @@ impl SearchPattern {
             pattern: pattern.to_string(),
             is_regex,
             re,
+            is_manual,
         })
     }
 }

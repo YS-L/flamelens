@@ -242,9 +242,9 @@ impl<'a> FlamelensWidget<'a> {
 
     fn get_status_text(&self) -> String {
         if self.app.input_buffer.is_some() {
-            return self.get_status_text_buffer();
+            self.get_status_text_buffer()
         } else {
-            return self.get_status_text_command();
+            self.get_status_text_command()
         }
     }
 

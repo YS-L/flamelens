@@ -77,10 +77,11 @@ pub fn handle_input_buffer(key_event: KeyEvent, app: &mut App) -> AppResult<()> 
             // Exit application on `ESC` or `q`
             KeyCode::Esc => {
                 app.input_buffer = None;
+                app.flamegraph_view.unset_manual_search_pattern();
             }
             KeyCode::Enter => {
                 if !input.value().is_empty() {
-                    match SearchPattern::new(input.value(), true) {
+                    match SearchPattern::new(input.value(), true, true) {
                         Ok(p) => app.flamegraph_view.set_search_pattern(p),
                         Err(e) => {
                             panic!("[todo] handle regex error: {}", e)

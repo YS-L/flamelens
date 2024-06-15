@@ -23,13 +23,18 @@ impl FlameGraphView {
 
     pub fn select_id(&mut self, stack_id: &StackIdentifier) {
         self.state.select_id(stack_id);
+        if let Some(p) = self.state.search_pattern.as_ref() {
+            if p.is_manual {
+                return;
+            }
+        }
         let pattern = self
             .flamegraph
             .get_stack(stack_id)
             .map(|x| &x.short_name)
             .cloned();
         if let Some(pattern) = pattern {
-            let search_pattern = SearchPattern::new(&pattern, false).unwrap();
+            let search_pattern = SearchPattern::new(&pattern, false, false).unwrap();
             self.set_search_pattern(search_pattern);
         }
     }
@@ -288,6 +293,14 @@ impl FlameGraphView {
     pub fn unset_search_pattern(&mut self) {
         self.flamegraph.clear_hits();
         self.state.unset_search_pattern();
+    }
+
+    pub fn unset_manual_search_pattern(&mut self) {
+        if let Some(p) = self.state.search_pattern.as_ref() {
+            if p.is_manual {
+                self.unset_search_pattern();
+            }
+        }
     }
 
     pub fn reset(&mut self) {
