@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 use crate::{
-    app::{App, AppResult},
+    app::{App, AppResult, InputBuffer},
     flame::SearchPattern,
 };
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
@@ -62,7 +62,10 @@ pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             app.flamegraph_view.reset();
         }
         KeyCode::Char('/') => {
-            app.input_buffer = Some(tui_input::Input::new("".to_string()));
+            app.input_buffer = Some(InputBuffer {
+                buffer: tui_input::Input::new("".to_string()),
+                cursor: None,
+            });
         }
         // Other handlers you could add here.
         _ => {}
@@ -80,8 +83,8 @@ pub fn handle_input_buffer(key_event: KeyEvent, app: &mut App) -> AppResult<()> 
                 app.flamegraph_view.unset_manual_search_pattern();
             }
             KeyCode::Enter => {
-                if !input.value().is_empty() {
-                    match SearchPattern::new(input.value(), true, true) {
+                if !input.buffer.value().is_empty() {
+                    match SearchPattern::new(input.buffer.value(), true, true) {
                         Ok(p) => app.flamegraph_view.set_search_pattern(p),
                         Err(e) => {
                             panic!("[todo] handle regex error: {}", e)
@@ -91,7 +94,7 @@ pub fn handle_input_buffer(key_event: KeyEvent, app: &mut App) -> AppResult<()> 
                 app.input_buffer = None;
             }
             _ => {
-                input.handle_event(&Event::Key(key_event));
+                input.buffer.handle_event(&Event::Key(key_event));
             }
         }
     }

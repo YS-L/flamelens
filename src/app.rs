@@ -23,6 +23,12 @@ pub struct ParsedFlameGraph {
     pub elapsed: Duration,
 }
 
+#[derive(Debug)]
+pub struct InputBuffer {
+    pub buffer: tui_input::Input,
+    pub cursor: Option<(u16, u16)>,
+}
+
 /// Application.
 #[derive(Debug)]
 pub struct App {
@@ -33,7 +39,7 @@ pub struct App {
     /// Flamegraph input information
     pub flamegraph_input: FlameGraphInput,
     /// User input buffer
-    pub input_buffer: Option<tui_input::Input>,
+    pub input_buffer: Option<InputBuffer>,
     /// Timing information for debugging
     pub elapsed: HashMap<String, Duration>,
     /// Debug mode

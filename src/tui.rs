@@ -51,7 +51,14 @@ impl<B: Backend> Tui<B> {
     /// [`Draw`]: ratatui::Terminal::draw
     /// [`rendering`]: crate::ui::render
     pub fn draw(&mut self, app: &mut App) -> AppResult<()> {
-        self.terminal.draw(|frame| ui::render(app, frame))?;
+        self.terminal.draw(|frame| {
+            ui::render(app, frame);
+            if let Some(input_buffer) = &app.input_buffer {
+                if let Some(cursor) = input_buffer.cursor {
+                    frame.set_cursor(cursor.0, cursor.1);
+                }
+            }
+        })?;
         Ok(())
     }
 

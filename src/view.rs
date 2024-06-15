@@ -307,6 +307,7 @@ impl FlameGraphView {
         self.state.select_root();
         self.state.level_offset = 0;
         self.state.unset_zoom();
+        self.unset_search_pattern();
     }
 }
 

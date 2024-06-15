@@ -17,11 +17,14 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+const SEARCH_PREFIX: &str = "Search: ";
+
 #[derive(Debug, Clone, Default)]
 pub struct FlamelensWidgetState {
     frame_height: u16,
     frame_width: u16,
     render_time: Duration,
+    cursor_position: Option<(u16, u16)>,
 }
 
 pub struct ZoomState {
@@ -92,6 +95,7 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
         state.frame_height = flamegraph_area.height;
         state.frame_width = flamegraph_area.width;
         state.render_time = flamegraph_render_time;
+        state.cursor_position = self.get_cursor_position(layout[2]);
     }
 }
 
@@ -249,9 +253,18 @@ impl<'a> FlamelensWidget<'a> {
     }
 
     fn get_status_text_buffer(&self) -> String {
-        let buffer = self.app.input_buffer.as_ref().unwrap();
-        let status_text = format!("Search: {}", buffer);
+        let input_buffer = self.app.input_buffer.as_ref().unwrap();
+        let status_text = format!("{}{}", SEARCH_PREFIX, input_buffer.buffer);
         status_text
+    }
+
+    fn get_cursor_position(&self, status_area: Rect) -> Option<(u16, u16)> {
+        self.app.input_buffer.as_ref().map(|input_buffer| {
+            (
+                (input_buffer.buffer.cursor() + SEARCH_PREFIX.len()) as u16,
+                status_area.bottom(),
+            )
+        })
     }
 
     fn get_status_text_command(&self) -> String {
@@ -341,4 +354,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     app.flamegraph_view
         .set_frame_width(flamelens_state.frame_width);
     app.add_elapsed("render", flamelens_state.render_time);
+    if let Some(input_buffer) = &mut app.input_buffer {
+        input_buffer.cursor = flamelens_state.cursor_position;
+    }
 }
