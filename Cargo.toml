@@ -11,4 +11,5 @@ clap = { version = "4.5.4", features = ["derive"] }
 crossterm = "0.27.0"
 py-spy = { git = "https://github.com/benfred/py-spy.git", rev = "8dd5492" }
 ratatui = { version = "0.26.3", features = ["unstable-rendered-line-info"] }
+regex = "1.10.5"
 remoteprocess = "0.4.13"

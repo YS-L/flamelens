@@ -184,9 +184,18 @@ impl<'a> FlamelensWidget<'a> {
         }
         let v1 = hash_name(&stack.full_name);
         let v2 = hash_name(&stack.full_name.chars().rev().collect::<String>());
-        let mut r = 205 + (50.0 * v2) as u8;
-        let mut g = (230.0 * v1) as u8;
-        let mut b = (55.0 * v2) as u8;
+        let mut r;
+        let mut g;
+        let mut b;
+        if !stack.hit {
+            r = 205 + (50.0 * v2) as u8;
+            g = (230.0 * v1) as u8;
+            b = (55.0 * v2) as u8;
+        } else {
+            r = 30;
+            g = 55;
+            b = 230;
+        }
         if let Some(zoom_state) = zoom_state {
             if zoom_state.ancestors.contains(&stack.id) {
                 r = (r as f64 / 2.5) as u8;

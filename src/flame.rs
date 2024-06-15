@@ -15,6 +15,7 @@ pub struct StackInfo {
     pub children: Vec<StackIdentifier>,
     pub level: usize,
     pub width_factor: f64,
+    pub hit: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -22,6 +23,7 @@ pub struct FlameGraph {
     stacks: Vec<StackInfo>,
     full_name_to_stack_id: HashMap<String, StackIdentifier>,
     levels: Vec<Vec<StackIdentifier>>,
+    search_pattern: Option<String>,
 }
 
 impl FlameGraph {
@@ -38,6 +40,7 @@ impl FlameGraph {
             parent: None,
             children: Vec::<StackIdentifier>::new(),
             level: 0,
+            hit: false,
         });
         full_name_to_stack_id.insert(ROOT.to_string(), ROOT_ID);
         for line in content.lines() {
@@ -79,6 +82,7 @@ impl FlameGraph {
                         parent: Some(parent_id),
                         children: Vec::<StackIdentifier>::new(),
                         level,
+                        hit: false,
                     });
                     full_name_to_stack_id.insert(full_name.clone(), stacks.len() - 1);
                 }
@@ -104,6 +108,7 @@ impl FlameGraph {
             stacks,
             full_name_to_stack_id,
             levels: vec![],
+            search_pattern: None,
         };
         out.populate_levels(&ROOT_ID, 0, None);
         out
@@ -213,6 +218,30 @@ impl FlameGraph {
         self.get_ancestors(stack_id).contains(other_id)
             || self.get_descendants(stack_id).contains(other_id)
     }
+
+    pub fn set_search_pattern(
+        &mut self,
+        pattern: &str,
+        is_regex: bool,
+    ) -> Result<(), regex::Error> {
+        // Configure a regex
+        let _pattern = if is_regex {
+            pattern.to_string()
+        } else {
+            format!("^{}$", regex::escape(pattern))
+        };
+        let re = regex::Regex::new(&_pattern)?;
+        self.search_pattern = Some(pattern.to_string());
+        self.stacks.iter_mut().for_each(|stack| {
+            stack.hit = re.is_match(&stack.short_name);
+        });
+        Ok(())
+    }
+
+    pub fn clear_search_pattern(&mut self) {
+        self.search_pattern = None;
+        self.stacks.iter_mut().for_each(|stack| stack.hit = false);
+    }
 }
 
 #[cfg(test)]
@@ -247,6 +276,7 @@ mod tests {
                 children: vec![1, 3, 5],
                 level: 0,
                 width_factor: 1.0,
+                hit: false,
             },
             StackInfo {
                 id: 1,
@@ -258,6 +288,7 @@ mod tests {
                 children: vec![2, 7],
                 level: 1,
                 width_factor: 0.0258751902587519,
+                hit: false,
             },
             StackInfo {
                 id: 2,
@@ -269,6 +300,7 @@ mod tests {
                 children: vec![],
                 level: 2,
                 width_factor: 0.0106544901065449,
+                hit: false,
             },
             StackInfo {
                 id: 3,
@@ -280,6 +312,7 @@ mod tests {
                 children: vec![4, 6],
                 level: 1,
                 width_factor: 0.9726027397260274,
+                hit: false,
             },
             StackInfo {
                 id: 4,
@@ -291,6 +324,7 @@ mod tests {
                 children: vec![],
                 level: 2,
                 width_factor: 0.6407914764079147,
+                hit: false,
             },
             StackInfo {
                 id: 5,
@@ -302,6 +336,7 @@ mod tests {
                 children: vec![],
                 level: 1,
                 width_factor: 0.0015220700152207,
+                hit: false,
             },
             StackInfo {
                 id: 6,
@@ -313,6 +348,7 @@ mod tests {
                 children: vec![],
                 level: 2,
                 width_factor: 0.3318112633181126,
+                hit: false,
             },
             StackInfo {
                 id: 7,
@@ -324,6 +360,7 @@ mod tests {
                 children: vec![],
                 level: 2,
                 width_factor: 0.015220700152207,
+                hit: false,
             },
         ];
         let expected = items.into_iter().collect::<Vec<StackInfo>>();
@@ -341,6 +378,7 @@ mod tests {
                 parent: None,
                 children: vec![1, 3, 5],
                 level: 0,
+                hit: false,
             }
         );
     }

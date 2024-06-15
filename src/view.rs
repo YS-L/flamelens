@@ -21,6 +21,18 @@ impl FlameGraphView {
         }
     }
 
+    pub fn select_id(&mut self, stack_id: &StackIdentifier) {
+        self.state.select_id(stack_id);
+        let pattern = self
+            .flamegraph
+            .get_stack(stack_id)
+            .map(|x| &x.short_name)
+            .cloned();
+        if let Some(pattern) = pattern {
+            self.flamegraph.set_search_pattern(&pattern, false).unwrap();
+        }
+    }
+
     pub fn replace_flamegraph(&mut self, new_flamegraph: FlameGraph) {
         self.state
             .handle_flamegraph_replacement(&self.flamegraph, &new_flamegraph);
@@ -54,14 +66,18 @@ impl FlameGraphView {
                 .collect::<Vec<_>>();
             // Visit the widest child first
             children_stacks.sort_by_key(|x| x.total_count);
+            let mut selected_child = None;
             for child_stack in children_stacks.iter().rev() {
                 if self.is_stack_visibly_wide(child_stack, None) {
-                    self.state.select_id(&child_stack.id);
+                    selected_child = Some(child_stack.id);
                     if !self.is_stack_in_view_port(child_stack) {
                         self.state.level_offset += 1;
                     }
-                    return;
+                    break;
                 }
+            }
+            if let Some(selected_child) = selected_child {
+                self.select_id(&selected_child);
             }
         } else {
             self.state.select_root();
@@ -70,14 +86,18 @@ impl FlameGraphView {
 
     pub fn to_parent_stack(&mut self) {
         // TODO: maybe also check parent visibility to handle resizing / edge cases
-        if let Some(stack) = self.flamegraph.get_stack(&self.state.selected) {
-            if let Some(parent) = &stack.parent {
-                if let Some(parent_stack) = self.flamegraph.get_stack(parent) {
-                    self.state.select_id(parent);
+        if let Some(parent) = self
+            .flamegraph
+            .get_stack(&self.state.selected)
+            .map(|x| x.parent)
+        {
+            if let Some(parent) = parent {
+                if let Some(parent_stack) = self.flamegraph.get_stack(&parent) {
                     if !self.is_stack_in_view_port(parent_stack) {
                         self.state.level_offset -= 1;
                     }
                 }
+                self.select_id(&parent);
             }
         } else {
             self.state.select_root();
@@ -205,13 +225,13 @@ impl FlameGraphView {
 
     pub fn to_previous_sibling(&mut self) {
         if let Some(stack_id) = self.get_previous_sibling(&self.state.selected) {
-            self.state.select_id(&stack_id)
+            self.select_id(&stack_id)
         }
     }
 
     pub fn to_next_sibling(&mut self) {
         if let Some(stack_id) = self.get_next_sibling(&self.state.selected) {
-            self.state.select_id(&stack_id)
+            self.select_id(&stack_id)
         }
     }
 
