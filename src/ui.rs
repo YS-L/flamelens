@@ -241,6 +241,20 @@ impl<'a> FlamelensWidget<'a> {
     }
 
     fn get_status_text(&self) -> String {
+        if self.app.input_buffer.is_some() {
+            return self.get_status_text_buffer();
+        } else {
+            return self.get_status_text_command();
+        }
+    }
+
+    fn get_status_text_buffer(&self) -> String {
+        let buffer = self.app.input_buffer.as_ref().unwrap();
+        let status_text = format!("Search: {}", buffer);
+        status_text
+    }
+
+    fn get_status_text_command(&self) -> String {
         let stack = self
             .app
             .flamegraph()

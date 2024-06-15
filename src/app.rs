@@ -32,6 +32,8 @@ pub struct App {
     pub flamegraph_view: FlameGraphView,
     /// Flamegraph input information
     pub flamegraph_input: FlameGraphInput,
+    /// User input buffer
+    pub input_buffer: Option<tui_input::Input>,
     /// Timing information for debugging
     pub elapsed: HashMap<String, Duration>,
     /// Debug mode
@@ -48,6 +50,7 @@ impl App {
             running: true,
             flamegraph_view: FlameGraphView::new(flamegraph),
             flamegraph_input: FlameGraphInput::File(filename.to_string()),
+            input_buffer: None,
             elapsed: HashMap::new(),
             debug: false,
             next_flamegraph: Arc::new(Mutex::new(None)),
@@ -109,6 +112,7 @@ impl App {
             flamegraph_view: FlameGraphView::new(flamegraph),
             flamegraph_input: FlameGraphInput::Pid(pid, process_info),
             next_flamegraph: next_flamegraph.clone(),
+            input_buffer: None,
             elapsed: HashMap::new(),
             debug: false,
             sampler_status: Some(sampler_status),
