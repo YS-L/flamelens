@@ -22,6 +22,23 @@ pub struct StackInfo {
 pub struct SearchPattern {
     pub pattern: String,
     pub is_regex: bool,
+    pub re: regex::Regex,
+}
+
+impl SearchPattern {
+    pub fn new(pattern: &str, is_regex: bool) -> Result<Self, regex::Error> {
+        let _pattern = if is_regex {
+            pattern.to_string()
+        } else {
+            format!("^{}$", regex::escape(pattern))
+        };
+        let re = regex::Regex::new(&_pattern)?;
+        Ok(Self {
+            pattern: pattern.to_string(),
+            is_regex,
+            re,
+        })
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -29,7 +46,6 @@ pub struct FlameGraph {
     stacks: Vec<StackInfo>,
     full_name_to_stack_id: HashMap<String, StackIdentifier>,
     levels: Vec<Vec<StackIdentifier>>,
-    search_pattern: Option<SearchPattern>,
 }
 
 impl FlameGraph {
@@ -114,7 +130,6 @@ impl FlameGraph {
             stacks,
             full_name_to_stack_id,
             levels: vec![],
-            search_pattern: None,
         };
         out.populate_levels(&ROOT_ID, 0, None);
         out
@@ -225,27 +240,13 @@ impl FlameGraph {
             || self.get_descendants(stack_id).contains(other_id)
     }
 
-    pub fn search_pattern(&self) -> &Option<SearchPattern> {
-        &self.search_pattern
-    }
-
-    pub fn set_search_pattern(&mut self, p: SearchPattern) -> Result<(), regex::Error> {
-        // Configure a regex
-        let _pattern = if p.is_regex {
-            p.pattern.clone()
-        } else {
-            format!("^{}$", regex::escape(&p.pattern))
-        };
-        let re = regex::Regex::new(&_pattern)?;
-        self.search_pattern = Some(p);
+    pub fn set_hits(&mut self, p: &SearchPattern) {
         self.stacks.iter_mut().for_each(|stack| {
-            stack.hit = re.is_match(&stack.short_name);
+            stack.hit = p.re.is_match(&stack.short_name);
         });
-        Ok(())
     }
 
-    pub fn clear_search_pattern(&mut self) {
-        self.search_pattern = None;
+    pub fn clear_hits(&mut self) {
         self.stacks.iter_mut().for_each(|stack| stack.hit = false);
     }
 }

@@ -29,12 +29,8 @@ impl FlameGraphView {
             .map(|x| &x.short_name)
             .cloned();
         if let Some(pattern) = pattern {
-            self.flamegraph
-                .set_search_pattern(SearchPattern {
-                    pattern,
-                    is_regex: false,
-                })
-                .unwrap();
+            let search_pattern = SearchPattern::new(&pattern, false).unwrap();
+            self.set_search_pattern(search_pattern);
         }
     }
 
@@ -282,6 +278,16 @@ impl FlameGraphView {
                 self.flamegraph.total_count() as f64 / selected_stack.total_count as f64;
             self.state.set_zoom(zoom_factor);
         }
+    }
+
+    pub fn set_search_pattern(&mut self, search_pattern: SearchPattern) {
+        self.flamegraph.set_hits(&search_pattern);
+        self.state.set_search_pattern(search_pattern);
+    }
+
+    pub fn unset_search_pattern(&mut self) {
+        self.flamegraph.clear_hits();
+        self.state.unset_search_pattern();
     }
 
     pub fn reset(&mut self) {

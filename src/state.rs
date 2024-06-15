@@ -1,4 +1,4 @@
-use crate::flame::{FlameGraph, StackIdentifier, ROOT_ID};
+use crate::flame::{FlameGraph, SearchPattern, StackIdentifier, ROOT_ID};
 
 #[derive(Debug, Clone)]
 pub struct ZoomState {
@@ -13,6 +13,7 @@ pub struct FlameGraphState {
     pub frame_height: Option<u16>,
     pub frame_width: Option<u16>,
     pub zoom: Option<ZoomState>,
+    pub search_pattern: Option<SearchPattern>,
 }
 
 impl Default for FlameGraphState {
@@ -23,6 +24,7 @@ impl Default for FlameGraphState {
             frame_height: None,
             frame_width: None,
             zoom: None,
+            search_pattern: None,
         }
     }
 }
@@ -51,6 +53,14 @@ impl FlameGraphState {
         self.zoom = None;
     }
 
+    pub fn set_search_pattern(&mut self, search_pattern: SearchPattern) {
+        self.search_pattern = Some(search_pattern);
+    }
+
+    pub fn unset_search_pattern(&mut self) {
+        self.search_pattern = None;
+    }
+
     /// Update StackIdentifiers to point to the correct ones in the new flamegraph
     pub fn handle_flamegraph_replacement(&mut self, old: &FlameGraph, new: &mut FlameGraph) {
         if self.selected != ROOT_ID {
@@ -69,8 +79,8 @@ impl FlameGraphState {
         }
         // Preserve search pattern. If expensive, can move this to next flamegraph construction
         // thread and share SearchPattern via Arc but let's keep it simple for now.
-        if let Some(p) = old.search_pattern() {
-            new.set_search_pattern(p.clone()).unwrap();
+        if let Some(p) = &self.search_pattern {
+            new.set_hits(p);
         }
     }
 
