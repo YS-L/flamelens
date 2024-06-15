@@ -229,22 +229,15 @@ impl FlameGraph {
         &self.search_pattern
     }
 
-    pub fn set_search_pattern(
-        &mut self,
-        pattern: &str,
-        is_regex: bool,
-    ) -> Result<(), regex::Error> {
+    pub fn set_search_pattern(&mut self, p: SearchPattern) -> Result<(), regex::Error> {
         // Configure a regex
-        let _pattern = if is_regex {
-            pattern.to_string()
+        let _pattern = if p.is_regex {
+            p.pattern.clone()
         } else {
-            format!("^{}$", regex::escape(pattern))
+            format!("^{}$", regex::escape(&p.pattern))
         };
         let re = regex::Regex::new(&_pattern)?;
-        self.search_pattern = Some(SearchPattern {
-            pattern: pattern.to_string(),
-            is_regex,
-        });
+        self.search_pattern = Some(p);
         self.stacks.iter_mut().for_each(|stack| {
             stack.hit = re.is_match(&stack.short_name);
         });

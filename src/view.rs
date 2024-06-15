@@ -1,7 +1,7 @@
 use std::cmp::min;
 
 use crate::{
-    flame::{FlameGraph, StackIdentifier, StackInfo, ROOT_ID},
+    flame::{FlameGraph, SearchPattern, StackIdentifier, StackInfo, ROOT_ID},
     state::FlameGraphState,
 };
 
@@ -29,20 +29,18 @@ impl FlameGraphView {
             .map(|x| &x.short_name)
             .cloned();
         if let Some(pattern) = pattern {
-            self.flamegraph.set_search_pattern(&pattern, false).unwrap();
+            self.flamegraph
+                .set_search_pattern(SearchPattern {
+                    pattern,
+                    is_regex: false,
+                })
+                .unwrap();
         }
     }
 
     pub fn replace_flamegraph(&mut self, mut new_flamegraph: FlameGraph) {
         self.state
-            .handle_flamegraph_replacement(&self.flamegraph, &new_flamegraph);
-        // Preserve search pattern. If expensive, can move this to next flamegraph construction
-        // thread and share SearchPattern via Arc but let's keep it simple for now.
-        if let Some(p) = self.flamegraph.search_pattern() {
-            new_flamegraph
-                .set_search_pattern(&p.pattern, p.is_regex)
-                .unwrap();
-        }
+            .handle_flamegraph_replacement(&self.flamegraph, &mut new_flamegraph);
         self.flamegraph = new_flamegraph;
         self.updated_at = std::time::Instant::now();
     }

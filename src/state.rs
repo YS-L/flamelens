@@ -52,7 +52,7 @@ impl FlameGraphState {
     }
 
     /// Update StackIdentifiers to point to the correct ones in the new flamegraph
-    pub fn handle_flamegraph_replacement(&mut self, old: &FlameGraph, new: &FlameGraph) {
+    pub fn handle_flamegraph_replacement(&mut self, old: &FlameGraph, new: &mut FlameGraph) {
         if self.selected != ROOT_ID {
             if let Some(new_stack_id) = Self::get_new_stack_id(&self.selected, old, new) {
                 self.selected = new_stack_id;
@@ -66,6 +66,11 @@ impl FlameGraphState {
             } else {
                 self.unset_zoom();
             }
+        }
+        // Preserve search pattern. If expensive, can move this to next flamegraph construction
+        // thread and share SearchPattern via Arc but let's keep it simple for now.
+        if let Some(p) = old.search_pattern() {
+            new.set_search_pattern(p.clone()).unwrap();
         }
     }
 
