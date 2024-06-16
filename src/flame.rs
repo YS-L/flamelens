@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 pub type StackIdentifier = usize;
 pub static ROOT: &str = "root";
 pub static ROOT_ID: usize = 0;
@@ -46,7 +44,6 @@ impl SearchPattern {
 #[derive(Debug, Clone)]
 pub struct FlameGraph {
     stacks: Vec<StackInfo>,
-    full_name_to_stack_id: HashMap<String, StackIdentifier>,
     levels: Vec<Vec<StackIdentifier>>,
     pub hit_coverage_count: Option<u64>,
 }
@@ -54,7 +51,6 @@ pub struct FlameGraph {
 impl FlameGraph {
     pub fn from_string(content: &str) -> Self {
         let mut stacks = Vec::<StackInfo>::new();
-        let mut full_name_to_stack_id = HashMap::<String, StackIdentifier>::new();
         stacks.push(StackInfo {
             id: ROOT_ID,
             short_name: ROOT.to_string(),
@@ -67,7 +63,6 @@ impl FlameGraph {
             level: 0,
             hit: false,
         });
-        full_name_to_stack_id.insert(ROOT.to_string(), ROOT_ID);
         for line in content.lines() {
             #[allow(clippy::unnecessary_unwrap)]
             let line_and_count = match line.rsplit_once(' ') {
@@ -96,7 +91,19 @@ impl FlameGraph {
                 } else {
                     format!("{};{}", leading, part)
                 };
-                if !full_name_to_stack_id.contains_key(&full_name) {
+                // Invariant: parent always exists
+                let parent_stack = stacks.get(parent_id).unwrap();
+                let current_stack_id_if_exists = parent_stack
+                    .children
+                    .iter()
+                    .find(|child_id| {
+                        let child = stacks.get(**child_id).unwrap();
+                        child.full_name == full_name
+                    })
+                    .cloned();
+                let stack_id = if let Some(stack_id) = current_stack_id_if_exists {
+                    stack_id
+                } else {
                     stacks.push(StackInfo {
                         id: stacks.len(),
                         short_name: part.to_string(),
@@ -109,19 +116,14 @@ impl FlameGraph {
                         level,
                         hit: false,
                     });
-                    full_name_to_stack_id.insert(full_name.clone(), stacks.len() - 1);
-                }
-                let stack_id = full_name_to_stack_id[&full_name];
+                    let stack_id = stacks.len() - 1;
+                    stacks.get_mut(parent_id).unwrap().children.push(stack_id);
+                    stack_id
+                };
                 let info = stacks.get_mut(stack_id).unwrap();
                 info.total_count += count;
                 if full_name == line {
                     info.self_count += count;
-                }
-                if let Some(parent_id) = info.parent {
-                    let parent = stacks.get_mut(parent_id).unwrap();
-                    if !parent.children.contains(&stack_id) {
-                        parent.children.push(stack_id);
-                    }
                 }
                 leading = full_name;
                 parent_id = stack_id;
@@ -131,7 +133,6 @@ impl FlameGraph {
 
         let mut out = Self {
             stacks,
-            full_name_to_stack_id,
             levels: vec![],
             hit_coverage_count: None,
         };
@@ -188,9 +189,9 @@ impl FlameGraph {
     }
 
     pub fn get_stack_by_full_name(&self, full_name: &str) -> Option<&StackInfo> {
-        self.full_name_to_stack_id
-            .get(full_name)
-            .and_then(|id| self.get_stack(id))
+        self.stacks
+            .iter()
+            .find(|stack| stack.full_name == full_name)
     }
 
     pub fn get_stacks_at_level(&self, level: usize) -> Option<&Vec<StackIdentifier>> {
