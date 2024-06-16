@@ -76,7 +76,7 @@ impl App {
             let _handle = thread::spawn(move || loop {
                 if let Some(data) = pyspy_data.lock().unwrap().take() {
                     let tic = std::time::Instant::now();
-                    let flamegraph = FlameGraph::from_string(&data);
+                    let flamegraph = FlameGraph::from_string(data);
                     let parsed = ParsedFlameGraph {
                         flamegraph,
                         elapsed: tic.elapsed(),
@@ -108,7 +108,7 @@ impl App {
             });
         }
 
-        let flamegraph = FlameGraph::from_string("");
+        let flamegraph = FlameGraph::from_string("".to_string());
         let process_info = remoteprocess::Process::new(pid as remoteprocess::Pid)
             .and_then(|p| p.cmdline())
             .ok()

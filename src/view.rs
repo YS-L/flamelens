@@ -28,13 +28,9 @@ impl FlameGraphView {
                 return;
             }
         }
-        let pattern = self
-            .flamegraph
-            .get_stack(stack_id)
-            .map(|x| &x.short_name)
-            .cloned();
+        let pattern = self.flamegraph.get_stack_short_name(stack_id);
         if let Some(pattern) = pattern {
-            let search_pattern = SearchPattern::new(&pattern, false, false).unwrap();
+            let search_pattern = SearchPattern::new(pattern, false, false).unwrap();
             self.set_search_pattern(search_pattern);
         }
     }
@@ -327,7 +323,7 @@ mod tests {
     #[test]
     fn test_get_next_sibling() {
         let content = std::fs::read_to_string("tests/data/py-spy-simple.txt").unwrap();
-        let fg = FlameGraph::from_string(&content);
+        let fg = FlameGraph::from_string(content);
         let view = FlameGraphView::new(fg);
 
         let result = view.get_next_sibling(&ROOT_ID);
@@ -355,7 +351,7 @@ mod tests {
     #[test]
     fn test_get_previous_sibling() {
         let content = std::fs::read_to_string("tests/data/py-spy-simple.txt").unwrap();
-        let fg = FlameGraph::from_string(&content);
+        let fg = FlameGraph::from_string(content);
         let view = FlameGraphView::new(fg);
 
         let result = view.get_previous_sibling(&ROOT_ID);

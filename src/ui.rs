@@ -125,7 +125,7 @@ impl<'a> FlamelensWidget<'a> {
                     &Span::styled(
                         &format!(
                             " {:width$}",
-                            stack.short_name,
+                            self.app.flamegraph().get_stack_short_name_from_info(stack),
                             width = effective_x_budget.saturating_sub(1) as usize,
                         ),
                         Style::default().fg(text_color).bg(stack_color),
@@ -186,8 +186,9 @@ impl<'a> FlamelensWidget<'a> {
             name.hash(&mut hasher);
             hasher.finish() as f64 / u64::MAX as f64
         }
-        let v1 = hash_name(&stack.full_name);
-        let v2 = hash_name(&stack.full_name.chars().rev().collect::<String>());
+        let full_name = self.app.flamegraph().get_stack_full_name_from_info(stack);
+        let v1 = hash_name(full_name);
+        let v2 = hash_name(full_name);
         let mut r;
         let mut g;
         let mut b;
@@ -293,7 +294,7 @@ impl<'a> FlamelensWidget<'a> {
                 });
                 let mut status_text = format!(
                     "Current: {} {} {}",
-                    stack.short_name,
+                    self.app.flamegraph().get_stack_short_name_from_info(stack),
                     FlamelensWidget::get_count_stats_str(
                         "Total",
                         stack.total_count,

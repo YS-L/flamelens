@@ -89,13 +89,8 @@ impl FlameGraphState {
         old: &FlameGraph,
         new: &FlameGraph,
     ) -> Option<StackIdentifier> {
-        // let mapping = new.get_full_name_to_stack_id_mapping();
-        // old.get_stack(stack_id).and_then(|stack| {
-        //     mapping.get(&stack.full_name)
-        //         .map(|stack_id| *stack_id)
-        // })
         old.get_stack(stack_id).and_then(|stack| {
-            new.get_stack_by_full_name(&stack.full_name)
+            new.get_stack_by_full_name(old.get_stack_full_name_from_info(stack))
                 .map(|stack| stack.id)
         })
     }

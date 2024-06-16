@@ -30,7 +30,7 @@ fn main() -> AppResult<()> {
     let app = if let Some(filename) = args.filename {
         let content = std::fs::read_to_string(&filename).expect("Could not read file");
         let tic = std::time::Instant::now();
-        let flamegraph = FlameGraph::from_string(&content);
+        let flamegraph = FlameGraph::from_string(content);
         let mut app = App::with_flamegraph(&filename, flamegraph);
         app.add_elapsed("flamegraph", tic.elapsed());
         Some(app)
