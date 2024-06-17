@@ -154,15 +154,17 @@ impl FlameGraph {
         level: usize,
         is_self: bool,
     ) -> StackIdentifier {
-        let full_name = &content[line_index..end_index];
-        // Invariant: parent always exists
+        let short_name = &content[start_index..end_index];
+        // Invariant: parent always exists. We can just check the short name to
+        // check if the parent already contains the child, since the prior
+        // prefixes should always match (definition of a parent).
         let parent_stack = stacks.get(parent_id).unwrap();
         let current_stack_id_if_exists = parent_stack
             .children
             .iter()
             .find(|child_id| {
                 let child = stacks.get(**child_id).unwrap();
-                &content[child.line_index..child.end_index] == full_name
+                &content[child.start_index..child.end_index] == short_name
             })
             .cloned();
         let stack_id = if let Some(stack_id) = current_stack_id_if_exists {
