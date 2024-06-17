@@ -189,9 +189,6 @@ impl FlameGraph {
         };
         let info = stacks.get_mut(stack_id).unwrap();
         info.total_count += count;
-        // if full_name == line {
-        //     info.self_count += count;
-        // }
         if is_self {
             info.self_count += count;
         }

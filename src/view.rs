@@ -329,21 +329,21 @@ mod tests {
         let result = view.get_next_sibling(&ROOT_ID);
         assert_eq!(result, None);
 
-        let result = view.get_next_sibling(&get_id(&view, "<module> (long_running.py:24)"));
+        let result = view.get_next_sibling(&get_id(&view, "<module> (long_running.py:25)"));
         assert_eq!(
             result.unwrap(),
-            get_id(&view, "<module> (long_running.py:25)")
+            get_id(&view, "<module> (long_running.py:24)")
         );
 
         let result = view.get_next_sibling(&get_id(
             &view,
-            "<module> (long_running.py:24);quick_work (long_running.py:17)",
+            "<module> (long_running.py:25);work (long_running.py:7)",
         ));
         assert_eq!(
             result.unwrap(),
             get_id(
                 &view,
-                "<module> (long_running.py:25);work (long_running.py:8)"
+                "<module> (long_running.py:24);quick_work (long_running.py:17)"
             ),
         );
     }
@@ -357,21 +357,21 @@ mod tests {
         let result = view.get_previous_sibling(&ROOT_ID);
         assert_eq!(result, None);
 
-        let result = view.get_previous_sibling(&get_id(&view, "<module> (long_running.py:25)"));
+        let result = view.get_previous_sibling(&get_id(&view, "<module> (long_running.py:24)"));
         assert_eq!(
             result.unwrap(),
-            get_id(&view, "<module> (long_running.py:24)")
+            get_id(&view, "<module> (long_running.py:25)")
         );
 
         let result = view.get_previous_sibling(&get_id(
             &view,
-            "<module> (long_running.py:25);work (long_running.py:8)".into(),
+            "<module> (long_running.py:24);quick_work (long_running.py:17)",
         ));
         assert_eq!(
             result.unwrap(),
             get_id(
                 &view,
-                "<module> (long_running.py:24);quick_work (long_running.py:17)"
+                "<module> (long_running.py:25);work (long_running.py:7)",
             ),
         );
     }
