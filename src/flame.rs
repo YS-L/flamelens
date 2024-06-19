@@ -1,5 +1,5 @@
 pub type StackIdentifier = usize;
-pub static ROOT: &str = "root";
+pub static ROOT: &str = "all";
 pub static ROOT_ID: usize = 0;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -415,8 +415,8 @@ mod tests {
         let items: Vec<StackInfoReadable> = vec![
             StackInfoReadable {
                 id: 0,
-                short_name: "root",
-                full_name: "root",
+                short_name: "all",
+                full_name: "all",
                 total_count: 657,
                 self_count: 0,
                 parent: None,
@@ -540,8 +540,8 @@ mod tests {
         let items: Vec<StackInfoReadable> = vec![
             StackInfoReadable {
                 id: 0,
-                short_name: "root",
-                full_name: "root",
+                short_name: "all",
+                full_name: "all",
                 total_count: 428,
                 self_count: 0,
                 parent: None,
