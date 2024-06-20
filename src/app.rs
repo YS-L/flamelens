@@ -1,5 +1,5 @@
 use crate::flame::FlameGraph;
-use crate::py_spy::{record_samples, SamplerStatus};
+use crate::py_spy::{record_samples, ProfilerOutput, SamplerState, SamplerStatus};
 use crate::state::FlameGraphState;
 use crate::view::FlameGraphView;
 use remoteprocess;
@@ -42,11 +42,12 @@ pub struct App {
     pub input_buffer: Option<InputBuffer>,
     /// Timing information for debugging
     pub elapsed: HashMap<String, Duration>,
+    /// State of the live sampler
     /// Debug mode
     pub debug: bool,
     /// Next flamegraph to swap in
     next_flamegraph: Arc<Mutex<Option<ParsedFlameGraph>>>,
-    sampler_status: Option<Arc<Mutex<SamplerStatus>>>,
+    sampler_state: Option<Arc<Mutex<SamplerState>>>,
 }
 
 impl App {
@@ -60,23 +61,23 @@ impl App {
             elapsed: HashMap::new(),
             debug: false,
             next_flamegraph: Arc::new(Mutex::new(None)),
-            sampler_status: None,
+            sampler_state: None,
         }
     }
 
     pub fn with_pid(pid: u64) -> Self {
         let next_flamegraph: Arc<Mutex<Option<ParsedFlameGraph>>> = Arc::new(Mutex::new(None));
-        let pyspy_data: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
-        let sampler_status = Arc::new(Mutex::new(SamplerStatus::Running));
+        let pyspy_data: Arc<Mutex<Option<ProfilerOutput>>> = Arc::new(Mutex::new(None));
+        let sampler_state = Arc::new(Mutex::new(SamplerState::default()));
 
         // Thread to poll data from pyspy and construct the next flamegraph
         {
             let next_flamegraph = next_flamegraph.clone();
             let pyspy_data = pyspy_data.clone();
             let _handle = thread::spawn(move || loop {
-                if let Some(data) = pyspy_data.lock().unwrap().take() {
+                if let Some(output) = pyspy_data.lock().unwrap().take() {
                     let tic = std::time::Instant::now();
-                    let flamegraph = FlameGraph::from_string(data);
+                    let flamegraph = FlameGraph::from_string(output.data);
                     let parsed = ParsedFlameGraph {
                         flamegraph,
                         elapsed: tic.elapsed(),
@@ -90,7 +91,7 @@ impl App {
         // pyspy live sampler thread
         {
             let pyspy_data = pyspy_data.clone();
-            let sampler_status = sampler_status.clone();
+            let sampler_state = sampler_state.clone();
             let _handle = thread::spawn(move || {
                 // Note: mimic a record command's invocation vs simply getting default Config as
                 // from_args does a lot of heavy lifting
@@ -104,7 +105,7 @@ impl App {
                 ];
                 let config = py_spy::Config::from_args(&args).unwrap();
                 let pid = pid as remoteprocess::Pid;
-                record_samples(pid, &config, pyspy_data, sampler_status);
+                record_samples(pid, &config, pyspy_data, sampler_state);
             });
         }
 
@@ -121,13 +122,14 @@ impl App {
             input_buffer: None,
             elapsed: HashMap::new(),
             debug: false,
-            sampler_status: Some(sampler_status),
+            sampler_state: Some(sampler_state),
         }
     }
 
     /// Handles the tick event of the terminal.
     pub fn tick(&mut self) {
         if let Some(parsed) = self.next_flamegraph.lock().unwrap().take() {
+            // Replace flamegraph
             self.elapsed
                 .insert("flamegraph".to_string(), parsed.elapsed);
             let tic = std::time::Instant::now();
@@ -136,9 +138,9 @@ impl App {
                 .insert("replacement".to_string(), tic.elapsed());
         }
         if let Some(SamplerStatus::Error(s)) = self
-            .sampler_status
+            .sampler_state
             .as_ref()
-            .map(|s| s.lock().unwrap().clone())
+            .map(|s| s.lock().unwrap().status.clone())
         {
             panic!("py-spy sampler exited with error: {}\n\nYou likely need to rerun this program with sudo.", s);
         }
@@ -157,8 +159,8 @@ impl App {
         &self.flamegraph_view.state
     }
 
-    pub fn sampler_status(&self) -> Option<SamplerStatus> {
-        self.sampler_status
+    pub fn sampler_state(&self) -> Option<SamplerState> {
+        self.sampler_state
             .as_ref()
             .map(|s| s.lock().unwrap().clone())
     }

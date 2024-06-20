@@ -34,27 +34,52 @@ use remoteprocess;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub enum SamplerStatus {
+    #[default]
     Running,
     Error(String),
     Done,
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct SamplerState {
+    pub status: SamplerStatus,
+    pub total_sampled_duration: Duration,
+}
+
+impl SamplerState {
+    pub fn set_status(&mut self, status: SamplerStatus) {
+        self.status = status;
+    }
+
+    pub fn set_total_sampled_duration(&mut self, total_sampled_duration: Duration) {
+        self.total_sampled_duration = total_sampled_duration;
+    }
+}
+
+#[derive(Debug)]
+pub struct ProfilerOutput {
+    pub data: String,
+}
+
 pub fn record_samples(
     pid: remoteprocess::Pid,
     config: &Config,
-    output_data: Arc<Mutex<Option<String>>>,
-    status: Arc<Mutex<SamplerStatus>>,
+    output_data: Arc<Mutex<Option<ProfilerOutput>>>,
+    state: Arc<Mutex<SamplerState>>,
 ) {
-    *status.lock().unwrap() = SamplerStatus::Running;
-    let result = run(pid, config, output_data);
+    state.lock().unwrap().set_status(SamplerStatus::Running);
+    let result = run(pid, config, output_data, state.clone());
     match result {
         Ok(_) => {
-            *status.lock().unwrap() = SamplerStatus::Done;
+            state.lock().unwrap().set_status(SamplerStatus::Done);
         }
         Err(e) => {
-            *status.lock().unwrap() = SamplerStatus::Error(format!("{:?}", e));
+            state
+                .lock()
+                .unwrap()
+                .set_status(SamplerStatus::Error(format!("{:?}", e)));
         }
     }
 }
@@ -62,10 +87,12 @@ pub fn record_samples(
 pub fn run(
     pid: remoteprocess::Pid,
     config: &Config,
-    output_data: Arc<Mutex<Option<String>>>,
+    output_data: Arc<Mutex<Option<ProfilerOutput>>>,
+    state: Arc<Mutex<SamplerState>>,
 ) -> Result<(), Error> {
     let mut output = PySpyFlamegraph::new(config.show_line_numbers);
 
+    let start_tic = std::time::Instant::now();
     let sampler = sampler::Sampler::new(pid, config)?;
 
     let max_intervals = match &config.duration {
@@ -163,7 +190,12 @@ pub fn run(
             let data = output.get_data();
             // let mut file = std::fs::File::create("data.txt")?;
             // std::io::Write::write_all(&mut file, data.as_bytes())?;
-            output_data.lock().unwrap().replace(data);
+            let profiler_output = ProfilerOutput { data };
+            output_data.lock().unwrap().replace(profiler_output);
+            state
+                .lock()
+                .unwrap()
+                .set_total_sampled_duration(start_tic.elapsed());
         }
     }
 

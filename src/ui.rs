@@ -233,12 +233,17 @@ impl<'a> FlamelensWidget<'a> {
                 if let Some(info) = info {
                     out += format!(" [{}]", info).as_str();
                 }
-                if let Some(status) = &self.app.sampler_status() {
-                    out += match status {
+                if let Some(state) = &self.app.sampler_state() {
+                    out += match state.status {
                         SamplerStatus::Running => " [Running]".to_string(),
                         _ => " [Exited]".to_string(),
                     }
                     .as_str();
+                    let duration = state.total_sampled_duration;
+                    let seconds = duration.as_secs() % 60;
+                    let minutes = (duration.as_secs() / 60) % 60;
+                    let hours = (duration.as_secs() / 60) / 60;
+                    out += format!(" [🕑{:0>2}:{:0>2}:{:0>2}]", hours, minutes, seconds).as_str();
                 }
                 out
             }
