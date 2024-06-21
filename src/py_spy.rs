@@ -46,6 +46,7 @@ pub enum SamplerStatus {
 pub struct SamplerState {
     pub status: SamplerStatus,
     pub total_sampled_duration: Duration,
+    pub late: Option<Duration>,
 }
 
 impl SamplerState {
@@ -55,6 +56,14 @@ impl SamplerState {
 
     pub fn set_total_sampled_duration(&mut self, total_sampled_duration: Duration) {
         self.total_sampled_duration = total_sampled_duration;
+    }
+
+    pub fn set_late(&mut self, late: Duration) {
+        self.late = Some(late);
+    }
+
+    pub fn unset_late(&mut self) {
+        self.late = None;
     }
 }
 
@@ -110,17 +119,16 @@ pub fn run(
     for mut sample in sampler {
         if let Some(delay) = sample.late {
             if delay > Duration::from_secs(1) {
-                if config.hide_progress {
-                    // display a message if we're late, but don't spam the log
-                    let now = std::time::Instant::now();
-                    if now - last_late_message > Duration::from_secs(1) {
-                        last_late_message = now;
-                        println!("{:.2?} behind in sampling, results may be inaccurate. Try reducing the sampling rate", delay)
-                    }
-                } else {
-                    println!("{:.2?} behind in sampling, results may be inaccurate. Try reducing the sampling rate.", delay);
+                let now = std::time::Instant::now();
+                if now - last_late_message > Duration::from_secs(1) {
+                    last_late_message = now;
+                    state.lock().unwrap().set_late(delay);
                 }
+            } else {
+                state.lock().unwrap().unset_late();
             }
+        } else {
+            state.lock().unwrap().unset_late();
         }
 
         intervals += 1;
