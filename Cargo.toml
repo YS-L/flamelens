@@ -14,3 +14,11 @@ ratatui = { version = "0.26.3", features = ["unstable-rendered-line-info"] }
 regex = "1.10.5"
 remoteprocess = "0.4.13"
 tui-input = "0.8.0"
+
+# The profile that 'cargo dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
+
+[profile.release]
+strip = "debuginfo"
