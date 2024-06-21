@@ -128,15 +128,19 @@ impl App {
 
     /// Handles the tick event of the terminal.
     pub fn tick(&mut self) {
-        if let Some(parsed) = self.next_flamegraph.lock().unwrap().take() {
-            // Replace flamegraph
-            self.elapsed
-                .insert("flamegraph".to_string(), parsed.elapsed);
-            let tic = std::time::Instant::now();
-            self.flamegraph_view.replace_flamegraph(parsed.flamegraph);
-            self.elapsed
-                .insert("replacement".to_string(), tic.elapsed());
+        // Replace flamegraph
+        if !self.flamegraph_view.state.freeze {
+            if let Some(parsed) = self.next_flamegraph.lock().unwrap().take() {
+                self.elapsed
+                    .insert("flamegraph".to_string(), parsed.elapsed);
+                let tic = std::time::Instant::now();
+                self.flamegraph_view.replace_flamegraph(parsed.flamegraph);
+                self.elapsed
+                    .insert("replacement".to_string(), tic.elapsed());
+            }
         }
+
+        // Exit if fatal error in sampler
         if let Some(SamplerStatus::Error(s)) = self
             .sampler_state
             .as_ref()

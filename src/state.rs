@@ -14,6 +14,7 @@ pub struct FlameGraphState {
     pub frame_width: Option<u16>,
     pub zoom: Option<ZoomState>,
     pub search_pattern: Option<SearchPattern>,
+    pub freeze: bool,
 }
 
 impl Default for FlameGraphState {
@@ -25,6 +26,7 @@ impl Default for FlameGraphState {
             frame_width: None,
             zoom: None,
             search_pattern: None,
+            freeze: false,
         }
     }
 }
@@ -59,6 +61,10 @@ impl FlameGraphState {
 
     pub fn unset_search_pattern(&mut self) {
         self.search_pattern = None;
+    }
+
+    pub fn toggle_freeze(&mut self) {
+        self.freeze = !self.freeze;
     }
 
     /// Update StackIdentifiers to point to the correct ones in the new flamegraph

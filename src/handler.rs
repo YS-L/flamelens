@@ -61,6 +61,9 @@ pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         KeyCode::Char('r') => {
             app.flamegraph_view.reset();
         }
+        KeyCode::Char('z') => {
+            app.flamegraph_view.state.toggle_freeze();
+        }
         KeyCode::Char('/') => {
             app.input_buffer = Some(InputBuffer {
                 buffer: tui_input::Input::new("".to_string()),
