@@ -243,7 +243,7 @@ impl<'a> FlamelensWidget<'a> {
                     let seconds = duration.as_secs() % 60;
                     let minutes = (duration.as_secs() / 60) % 60;
                     let hours = (duration.as_secs() / 60) / 60;
-                    out += format!(" [🕑{:0>2}:{:0>2}:{:0>2}]", hours, minutes, seconds).as_str();
+                    out += format!(" [Duration: {:0>2}:{:0>2}:{:0>2}]", hours, minutes, seconds).as_str();
                 }
                 out
             }
