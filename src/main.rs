@@ -18,6 +18,10 @@ struct Args {
     #[clap(long, value_name = "pid")]
     pid: Option<String>,
 
+    /// Additional arguments to pass to "py-spy record" command
+    #[clap(long, value_name = "py-spy-args")]
+    py_spy_args: Option<String>,
+
     /// Show debug info
     #[clap(long)]
     debug: bool,
@@ -35,8 +39,12 @@ fn main() -> AppResult<()> {
         app.add_elapsed("flamegraph", tic.elapsed());
         Some(app)
     } else {
-        args.pid
-            .map(|pid| App::with_pid(pid.parse().expect("Could not parse pid")))
+        args.pid.map(|pid| {
+            App::with_pid(
+                pid.parse().expect("Could not parse pid"),
+                args.py_spy_args.clone(),
+            )
+        })
     };
     let mut app = match app {
         Some(app) => app,

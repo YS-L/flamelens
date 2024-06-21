@@ -65,7 +65,7 @@ impl App {
         }
     }
 
-    pub fn with_pid(pid: u64) -> Self {
+    pub fn with_pid(pid: u64, py_spy_args: Option<String>) -> Self {
         let next_flamegraph: Arc<Mutex<Option<ParsedFlameGraph>>> = Arc::new(Mutex::new(None));
         let pyspy_data: Arc<Mutex<Option<ProfilerOutput>>> = Arc::new(Mutex::new(None));
         let sampler_state = Arc::new(Mutex::new(SamplerState::default()));
@@ -95,14 +95,20 @@ impl App {
             let _handle = thread::spawn(move || {
                 // Note: mimic a record command's invocation vs simply getting default Config as
                 // from_args does a lot of heavy lifting
-                let args = vec![
-                    "py-spy".to_owned(),
-                    "record".to_string(),
-                    "--pid".to_string(),
-                    format!("{}", pid),
-                    "--format".to_string(),
-                    "raw".to_string(),
-                ];
+                let mut args = [
+                    "py-spy",
+                    "record",
+                    "--pid",
+                    pid.to_string().as_str(),
+                    "--format",
+                    "raw",
+                ]
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>();
+                if let Some(py_spy_args) = py_spy_args {
+                    args.extend(py_spy_args.split_whitespace().map(|s| s.to_string()));
+                }
                 let config = py_spy::Config::from_args(&args).unwrap();
                 let pid = pid as remoteprocess::Pid;
                 record_samples(pid, &config, pyspy_data, sampler_state);
