@@ -323,7 +323,7 @@ mod tests {
     #[test]
     fn test_get_next_sibling() {
         let content = std::fs::read_to_string("tests/data/py-spy-simple.txt").unwrap();
-        let fg = FlameGraph::from_string(content);
+        let fg = FlameGraph::from_string(content, true);
         let view = FlameGraphView::new(fg);
 
         let result = view.get_next_sibling(&ROOT_ID);
@@ -351,7 +351,7 @@ mod tests {
     #[test]
     fn test_get_previous_sibling() {
         let content = std::fs::read_to_string("tests/data/py-spy-simple.txt").unwrap();
-        let fg = FlameGraph::from_string(content);
+        let fg = FlameGraph::from_string(content, true);
         let view = FlameGraphView::new(fg);
 
         let result = view.get_previous_sibling(&ROOT_ID);

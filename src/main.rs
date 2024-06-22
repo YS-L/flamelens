@@ -18,6 +18,10 @@ struct Args {
     #[clap(long, value_name = "pid")]
     pid: Option<String>,
 
+    /// Whether to sort the stacks by time spent
+    #[clap(long, action, value_name = "sorted")]
+    sorted: bool,
+
     /// Additional arguments to pass to "py-spy record" command
     #[clap(long, value_name = "py-spy-args")]
     py_spy_args: Option<String>,
@@ -34,7 +38,7 @@ fn main() -> AppResult<()> {
     let app = if let Some(filename) = args.filename {
         let content = std::fs::read_to_string(&filename).expect("Could not read file");
         let tic = std::time::Instant::now();
-        let flamegraph = FlameGraph::from_string(content);
+        let flamegraph = FlameGraph::from_string(content, args.sorted);
         let mut app = App::with_flamegraph(&filename, flamegraph);
         app.add_elapsed("flamegraph", tic.elapsed());
         Some(app)

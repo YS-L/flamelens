@@ -42,7 +42,6 @@ pub struct App {
     pub input_buffer: Option<InputBuffer>,
     /// Timing information for debugging
     pub elapsed: HashMap<String, Duration>,
-    /// State of the live sampler
     /// Debug mode
     pub debug: bool,
     /// Next flamegraph to swap in
@@ -77,7 +76,7 @@ impl App {
             let _handle = thread::spawn(move || loop {
                 if let Some(output) = pyspy_data.lock().unwrap().take() {
                     let tic = std::time::Instant::now();
-                    let flamegraph = FlameGraph::from_string(output.data);
+                    let flamegraph = FlameGraph::from_string(output.data, true);
                     let parsed = ParsedFlameGraph {
                         flamegraph,
                         elapsed: tic.elapsed(),
@@ -115,7 +114,7 @@ impl App {
             });
         }
 
-        let flamegraph = FlameGraph::from_string("".to_string());
+        let flamegraph = FlameGraph::from_string("".to_string(), true);
         let process_info = remoteprocess::Process::new(pid as remoteprocess::Pid)
             .and_then(|p| p.cmdline())
             .ok()

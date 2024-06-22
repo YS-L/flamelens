@@ -48,10 +48,11 @@ pub struct FlameGraph {
     stacks: Vec<StackInfo>,
     levels: Vec<Vec<StackIdentifier>>,
     pub hit_coverage_count: Option<u64>,
+    sorted: bool,
 }
 
 impl FlameGraph {
-    pub fn from_string(mut content: String) -> Self {
+    pub fn from_string(mut content: String, sorted: bool) -> Self {
         // Make sure content ends with newline to simplify parsing
         if !content.ends_with('\n') {
             content.push('\n');
@@ -138,6 +139,7 @@ impl FlameGraph {
             stacks,
             levels: vec![],
             hit_coverage_count: None,
+            sorted,
         };
         out.populate_levels(&ROOT_ID, 0, None);
         out
@@ -220,19 +222,26 @@ impl FlameGraph {
         };
 
         // Sort children
-        let mut sorted_children = stack.children.clone();
-        sorted_children.sort_by_key(|child_id| {
-            self.stacks
-                .get(*child_id)
-                .map(|child| child.total_count)
-                .unwrap_or(0)
-        });
-        sorted_children.reverse();
+        let sorted_children = if self.sorted {
+            let mut sorted_children = stack.children.clone();
+            sorted_children.sort_by_key(|child_id| {
+                self.stacks
+                    .get(*child_id)
+                    .map(|child| child.total_count)
+                    .unwrap_or(0)
+            });
+            sorted_children.reverse();
+            Some(sorted_children)
+        } else {
+            None
+        };
 
         // Make the updates to the current stack
         let stack = self.stacks.get_mut(*stack_id).unwrap();
         stack.width_factor = width_factor;
-        stack.children = sorted_children;
+        if let Some(sorted_children) = sorted_children {
+            stack.children = sorted_children;
+        }
 
         // Move on to children
         for child_id in stack.children.clone().iter() {
@@ -409,7 +418,7 @@ mod tests {
     #[test]
     fn test_simple() {
         let content = std::fs::read_to_string("tests/data/py-spy-simple.txt").unwrap();
-        let fg = FlameGraph::from_string(content);
+        let fg = FlameGraph::from_string(content, true);
         let stacks = get_readable_stacks(&fg);
         // _print_stacks(&fg);
         let items: Vec<StackInfoReadable> = vec![
@@ -534,7 +543,7 @@ mod tests {
     #[test]
     fn test_no_name_count() {
         let content = std::fs::read_to_string("tests/data/invalid-lines.txt").unwrap();
-        let fg = FlameGraph::from_string(content);
+        let fg = FlameGraph::from_string(content, true);
         let stacks = get_readable_stacks(&fg);
         // _print_stacks(&fg);
         let items: Vec<StackInfoReadable> = vec![
