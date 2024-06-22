@@ -75,6 +75,20 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
                 zoom_stack: zoom.stack_id,
                 ancestors: self.app.flamegraph().get_ancestors(&zoom.stack_id),
             });
+        let re = self
+            .app
+            .flamegraph_state()
+            .search_pattern
+            .as_ref()
+            .and_then(|p| {
+                if p.is_manual {
+                    Some(&p.re)
+                } else {
+                    // Don't highlight if the whole stack is expected to be matched (this is
+                    // when auto-searching while navigating between stacks)
+                    None
+                }
+            });
         self.render_stacks(
             self.app.flamegraph().root(),
             buf,
@@ -83,6 +97,7 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
             flamegraph_area.width as f64,
             flamegraph_area.bottom(),
             &zoom_state,
+            &re,
         );
         let flamegraph_render_time = tic.elapsed();
 
@@ -110,6 +125,7 @@ impl<'a> FlamelensWidget<'a> {
         x_budget: f64,
         y_max: u16,
         zoom_state: &Option<ZoomState>,
+        re: &Option<&regex::Regex>,
     ) {
         let after_level_offset = stack.level >= self.app.flamegraph_state().level_offset;
 
@@ -120,7 +136,7 @@ impl<'a> FlamelensWidget<'a> {
                 let stack_color = self.get_stack_color(stack, zoom_state);
                 let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
                 let style = Style::default().fg(text_color).bg(stack_color);
-                let line = self.get_line_for_stack(stack, effective_x_budget, style);
+                let line = self.get_line_for_stack(stack, effective_x_budget, style, re);
                 buf.set_line(x, y, &line, effective_x_budget);
             }
         } else {
@@ -161,34 +177,39 @@ impl<'a> FlamelensWidget<'a> {
                 child_x_budget,
                 y_max,
                 zoom_state,
+                re,
             );
             x_offset += child_x_budget as u16;
         }
     }
 
-    fn get_line_for_stack(&self, stack: &StackInfo, width: u16, style: Style) -> Line {
+    fn get_line_for_stack(
+        &self,
+        stack: &StackInfo,
+        width: u16,
+        style: Style,
+        re: &Option<&regex::Regex>,
+    ) -> Line {
         let short_name = self.app.flamegraph().get_stack_short_name_from_info(stack);
 
         // Empty space separator at the beginning
         let mut spans = vec![Span::styled(if width > 1 { " " } else { "." }, style)];
 
         // Stack name with highlighted search terms if needed
-        let short_name_spans = if stack.hit {
+        let short_name_spans = if let (true, &Some(re)) = (stack.hit, re) {
             let mut spans: Vec<Span> = Vec::new();
-            if let Some(pattern) = self.app.flamegraph_state().search_pattern.as_ref() {
-                let mut matches = pattern.re.find_iter(short_name);
-                for part in pattern.re.split(short_name) {
-                    // Non-match, regular style
-                    spans.push(Span::styled(part, style));
-                    // Match, highlighted style
-                    if let Some(matched) = matches.next() {
-                        spans.push(Span::styled(
-                            matched.as_str(),
-                            style
-                                .fg(Color::Rgb(225, 10, 10))
-                                .add_modifier(Modifier::BOLD),
-                        ));
-                    }
+            let mut matches = re.find_iter(short_name);
+            for part in re.split(short_name) {
+                // Non-match, regular style
+                spans.push(Span::styled(part, style));
+                // Match, highlighted style
+                if let Some(matched) = matches.next() {
+                    spans.push(Span::styled(
+                        matched.as_str(),
+                        style
+                            .fg(Color::Rgb(225, 10, 10))
+                            .add_modifier(Modifier::BOLD),
+                    ));
                 }
             }
             spans
