@@ -170,7 +170,7 @@ impl<'a> FlamelensWidget<'a> {
         let short_name = self.app.flamegraph().get_stack_short_name_from_info(stack);
 
         // Empty space separator at the beginning
-        let mut spans = vec![Span::styled(" ", style)];
+        let mut spans = vec![Span::styled(if width > 1 { " " } else { "." }, style)];
 
         // Stack name with highlighted search terms if needed
         let short_name_spans = if stack.hit {
