@@ -176,18 +176,20 @@ impl<'a> FlamelensWidget<'a> {
         let short_name_spans = if stack.hit {
             let mut spans: Vec<Span> = Vec::new();
             if let Some(pattern) = self.app.flamegraph_state().search_pattern.as_ref() {
+                let mut matches = pattern.re.find_iter(short_name);
                 for part in pattern.re.split(short_name) {
                     // Non-match, regular style
                     spans.push(Span::styled(part, style));
                     // Match, highlighted style
-                    spans.push(Span::styled(
-                        pattern.pattern.as_str(),
-                        style
-                            .fg(Color::Rgb(225, 10, 10))
-                            .add_modifier(Modifier::BOLD),
-                    ));
+                    if let Some(matched) = matches.next() {
+                        spans.push(Span::styled(
+                            matched.as_str(),
+                            style
+                                .fg(Color::Rgb(225, 10, 10))
+                                .add_modifier(Modifier::BOLD),
+                        ));
+                    }
                 }
-                spans.pop();
             }
             spans
         } else {
