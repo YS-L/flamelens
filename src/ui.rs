@@ -119,13 +119,8 @@ impl<'a> FlamelensWidget<'a> {
             if after_level_offset {
                 let stack_color = self.get_stack_color(stack, zoom_state);
                 let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
-                let padded = format!(
-                    " {:width$}",
-                    self.app.flamegraph().get_stack_short_name_from_info(stack),
-                    width = effective_x_budget.saturating_sub(1) as usize,
-                );
-                let line =
-                    self.get_line_from_padded_text(stack, padded.as_str(), text_color, stack_color);
+                let style = Style::default().fg(text_color).bg(stack_color);
+                let line = self.get_line_for_stack(stack, effective_x_budget, style);
                 buf.set_line(x, y, &line, effective_x_budget);
             }
         } else {
@@ -171,47 +166,45 @@ impl<'a> FlamelensWidget<'a> {
         }
     }
 
-    fn get_line_from_padded_text<'h>(
-        &self,
-        stack: &StackInfo,
-        padded: &'h str,
-        text_color: Color,
-        stack_color: Color,
-    ) -> Line<'h>
-    where
-        'a: 'h,
-    {
-        if stack.hit {
+    fn get_line_for_stack(&self, stack: &StackInfo, width: u16, style: Style) -> Line {
+        let short_name = self.app.flamegraph().get_stack_short_name_from_info(stack);
+
+        // Empty space separator at the beginning
+        let mut spans = vec![Span::styled(" ", style)];
+
+        // Stack name with highlighted search terms if needed
+        let short_name_spans = if stack.hit {
             let mut spans: Vec<Span> = Vec::new();
             if let Some(pattern) = self.app.flamegraph_state().search_pattern.as_ref() {
-                // For non-manual matches i.e. those that match the whole stack via the ^$ regex, we
-                // don't want them to be highlighted. Incidentally there's no need to handle that
-                // separately since the added " " prefix in the padded string means the re won't
-                // match.
-                for part in pattern.re.split(padded) {
+                for part in pattern.re.split(short_name) {
                     // Non-match, regular style
-                    spans.push(Span::styled(
-                        part,
-                        Style::default().fg(text_color).bg(stack_color),
-                    ));
+                    spans.push(Span::styled(part, style));
                     // Match, highlighted style
                     spans.push(Span::styled(
                         pattern.pattern.as_str(),
-                        Style::default()
+                        style
                             .fg(Color::Rgb(225, 10, 10))
-                            .bg(stack_color)
                             .add_modifier(Modifier::BOLD),
                     ));
                 }
                 spans.pop();
             }
-            Line::from(spans)
+            spans
         } else {
-            Line::from(Span::styled(
-                padded,
-                Style::default().fg(text_color).bg(stack_color),
-            ))
-        }
+            vec![Span::styled(short_name, style)]
+        };
+        spans.extend(short_name_spans);
+
+        // Padding to fill the rest of the width
+        let pad_length = width
+            .saturating_sub(short_name.len() as u16)
+            .saturating_sub(1) as usize;
+        spans.push(Span::styled(
+            format!("{:width$}", "", width = pad_length),
+            style,
+        ));
+
+        Line::from(spans)
     }
 
     fn get_stack_color(&self, stack: &StackInfo, zoom_state: &Option<ZoomState>) -> Color {
