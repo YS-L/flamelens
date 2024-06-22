@@ -281,6 +281,10 @@ impl FlameGraphView {
         }
     }
 
+    pub fn unset_zoom(&mut self) {
+        self.state.unset_zoom();
+    }
+
     pub fn set_search_pattern(&mut self, search_pattern: SearchPattern) {
         self.flamegraph.set_hits(&search_pattern);
         self.state.set_search_pattern(search_pattern);

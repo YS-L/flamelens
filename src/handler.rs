@@ -20,8 +20,8 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
 pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
     let tic = Instant::now();
     match key_event.code {
-        // Exit application on `ESC` or `q`
-        KeyCode::Esc | KeyCode::Char('q') => {
+        // Exit application on `q`
+        KeyCode::Char('q') => {
             app.quit();
         }
         // Exit application on `Ctrl-C`
@@ -30,7 +30,6 @@ pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
                 app.quit();
             }
         }
-        // Counter handlers
         KeyCode::Right | KeyCode::Char('l') => {
             app.flamegraph_view.to_next_sibling();
         }
@@ -57,6 +56,9 @@ pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         }
         KeyCode::Enter => {
             app.flamegraph_view.set_zoom();
+        }
+        KeyCode::Esc => {
+            app.flamegraph_view.unset_zoom();
         }
         KeyCode::Char('r') => {
             app.flamegraph_view.reset();
