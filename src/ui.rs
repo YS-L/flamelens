@@ -6,8 +6,8 @@ use crate::{
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Style},
-    text::Span,
+    style::{Color, Modifier, Style},
+    text::{Line, Span},
     widgets::{Block, Borders, Paragraph, StatefulWidget, Widget, Wrap},
     Frame,
 };
@@ -119,19 +119,14 @@ impl<'a> FlamelensWidget<'a> {
             if after_level_offset {
                 let stack_color = self.get_stack_color(stack, zoom_state);
                 let text_color = FlamelensWidget::<'a>::get_text_color(stack_color);
-                buf.set_span(
-                    x,
-                    y,
-                    &Span::styled(
-                        &format!(
-                            " {:width$}",
-                            self.app.flamegraph().get_stack_short_name_from_info(stack),
-                            width = effective_x_budget.saturating_sub(1) as usize,
-                        ),
-                        Style::default().fg(text_color).bg(stack_color),
-                    ),
-                    effective_x_budget,
+                let padded = format!(
+                    " {:width$}",
+                    self.app.flamegraph().get_stack_short_name_from_info(stack),
+                    width = effective_x_budget.saturating_sub(1) as usize,
                 );
+                let line =
+                    self.get_line_from_padded_text(stack, padded.as_str(), text_color, stack_color);
+                buf.set_line(x, y, &line, effective_x_budget);
             }
         } else {
             // Can skip rendering children if the stack is already not visible
@@ -176,6 +171,49 @@ impl<'a> FlamelensWidget<'a> {
         }
     }
 
+    fn get_line_from_padded_text<'h>(
+        &self,
+        stack: &StackInfo,
+        padded: &'h str,
+        text_color: Color,
+        stack_color: Color,
+    ) -> Line<'h>
+    where
+        'a: 'h,
+    {
+        if stack.hit {
+            let mut spans: Vec<Span> = Vec::new();
+            if let Some(pattern) = self.app.flamegraph_state().search_pattern.as_ref() {
+                // For non-manual matches i.e. those that match the whole stack via the ^$ regex, we
+                // don't want them to be highlighted. Incidentally there's no need to handle that
+                // separately since the added " " prefix in the padded string means the re won't
+                // match.
+                for part in pattern.re.split(padded) {
+                    // Non-match, regular style
+                    spans.push(Span::styled(
+                        part,
+                        Style::default().fg(text_color).bg(stack_color),
+                    ));
+                    // Match, highlighted style
+                    spans.push(Span::styled(
+                        pattern.pattern.as_str(),
+                        Style::default()
+                            .fg(Color::Rgb(225, 10, 10))
+                            .bg(stack_color)
+                            .add_modifier(Modifier::BOLD),
+                    ));
+                }
+                spans.pop();
+            }
+            Line::from(spans)
+        } else {
+            Line::from(Span::styled(
+                padded,
+                Style::default().fg(text_color).bg(stack_color),
+            ))
+        }
+    }
+
     fn get_stack_color(&self, stack: &StackInfo, zoom_state: &Option<ZoomState>) -> Color {
         if self.app.flamegraph_state().selected == stack.id {
             return Color::Rgb(250, 250, 250);
@@ -197,9 +235,9 @@ impl<'a> FlamelensWidget<'a> {
             g = (230.0 * v1) as u8;
             b = (55.0 * v2) as u8;
         } else {
-            r = 30;
-            g = 55;
-            b = 230;
+            r = 10;
+            g = 35;
+            b = 150;
         }
         if let Some(zoom_state) = zoom_state {
             if zoom_state.ancestors.contains(&stack.id) {
