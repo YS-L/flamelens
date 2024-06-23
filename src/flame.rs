@@ -90,7 +90,7 @@ impl FlameGraph {
                 }
                 _ => None,
             };
-            if line_and_count.is_none() {
+            if line_and_count.is_none() || line.starts_with('#') {
                 last_line_index = line_index + 1;
                 continue;
             }
@@ -587,5 +587,40 @@ mod tests {
         let expected = items.into_iter().collect::<Vec<StackInfoReadable>>();
         assert_eq!(stacks, expected);
         assert_eq!(fg.total_count(), 428);
+    }
+
+    #[test]
+    fn test_ignore_lines_starting_with_hash() {
+        let content = std::fs::read_to_string("tests/data/ignore-metadata-lines.txt").unwrap();
+        let fg = FlameGraph::from_string(content, true);
+        let stacks = get_readable_stacks(&fg);
+        // _print_stacks(&fg);
+        let expected = vec![
+            StackInfoReadable {
+                id: 0,
+                short_name: "all",
+                full_name: "all",
+                total_count: 7,
+                self_count: 0,
+                parent: None,
+                children: vec![1],
+                level: 0,
+                width_factor: 1.0,
+                hit: false,
+            },
+            StackInfoReadable {
+                id: 1,
+                short_name: "<module> (long_running.py:24)",
+                full_name: "<module> (long_running.py:24)",
+                total_count: 7,
+                self_count: 7,
+                parent: Some(0),
+                children: vec![],
+                level: 1,
+                width_factor: 1.0,
+                hit: false,
+            },
+        ];
+        assert_eq!(stacks, expected);
     }
 }
