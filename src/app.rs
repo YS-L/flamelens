@@ -1,4 +1,4 @@
-use crate::flame::FlameGraph;
+use crate::flame::{FlameGraph, SearchPattern};
 use crate::py_spy::{record_samples, ProfilerOutput, SamplerState, SamplerStatus};
 use crate::state::FlameGraphState;
 use crate::view::FlameGraphView;
@@ -180,6 +180,26 @@ impl App {
 
     pub fn add_elapsed(&mut self, name: &str, elapsed: Duration) {
         self.elapsed.insert(name.to_string(), elapsed);
+    }
+
+    pub fn search_selected(&mut self) {
+        let short_name = self.flamegraph_view.get_selected_stack().map(|s| {
+            self.flamegraph()
+                .get_stack_short_name_from_info(s)
+                .to_string()
+        });
+        if let Some(short_name) = short_name {
+            self.set_manual_search_pattern(short_name.as_str(), false);
+        }
+    }
+
+    pub fn set_manual_search_pattern(&mut self, pattern: &str, is_regex: bool) {
+        match SearchPattern::new(pattern, is_regex, true) {
+            Ok(p) => self.flamegraph_view.set_search_pattern(p),
+            Err(_) => {
+                self.set_transient_message(&format!("Invalid regex: {}", pattern));
+            }
+        }
     }
 
     pub fn set_transient_message(&mut self, message: &str) {

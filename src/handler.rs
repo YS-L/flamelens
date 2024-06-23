@@ -1,9 +1,6 @@
 use std::time::Instant;
 
-use crate::{
-    app::{App, AppResult, InputBuffer},
-    flame::SearchPattern,
-};
+use crate::app::{App, AppResult, InputBuffer};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 use tui_input::backend::crossterm::EventHandler;
 
@@ -67,6 +64,9 @@ pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         KeyCode::Char('z') => {
             app.flamegraph_view.state.toggle_freeze();
         }
+        KeyCode::Char('#') => {
+            app.search_selected();
+        }
         KeyCode::Char('/') => {
             app.input_buffer = Some(InputBuffer {
                 buffer: tui_input::Input::new("".to_string()),
@@ -96,12 +96,7 @@ pub fn handle_input_buffer(key_event: KeyEvent, app: &mut App) -> AppResult<()> 
                     app.flamegraph_view.unset_manual_search_pattern();
                 } else {
                     let re_pattern = input.buffer.value().to_string();
-                    match SearchPattern::new(re_pattern.as_str(), true, true) {
-                        Ok(p) => app.flamegraph_view.set_search_pattern(p),
-                        Err(_) => {
-                            app.set_transient_message(&format!("Invalid regex: {}", re_pattern));
-                        }
-                    }
+                    app.set_manual_search_pattern(re_pattern.as_str(), true);
                 }
                 app.input_buffer = None;
             }

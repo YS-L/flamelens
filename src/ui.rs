@@ -371,7 +371,7 @@ impl<'a> FlamelensWidget<'a> {
                     {
                         status_text += " ";
                         status_text += FlamelensWidget::get_count_stats_str(
-                            Some(format!("Match \"{}\"", p.pattern).as_str()),
+                            Some(format!("Match \"{}\"", p.re.as_str()).as_str()),
                             hit_coverage_count,
                             root_total_count,
                             zoom_total_count,
