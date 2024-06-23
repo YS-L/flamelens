@@ -356,7 +356,7 @@ impl<'a> FlamelensWidget<'a> {
                         .total_count
                 });
                 let mut status_text = format!(
-                    "Current: {} {} {}",
+                    "Function: {} {} {}",
                     self.app.flamegraph().get_stack_short_name_from_info(stack),
                     FlamelensWidget::get_count_stats_str(
                         "Total",
@@ -377,7 +377,7 @@ impl<'a> FlamelensWidget<'a> {
                     {
                         status_text += " ";
                         status_text += FlamelensWidget::get_count_stats_str(
-                            format!("\"{}\" hits", p.pattern).as_str(),
+                            format!("Match \"{}\"", p.pattern).as_str(),
                             hit_coverage_count,
                             root_total_count,
                             zoom_total_count,
