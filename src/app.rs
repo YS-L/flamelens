@@ -42,6 +42,8 @@ pub struct App {
     pub input_buffer: Option<InputBuffer>,
     /// Timing information for debugging
     pub elapsed: HashMap<String, Duration>,
+    /// Transient message
+    pub transient_message: Option<String>,
     /// Debug mode
     pub debug: bool,
     /// Next flamegraph to swap in
@@ -58,6 +60,7 @@ impl App {
             flamegraph_input: FlameGraphInput::File(filename.to_string()),
             input_buffer: None,
             elapsed: HashMap::new(),
+            transient_message: None,
             debug: false,
             next_flamegraph: Arc::new(Mutex::new(None)),
             sampler_state: None,
@@ -126,6 +129,7 @@ impl App {
             next_flamegraph: next_flamegraph.clone(),
             input_buffer: None,
             elapsed: HashMap::new(),
+            transient_message: None,
             debug: false,
             sampler_state: Some(sampler_state),
         }
@@ -176,5 +180,13 @@ impl App {
 
     pub fn add_elapsed(&mut self, name: &str, elapsed: Duration) {
         self.elapsed.insert(name.to_string(), elapsed);
+    }
+
+    pub fn set_transient_message(&mut self, message: &str) {
+        self.transient_message = Some(message.to_string());
+    }
+
+    pub fn clear_transient_message(&mut self) {
+        self.transient_message = None;
     }
 }

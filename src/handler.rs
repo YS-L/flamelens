@@ -19,6 +19,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
 /// Handle key events as commands
 pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
     let tic = Instant::now();
+    let mut key_handled = true;
     match key_event.code {
         // Exit application on `q`
         KeyCode::Char('q') => {
@@ -73,7 +74,12 @@ pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             });
         }
         // Other handlers you could add here.
-        _ => {}
+        _ => {
+            key_handled = false;
+        }
+    }
+    if key_handled && app.transient_message.is_some() {
+        app.clear_transient_message();
     }
     app.add_elapsed("handle_key_events", tic.elapsed());
     Ok(())
@@ -89,10 +95,11 @@ pub fn handle_input_buffer(key_event: KeyEvent, app: &mut App) -> AppResult<()> 
                 if input.buffer.value().is_empty() {
                     app.flamegraph_view.unset_manual_search_pattern();
                 } else {
-                    match SearchPattern::new(input.buffer.value(), true, true) {
+                    let re_pattern = input.buffer.value().to_string();
+                    match SearchPattern::new(re_pattern.as_str(), true, true) {
                         Ok(p) => app.flamegraph_view.set_search_pattern(p),
-                        Err(e) => {
-                            panic!("[todo] handle regex error: {}", e)
+                        Err(_) => {
+                            app.set_transient_message(&format!("Invalid regex: {}", re_pattern));
                         }
                     }
                 }

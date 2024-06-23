@@ -385,6 +385,9 @@ impl<'a> FlamelensWidget<'a> {
                         .as_str();
                     }
                 }
+                if let Some(transient_message) = &self.app.transient_message {
+                    status_text += format!(" [{}]", transient_message).as_str();
+                }
                 if self.app.debug {
                     status_text += " ";
                     status_text += elapsed_str.as_str();
