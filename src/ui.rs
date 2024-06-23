@@ -356,17 +356,11 @@ impl<'a> FlamelensWidget<'a> {
                         .total_count
                 });
                 let mut status_text = format!(
-                    "Function: {} {} {}",
+                    "Function: {} {}",
                     self.app.flamegraph().get_stack_short_name_from_info(stack),
                     FlamelensWidget::get_count_stats_str(
-                        "Total",
+                        None,
                         stack.total_count,
-                        root_total_count,
-                        zoom_total_count
-                    ),
-                    FlamelensWidget::get_count_stats_str(
-                        "Self",
-                        stack.self_count,
                         root_total_count,
                         zoom_total_count
                     ),
@@ -377,7 +371,7 @@ impl<'a> FlamelensWidget<'a> {
                     {
                         status_text += " ";
                         status_text += FlamelensWidget::get_count_stats_str(
-                            format!("Match \"{}\"", p.pattern).as_str(),
+                            Some(format!("Match \"{}\"", p.pattern).as_str()),
                             hit_coverage_count,
                             root_total_count,
                             zoom_total_count,
@@ -399,14 +393,14 @@ impl<'a> FlamelensWidget<'a> {
     }
 
     fn get_count_stats_str(
-        name: &str,
+        name: Option<&str>,
         count: u64,
         total_count: u64,
         zoomed_total_count: Option<u64>,
     ) -> String {
         format!(
-            "[{}: {} samples, {:.2}%{}]",
-            name,
+            "[{}{} samples, {:.2}% of all{}]",
+            name.map(|n| format!("{}: ", n)).unwrap_or_default(),
             count,
             (count as f64 / total_count as f64) * 100.0,
             if let Some(zoomed_total_count) = zoomed_total_count {
