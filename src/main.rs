@@ -6,7 +6,7 @@ use flamelens::handler::handle_key_events;
 use flamelens::tui::Tui;
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
-use std::io;
+use std::io::{self, Read};
 
 #[derive(Parser, Debug)]
 #[command(version)]
@@ -35,27 +35,30 @@ fn main() -> AppResult<()> {
     let args = Args::parse();
 
     // Create an application.
-    let app = if let Some(filename) = args.filename {
-        let content = std::fs::read_to_string(&filename).expect("Could not read file");
+    let mut app = if let Some(pid) = args.pid {
+        App::with_pid(
+            pid.parse().expect("Could not parse pid"),
+            args.py_spy_args.clone(),
+        )
+    } else {
+        let (filename, content) = if let Some(filename) = &args.filename {
+            (
+                filename.as_str(),
+                std::fs::read_to_string(filename).expect("Could not read file"),
+            )
+        } else {
+            let mut buf: Vec<u8> = Vec::new();
+            io::stdin()
+                .read_to_end(&mut buf)
+                .expect("Could not read stdin");
+            let content = String::from_utf8(buf).expect("Could not parse stdin");
+            ("stdin", content)
+        };
         let tic = std::time::Instant::now();
         let flamegraph = FlameGraph::from_string(content, args.sorted);
-        let mut app = App::with_flamegraph(&filename, flamegraph);
+        let mut app = App::with_flamegraph(filename, flamegraph);
         app.add_elapsed("flamegraph", tic.elapsed());
-        Some(app)
-    } else {
-        args.pid.map(|pid| {
-            App::with_pid(
-                pid.parse().expect("Could not parse pid"),
-                args.py_spy_args.clone(),
-            )
-        })
-    };
-    let mut app = match app {
-        Some(app) => app,
-        None => {
-            eprintln!("No filename or pid provided");
-            std::process::exit(1);
-        }
+        app
     };
     app.debug = args.debug;
 
