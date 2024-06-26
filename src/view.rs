@@ -2,7 +2,7 @@ use std::cmp::min;
 
 use crate::{
     flame::{FlameGraph, SearchPattern, StackIdentifier, StackInfo, ROOT_ID},
-    state::FlameGraphState,
+    state::{FlameGraphState, ZoomState},
 };
 
 #[derive(Debug)]
@@ -39,6 +39,11 @@ impl FlameGraphView {
         self.state
             .handle_flamegraph_replacement(&self.flamegraph, &mut new_flamegraph);
         self.flamegraph = new_flamegraph;
+        // Now the id in ZoomState points to the one in new flamegraph, but the ancestors and
+        // descendants are not. Set the zoom again to update them.
+        if let Some(zoom) = &self.state.zoom {
+            self.set_zoom_for_id(zoom.stack_id);
+        }
         self.updated_at = std::time::Instant::now();
     }
 
@@ -124,12 +129,7 @@ impl FlameGraphView {
                 // handled by the caller
                 expected_frame_width *= zoom_factor;
             } else if let Some(zoom) = &self.state.zoom {
-                // This is expensive, but this is only called on a small number of candidate stacks
-                // on navigation
-                if self
-                    .flamegraph
-                    .is_ancenstor_or_descendant(&zoom.stack_id, &stack.id)
-                {
+                if zoom.is_ancestor_or_descendant(&stack.id) {
                     expected_frame_width *= zoom.zoom_factor;
                 } else {
                     return false;
@@ -277,13 +277,28 @@ impl FlameGraphView {
         }
     }
 
-    pub fn set_zoom(&mut self) {
-        let selected = self.state.selected;
-        if let Some(selected_stack) = self.flamegraph.get_stack(&selected) {
+    pub fn set_zoom_for_id(&mut self, stack_id: StackIdentifier) {
+        if let Some(selected_stack) = self.flamegraph.get_stack(&stack_id) {
             let zoom_factor =
                 self.flamegraph.total_count() as f64 / selected_stack.total_count as f64;
-            self.state.set_zoom(zoom_factor);
+            let ancestors = self.flamegraph.get_ancestors(&stack_id);
+            let descendants = self.flamegraph.get_descendants(&stack_id);
+            if stack_id == ROOT_ID {
+                self.unset_zoom();
+            } else {
+                let zoom = ZoomState {
+                    stack_id,
+                    zoom_factor,
+                    ancestors,
+                    descendants,
+                };
+                self.state.set_zoom(zoom);
+            }
         }
+    }
+
+    pub fn set_zoom(&mut self) {
+        self.set_zoom_for_id(self.state.selected);
     }
 
     pub fn unset_zoom(&mut self) {

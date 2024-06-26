@@ -3,7 +3,15 @@ use crate::flame::{FlameGraph, SearchPattern, StackIdentifier, ROOT_ID};
 #[derive(Debug, Clone)]
 pub struct ZoomState {
     pub stack_id: StackIdentifier,
+    pub ancestors: Vec<StackIdentifier>,
+    pub descendants: Vec<StackIdentifier>,
     pub zoom_factor: f64,
+}
+
+impl ZoomState {
+    pub fn is_ancestor_or_descendant(&self, stack_id: &StackIdentifier) -> bool {
+        self.ancestors.contains(stack_id) || self.descendants.contains(stack_id)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -40,15 +48,8 @@ impl FlameGraphState {
         self.selected.clone_from(stack_id);
     }
 
-    pub fn set_zoom(&mut self, zoom_factor: f64) {
-        if self.selected == ROOT_ID {
-            self.unset_zoom();
-        } else {
-            self.zoom = Some(ZoomState {
-                stack_id: self.selected,
-                zoom_factor,
-            });
-        }
+    pub fn set_zoom(&mut self, zoom: ZoomState) {
+        self.zoom = Some(zoom);
     }
 
     pub fn unset_zoom(&mut self) {

@@ -331,15 +331,6 @@ impl FlameGraph {
         descendants
     }
 
-    pub fn is_ancenstor_or_descendant(
-        &self,
-        stack_id: &StackIdentifier,
-        other_id: &StackIdentifier,
-    ) -> bool {
-        self.get_ancestors(stack_id).contains(other_id)
-            || self.get_descendants(stack_id).contains(other_id)
-    }
-
     pub fn set_hits(&mut self, p: &SearchPattern) {
         self.stacks.iter_mut().for_each(|stack| {
             stack.hit =
