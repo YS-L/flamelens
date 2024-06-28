@@ -51,12 +51,17 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
             .block(Block::new().borders(Borders::BOTTOM | Borders::TOP));
         let header_line_count_with_borders = header.line_count(area.width) as u16 + 2;
 
+        let status_bar = Paragraph::new(self.get_status_text())
+            .wrap(Wrap { trim: true })
+            .block(Block::new().borders(Borders::TOP));
+        let status_line_count_with_borders = status_bar.line_count(area.width) as u16 + 1;
+
         let layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
                 Constraint::Length(header_line_count_with_borders),
                 Constraint::Fill(1),
-                Constraint::Length(2),
+                Constraint::Length(status_line_count_with_borders),
             ])
             .split(area);
 
@@ -102,8 +107,6 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
         let flamegraph_render_time = tic.elapsed();
 
         // Status bar
-        let status_bar =
-            Paragraph::new(self.get_status_text()).block(Block::new().borders(Borders::TOP));
         status_bar.render(layout[2], buf);
 
         // Update widget state
