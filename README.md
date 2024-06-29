@@ -12,12 +12,21 @@ Run `flamelens` with the filename of the profiling data in the form of "folded s
 flamelens <folded-stacks-filename>
 ```
 
+#### Python
+
 Display a live FlameGraph of a running Python program using `py-spy` as the profiler (sudo likely
 required):
 
 ```
 flamelens --pid <pid-of-python-program>
 ```
+<details>
+
+<summary>Screenshot of a live FlameGraph</summary>
+
+![demo-live](.github/demo-live.gif)
+
+</details>
 
 ### Key bindings
 Key | Action
