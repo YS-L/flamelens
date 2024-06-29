@@ -14,12 +14,14 @@ flamelens <folded-stacks-filename>
 
 #### Python
 
-Display a live FlameGraph of a running Python program using `py-spy` as the profiler (sudo likely
-required):
+Display a live FlameGraph of a running Python program using `py-spy` as the profiler:
 
 ```
 flamelens --pid <pid-of-python-program>
 ```
+
+This requires enabling the `python` feature when installing.
+
 <details>
 
 <summary>Screenshot of a live FlameGraph</summary>
@@ -45,6 +47,14 @@ Key | Action
 
 ### Installation
 
+If you have [Rust](https://www.rust-lang.org/tools/install) installed, `flamelens` is available on
+[crates.io](https://crates.io/crates/flamelens) and you can install it using:
+
 ```
 cargo install flamelens
+```
+
+If you want the live FlameGraph functionality, install with the `--all-features` option:
+```
+cargo install flamelens --all-features
 ```
