@@ -19,6 +19,8 @@ pub mod state;
 
 pub mod view;
 
+#[cfg(feature = "python")]
 pub mod py_spy;
 
+#[cfg(feature = "python")]
 pub mod py_spy_flamegraph;

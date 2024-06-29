@@ -1,12 +1,16 @@
 use crate::flame::{FlameGraph, SearchPattern};
+#[cfg(feature = "python")]
 use crate::py_spy::{record_samples, ProfilerOutput, SamplerState, SamplerStatus};
 use crate::state::FlameGraphState;
 use crate::view::FlameGraphView;
+#[cfg(feature = "python")]
 use remoteprocess;
 use std::collections::HashMap;
+use std::error;
 use std::sync::{Arc, Mutex};
+#[cfg(feature = "python")]
+use std::thread;
 use std::time::Duration;
-use std::{error, thread};
 
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -48,6 +52,7 @@ pub struct App {
     pub debug: bool,
     /// Next flamegraph to swap in
     next_flamegraph: Arc<Mutex<Option<ParsedFlameGraph>>>,
+    #[cfg(feature = "python")]
     sampler_state: Option<Arc<Mutex<SamplerState>>>,
 }
 
@@ -63,10 +68,12 @@ impl App {
             transient_message: None,
             debug: false,
             next_flamegraph: Arc::new(Mutex::new(None)),
+            #[cfg(feature = "python")]
             sampler_state: None,
         }
     }
 
+    #[cfg(feature = "python")]
     pub fn with_pid(pid: u64, py_spy_args: Option<String>) -> Self {
         let next_flamegraph: Arc<Mutex<Option<ParsedFlameGraph>>> = Arc::new(Mutex::new(None));
         let pyspy_data: Arc<Mutex<Option<ProfilerOutput>>> = Arc::new(Mutex::new(None));
@@ -150,6 +157,7 @@ impl App {
         }
 
         // Exit if fatal error in sampler
+        #[cfg(feature = "python")]
         if let Some(SamplerStatus::Error(s)) = self
             .sampler_state
             .as_ref()
@@ -172,6 +180,7 @@ impl App {
         &self.flamegraph_view.state
     }
 
+    #[cfg(feature = "python")]
     pub fn sampler_state(&self) -> Option<SamplerState> {
         self.sampler_state
             .as_ref()

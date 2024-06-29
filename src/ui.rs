@@ -1,7 +1,8 @@
+#[cfg(feature = "python")]
+use crate::py_spy::SamplerStatus;
 use crate::{
     app::{App, FlameGraphInput},
     flame::{StackIdentifier, StackInfo},
-    py_spy::SamplerStatus,
 };
 use ratatui::{
     buffer::Buffer,
@@ -290,6 +291,7 @@ impl<'a> FlamelensWidget<'a> {
                 if let Some(info) = info {
                     out += format!(" [{}]", info).as_str();
                 }
+                #[cfg(feature = "python")]
                 if let Some(state) = &self.app.sampler_state() {
                     out += match state.status {
                         SamplerStatus::Running => " [Running]".to_string(),

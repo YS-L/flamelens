@@ -7,13 +7,17 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.86"
+cfg-if = "1.0.0"
 clap = { version = "4.5.4", features = ["derive"] }
 crossterm = "0.27.0"
-py-spy = { git = "https://github.com/benfred/py-spy.git", rev = "8dd5492" }
+py-spy = { git = "https://github.com/benfred/py-spy.git", rev = "8dd5492", optional = true }
 ratatui = { version = "0.26.3", features = ["unstable-rendered-line-info"] }
 regex = "1.10.5"
-remoteprocess = "0.4.13"
+remoteprocess = { version = "0.4.13", optional = true }
 tui-input = "0.8.0"
+
+[features]
+python = ["dep:py-spy", "dep:remoteprocess"]
 
 # The profile that 'cargo dist' will build with
 [profile.dist]
