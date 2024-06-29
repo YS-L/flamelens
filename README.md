@@ -1,15 +1,16 @@
 # flamelens
 
-`flamelens` is an interactive FlameGraph viewer in the terminal.
+`flamelens` is an interactive flamegraph viewer in the terminal.
 
 ![Demo](.github/demo.gif)
 
 ## What is it?
 
-FlameGraph tools such as [FlameGraph](https://github.com/brendangregg/FlameGraph) and
+Flamegraph tools such as [FlameGraph](https://github.com/brendangregg/FlameGraph) and
 [inferno](https://github.com/jonhoo/inferno) process output from various profiling tools and
-generate intermediate data in the "folded" format ready for FlameGraph plotting, typically as SVG
-files. `flamelens` takes this data and generate an interactive FlameGraph in the terminal.
+generate intermediate data in the "folded" format ready for flamegraph plotting. Instead of plotting
+the flamegraph as an SVG file, `flamelens` takes the folded stacks data and generate an interactive
+flamegraph in the terminal.
 
 No more hauling SVG files and opening a browser just to have a quick look at the profiling result!
 
@@ -25,7 +26,7 @@ You can also pipe data directly to `flamelens` without providing a filename.
 
 ### Python
 
-Display a live FlameGraph of a running Python program using
+Display a live flamegraph of a running Python program using
 [`py-spy`](https://github.com/benfred/py-spy) as the profiler:
 
 ```
@@ -36,7 +37,7 @@ This requires enabling the `python` feature when installing.
 
 <details>
 
-<summary>Example of a live FlameGraph</summary>
+<summary>Example of a live flamegraph</summary>
 
 ![demo-live](.github/demo-live.gif)
 
@@ -54,7 +55,8 @@ Key | Action
 `Esc` | Reset zoom
 `/<regex>` | Find and highlight frames matching the regex
 `#` | Find and highlight frames matching the selected frame
-`z` (in Live mode) | Freeze the FlameGraph
+`r` | Reset to default view
+`z` (in Live mode) | Freeze the flamegraph
 `q` (or `Ctrl + c`) | Exit
 
 ## Installation
@@ -66,7 +68,7 @@ If you have [Rust](https://www.rust-lang.org/tools/install) installed, `flamelen
 cargo install flamelens
 ```
 
-If you want the live FlameGraph functionality, install with the `--all-features` option:
+If you want the live flamegraph functionality, install with the `--all-features` option:
 ```
 cargo install flamelens --all-features
 ```
