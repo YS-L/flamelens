@@ -3,11 +3,11 @@ name = "flamelens"
 version = "0.1.0"
 authors = ["Yung Siang Liau <liauys@gmail.com>"]
 license = "MIT"
-description = "Command line FlameGraph viewer"
+description = "Flamegraph viewer in the terminal"
 readme = "README.md"
 homepage = "https://github.com/YS-L/flamelens"
 repository = "https://github.com/YS-L/flamelens"
-exclude = [".github/*", "tests/*"]
+exclude = [".github/*", "tests/*", ".vscode/*"]
 keywords = ["flamegraph", "profiling", "cli", "tui"]
 edition = "2021"
 
