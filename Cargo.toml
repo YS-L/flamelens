@@ -17,7 +17,7 @@ edition = "2021"
 anyhow = "1.0.86"
 cfg-if = "1.0.0"
 clap = { version = "4.5.4", features = ["derive"] }
-crossterm = "0.27.0"
+crossterm = { version = "0.27.0", features = ["use-dev-tty"] }
 py-spy = { git = "https://github.com/benfred/py-spy.git", rev = "8dd5492", optional = true }
 ratatui = { version = "0.26.3", features = ["unstable-rendered-line-info"] }
 regex = "1.10.5"
