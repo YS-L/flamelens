@@ -1,0 +1,9 @@
+# ---------- level1-a ---------- | ---- level1-b ----- |
+#
+# level2-a | level2-b | level2-c | level2-d | level2-e |
+
+level1-a;level2-a 10
+level1-a;level2-b 20
+level1-a;level2-c 10
+level1-b;level2-d 10
+level1-b;level2-e 20

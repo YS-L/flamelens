@@ -43,11 +43,17 @@ impl SearchPattern {
 }
 
 #[derive(Debug, Clone)]
+pub struct Hits {
+    coverage_count: u64,
+    ids: Vec<StackIdentifier>,
+}
+
+#[derive(Debug, Clone)]
 pub struct FlameGraph {
     data: String,
     stacks: Vec<StackInfo>,
     levels: Vec<Vec<StackIdentifier>>,
-    pub hit_coverage_count: Option<u64>,
+    hits: Option<Hits>,
     sorted: bool,
 }
 
@@ -138,7 +144,7 @@ impl FlameGraph {
             data: content,
             stacks,
             levels: vec![],
-            hit_coverage_count: None,
+            hits: None,
             sorted,
         };
         out.populate_levels(&ROOT_ID, 0, None);
@@ -336,12 +342,23 @@ impl FlameGraph {
             stack.hit =
                 p.re.is_match(&self.data[stack.start_index..stack.end_index]);
         });
-        self.hit_coverage_count = Some(self._count_hit_coverage(ROOT_ID));
+        self.hits = Some(Hits {
+            coverage_count: self._count_hit_coverage(ROOT_ID),
+            ids: self._collect_hit_ids(),
+        });
     }
 
     pub fn clear_hits(&mut self) {
         self.stacks.iter_mut().for_each(|stack| stack.hit = false);
-        self.hit_coverage_count = None;
+        self.hits = None;
+    }
+
+    pub fn hit_coverage_count(&self) -> Option<u64> {
+        self.hits.as_ref().map(|h| h.coverage_count)
+    }
+
+    pub fn hit_ids(&self) -> Option<&Vec<StackIdentifier>> {
+        self.hits.as_ref().map(|h| &h.ids)
     }
 
     fn _count_hit_coverage(&self, stack_id: StackIdentifier) -> u64 {
@@ -354,6 +371,20 @@ impl FlameGraph {
             count += self._count_hit_coverage(*child_id);
         }
         count
+    }
+
+    fn _collect_hit_ids(&self) -> Vec<StackIdentifier> {
+        let mut hits = vec![];
+        for level in self.levels.iter() {
+            for stacks in level.iter() {
+                if let Some(stack) = self.get_stack(stacks) {
+                    if stack.hit {
+                        hits.push(*stacks);
+                    }
+                }
+            }
+        }
+        hits
     }
 }
 

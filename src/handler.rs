@@ -52,6 +52,12 @@ pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         KeyCode::Char('b') => {
             app.flamegraph_view.page_up();
         }
+        KeyCode::Char('n') => {
+            app.flamegraph_view.to_next_search_result();
+        }
+        KeyCode::Char('N') => {
+            app.flamegraph_view.to_previous_search_result();
+        }
         KeyCode::Enter => {
             app.flamegraph_view.set_zoom();
         }

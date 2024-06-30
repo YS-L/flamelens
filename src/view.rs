@@ -129,8 +129,12 @@ impl FlameGraphView {
                 // handled by the caller
                 expected_frame_width *= zoom_factor;
             } else if let Some(zoom) = &self.state.zoom {
-                if zoom.is_ancestor_or_descendant(&stack.id) {
-                    expected_frame_width *= zoom.zoom_factor;
+                let adjusted_frame_width = expected_frame_width * zoom.zoom_factor;
+                // Important: Must short circuit by checking the adjusted_frame_width >= 1.0
+                // condition first because the is_ancestor_or_descendant check is expensive for very
+                // deep call stacks.
+                if adjusted_frame_width >= 1.0 && zoom.is_ancestor_or_descendant(&stack.id) {
+                    expected_frame_width = adjusted_frame_width;
                 } else {
                     return false;
                 }
@@ -242,6 +246,81 @@ impl FlameGraphView {
         }
     }
 
+    pub fn to_previous_search_result(&mut self) {
+        if let Some(previous_id) = self.get_previous_hit() {
+            self.select_id(&previous_id);
+            self.scroll_to_selected();
+        }
+    }
+
+    pub fn to_next_search_result(&mut self) {
+        if let Some(next_id) = self.get_next_hit() {
+            self.select_id(&next_id);
+            self.scroll_to_selected();
+        }
+    }
+
+    fn get_next_hit(&self) -> Option<StackIdentifier> {
+        // Nothing to do if not searching
+        let _ = self.state.search_pattern.as_ref()?;
+
+        // Get from the current level
+        let selected_stack = self.flamegraph.get_stack(&self.state.selected)?;
+        let level_stacks = self.flamegraph.get_stacks_at_level(selected_stack.level)?;
+        let next_hit = self.get_next_hit_same_level(level_stacks.iter());
+        if next_hit.is_some() {
+            return next_hit;
+        }
+
+        // Get from the next level
+        self.flamegraph.hit_ids().and_then(|hit_ids| {
+            hit_ids
+                .iter()
+                .filter_map(|x| self.flamegraph.get_stack(x))
+                .filter(|x| x.level > selected_stack.level && self.is_stack_visibly_wide(x, None))
+                .map(|x| x.id)
+                .next()
+        })
+    }
+
+    pub fn get_previous_hit(&self) -> Option<StackIdentifier> {
+        // Nothing to do if not searching
+        let _ = self.state.search_pattern.as_ref()?;
+
+        // Get from the current level
+        let selected_stack = self.flamegraph.get_stack(&self.state.selected)?;
+        let level_stacks = self.flamegraph.get_stacks_at_level(selected_stack.level)?;
+        let hit = self.get_next_hit_same_level(level_stacks.iter().rev());
+        if hit.is_some() {
+            return hit;
+        }
+
+        // Get from the previous level
+        self.flamegraph.hit_ids().and_then(|hit_ids| {
+            hit_ids
+                .iter()
+                .rev()
+                .filter_map(|x| self.flamegraph.get_stack(x))
+                .filter(|x| x.level < selected_stack.level && self.is_stack_visibly_wide(x, None))
+                .map(|x| x.id)
+                .next()
+        })
+    }
+
+    fn get_next_hit_same_level<'a, I>(&self, level_stacks: I) -> Option<StackIdentifier>
+    where
+        I: Iterator<Item = &'a StackIdentifier>,
+    {
+        let same_level_candidates = level_stacks
+            .filter_map(|x| self.flamegraph.get_stack(x))
+            .skip_while(|x| x.id != self.state.selected)
+            .skip(1); // skip the selected stack
+        same_level_candidates
+            .filter(|x| x.hit)
+            .find(|x| self.is_stack_visibly_wide(x, None))
+            .map(|x| x.id)
+    }
+
     pub fn scroll_bottom(&mut self) {
         if let Some(bottom_offset) = self.get_bottom_level_offset() {
             self.state.level_offset = bottom_offset;
@@ -252,6 +331,14 @@ impl FlameGraphView {
     pub fn scroll_top(&mut self) {
         self.state.level_offset = 0;
         self.keep_selected_stack_in_view_port();
+    }
+
+    pub fn scroll_to_selected(&mut self) {
+        if let Some(stack) = self.get_selected_stack() {
+            if !self.is_stack_in_view_port(stack) {
+                self.set_level_offset(stack.level);
+            }
+        }
     }
 
     pub fn page_down(&mut self) {
@@ -344,6 +431,12 @@ mod tests {
             .id
     }
 
+    fn get_selected_short_name(view: &FlameGraphView) -> &str {
+        view.flamegraph
+            .get_stack_short_name(&view.state.selected)
+            .unwrap()
+    }
+
     #[test]
     fn test_get_next_sibling() {
         let content = std::fs::read_to_string("tests/data/py-spy-simple.txt").unwrap();
@@ -398,5 +491,53 @@ mod tests {
                 "<module> (long_running.py:25);work (long_running.py:7)",
             ),
         );
+    }
+
+    #[test]
+    fn test_get_next_and_previous_search_result() {
+        let content = std::fs::read_to_string("tests/data/readable.txt").unwrap();
+        let fg = FlameGraph::from_string(content, false);
+
+        // No-op if no search pattern
+        let mut view = FlameGraphView::new(fg);
+        view.to_next_search_result();
+        view.to_previous_search_result();
+        assert_eq!(get_selected_short_name(&view), "all");
+
+        // Set a search pattern
+        view.set_search_pattern(
+            SearchPattern::new("1-b$|2-a$|2-c$|2-e$", true, true)
+                .expect("Could not create search pattern"),
+        );
+        assert_eq!(get_selected_short_name(&view), "all");
+
+        // Check going to the next search result
+        view.to_next_search_result();
+        assert_eq!(get_selected_short_name(&view), "level1-b");
+
+        view.to_next_search_result();
+        assert_eq!(get_selected_short_name(&view), "level2-a");
+
+        view.to_next_search_result();
+        assert_eq!(get_selected_short_name(&view), "level2-c");
+
+        view.to_next_search_result();
+        assert_eq!(get_selected_short_name(&view), "level2-e");
+
+        view.to_next_search_result();
+        assert_eq!(get_selected_short_name(&view), "level2-e");
+
+        // Check going to the previous search result
+        view.to_previous_search_result();
+        assert_eq!(get_selected_short_name(&view), "level2-c");
+
+        view.to_previous_search_result();
+        assert_eq!(get_selected_short_name(&view), "level2-a");
+
+        view.to_previous_search_result();
+        assert_eq!(get_selected_short_name(&view), "level1-b");
+
+        view.to_previous_search_result();
+        assert_eq!(get_selected_short_name(&view), "level1-b");
     }
 }

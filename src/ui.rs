@@ -372,7 +372,7 @@ impl<'a> FlamelensWidget<'a> {
                 );
                 if let Some(p) = &self.app.flamegraph_state().search_pattern {
                     if let (true, Some(hit_coverage_count)) =
-                        (p.is_manual, self.app.flamegraph().hit_coverage_count)
+                        (p.is_manual, self.app.flamegraph().hit_coverage_count())
                     {
                         status_text += " ";
                         status_text += FlamelensWidget::get_count_stats_str(
