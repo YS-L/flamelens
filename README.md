@@ -55,6 +55,8 @@ Key | Action
 `Esc` | Reset zoom
 `/<regex>` | Find and highlight frames matching the regex
 `#` | Find and highlight frames matching the selected frame
+`n` | Jump to next match
+`N` | Jump to previous match
 `r` | Reset to default view
 `z` (in Live mode) | Freeze the flamegraph
 `q` (or `Ctrl + c`) | Exit
