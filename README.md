@@ -65,10 +65,10 @@ If you have [Rust](https://www.rust-lang.org/tools/install) installed, `flamelen
 [crates.io](https://crates.io/crates/flamelens) and you can install it using:
 
 ```
-cargo install flamelens
+cargo install flamelens --locked
 ```
 
 If you want the live flamegraph functionality, install with the `--all-features` option:
 ```
-cargo install flamelens --all-features
+cargo install flamelens --locked --all-features
 ```
