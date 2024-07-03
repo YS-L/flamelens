@@ -393,6 +393,10 @@ impl FlameGraphView {
     }
 
     pub fn unset_zoom(&mut self) {
+        if let Some(zoom_stack_id) = self.state.zoom.as_ref().map(|z| z.stack_id) {
+            // Restore selected to previous zoom point
+            self.select_id(&zoom_stack_id);
+        }
         self.state.unset_zoom();
     }
 
