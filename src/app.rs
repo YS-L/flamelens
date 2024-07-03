@@ -192,6 +192,9 @@ impl App {
     }
 
     pub fn search_selected(&mut self) {
+        if self.flamegraph_view.is_root_selected() {
+            return;
+        }
         let short_name = self.flamegraph_view.get_selected_stack().map(|s| {
             self.flamegraph()
                 .get_stack_short_name_from_info(s)

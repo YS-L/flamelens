@@ -171,6 +171,10 @@ impl FlameGraphView {
         self.flamegraph.get_stack(&self.state.selected)
     }
 
+    pub fn is_root_selected(&self) -> bool {
+        self.state.selected == ROOT_ID
+    }
+
     pub fn get_next_sibling(&self, stack_id: &StackIdentifier) -> Option<StackIdentifier> {
         let stack = self.flamegraph.get_stack(stack_id)?;
         let level = self.flamegraph.get_stacks_at_level(stack.level)?;
