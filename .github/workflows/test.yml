@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: apt-get update && apt-get install -y libunwind-dev
     - name: Build
       run: cargo build --verbose --all-features
     - name: Test
