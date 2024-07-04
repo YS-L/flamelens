@@ -19,6 +19,8 @@ use std::{
 };
 
 const SEARCH_PREFIX: &str = "Search: ";
+const COLOR_SELECTED_BACKGROUND: Color = Color::Rgb(250, 250, 250);
+const COLOR_MATCHED_BACKGROUND: Color = Color::Rgb(10, 35, 150);
 
 #[derive(Debug, Clone, Default)]
 pub struct FlamelensWidgetState {
@@ -52,7 +54,7 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
             .block(Block::new().borders(Borders::BOTTOM | Borders::TOP));
         let header_line_count_with_borders = header.line_count(area.width) as u16 + 2;
 
-        let status_bar = Paragraph::new(self.get_status_text())
+        let status_bar = Paragraph::new(self.get_status_text(area.width))
             .wrap(Wrap { trim: true })
             .block(Block::new().borders(Borders::TOP));
         let status_line_count_with_borders = status_bar.line_count(area.width) as u16 + 1;
@@ -236,7 +238,7 @@ impl<'a> FlamelensWidget<'a> {
 
     fn get_stack_color(&self, stack: &StackInfo, zoom_state: &Option<ZoomState>) -> Color {
         if self.app.flamegraph_state().selected == stack.id {
-            return Color::Rgb(250, 250, 250);
+            return COLOR_SELECTED_BACKGROUND;
         }
         // Roughly based on flamegraph.pl
         fn hash_name(name: &str) -> f64 {
@@ -254,10 +256,12 @@ impl<'a> FlamelensWidget<'a> {
             r = 205 + (50.0 * v2) as u8;
             g = (230.0 * v1) as u8;
             b = (55.0 * v2) as u8;
+        } else if let Color::Rgb(r_, g_, b_) = COLOR_MATCHED_BACKGROUND {
+            r = r_;
+            g = g_;
+            b = b_;
         } else {
-            r = 10;
-            g = 35;
-            b = 150;
+            unreachable!();
         }
         if let Some(zoom_state) = zoom_state {
             if zoom_state.ancestors.contains(&stack.id) {
@@ -281,6 +285,12 @@ impl<'a> FlamelensWidget<'a> {
             }
             _ => Color::Black,
         }
+    }
+
+    fn get_style_from_bg(background_color: Color) -> Style {
+        Style::default()
+            .bg(background_color)
+            .fg(FlamelensWidget::get_text_color(background_color))
     }
 
     fn get_header_text(&self) -> String {
@@ -313,18 +323,18 @@ impl<'a> FlamelensWidget<'a> {
         }
     }
 
-    fn get_status_text(&self) -> String {
+    fn get_status_text(&self, width: u16) -> Vec<Line> {
         if self.app.input_buffer.is_some() {
             self.get_status_text_buffer()
         } else {
-            self.get_status_text_command()
+            self.get_status_text_command(width)
         }
     }
 
-    fn get_status_text_buffer(&self) -> String {
+    fn get_status_text_buffer(&self) -> Vec<Line> {
         let input_buffer = self.app.input_buffer.as_ref().unwrap();
         let status_text = format!("{}{}", SEARCH_PREFIX, input_buffer.buffer);
-        status_text
+        vec![Line::from(status_text)]
     }
 
     fn get_cursor_position(&self, status_area: Rect) -> Option<(u16, u16)> {
@@ -336,21 +346,13 @@ impl<'a> FlamelensWidget<'a> {
         })
     }
 
-    fn get_status_text_command(&self) -> String {
+    fn get_status_text_command(&self, width: u16) -> Vec<Line> {
         let stack = self
             .app
             .flamegraph()
             .get_stack(&self.app.flamegraph_state().selected);
         let root_total_count = self.app.flamegraph().root().total_count;
-        let elapsed_str = format!(
-            "[{}]",
-            self.app
-                .elapsed
-                .iter()
-                .map(|(k, v)| format!("{}:{:.2}ms", k, v.as_micros() as f64 / 1000.0))
-                .collect::<Vec<String>>()
-                .join(" ")
-        );
+        let mut lines = vec![];
         match stack {
             Some(stack) => {
                 let zoom_total_count = self.app.flamegraph_state().zoom.as_ref().map(|zoom| {
@@ -360,7 +362,8 @@ impl<'a> FlamelensWidget<'a> {
                         .unwrap()
                         .total_count
                 });
-                let mut status_text = format!(
+                // format!("{:width$}", "", width = pad_length)
+                let status_text = format!(
                     "Function: {} {}",
                     self.app.flamegraph().get_stack_short_name_from_info(stack),
                     FlamelensWidget::get_count_stats_str(
@@ -370,30 +373,52 @@ impl<'a> FlamelensWidget<'a> {
                         zoom_total_count
                     ),
                 );
+                let status_text = format!("{:width$}", status_text, width = width as usize,);
+                lines.push(
+                    Line::from(status_text).style(FlamelensWidget::get_style_from_bg(
+                        COLOR_SELECTED_BACKGROUND,
+                    )),
+                );
                 if let Some(p) = &self.app.flamegraph_state().search_pattern {
                     if let (true, Some(hit_coverage_count)) =
                         (p.is_manual, self.app.flamegraph().hit_coverage_count())
                     {
-                        status_text += " ";
-                        status_text += FlamelensWidget::get_count_stats_str(
-                            Some(format!("Match \"{}\"", p.re.as_str()).as_str()),
-                            hit_coverage_count,
-                            root_total_count,
-                            zoom_total_count,
-                        )
-                        .as_str();
+                        let match_text = format!(
+                            "Match: \"{}\" {}",
+                            p.re.as_str(),
+                            FlamelensWidget::get_count_stats_str(
+                                None,
+                                hit_coverage_count,
+                                root_total_count,
+                                zoom_total_count,
+                            )
+                        );
+                        let match_text = format!("{:width$}", match_text, width = width as usize,);
+                        lines.push(
+                            Line::from(match_text).style(FlamelensWidget::get_style_from_bg(
+                                COLOR_MATCHED_BACKGROUND,
+                            )),
+                        );
                     }
                 }
-                if let Some(transient_message) = &self.app.transient_message {
-                    status_text += format!(" [{}]", transient_message).as_str();
-                }
                 if self.app.debug {
-                    status_text += " ";
-                    status_text += elapsed_str.as_str();
+                    let elapsed_str = format!(
+                        "Debug: {}",
+                        self.app
+                            .elapsed
+                            .iter()
+                            .map(|(k, v)| format!("{}:{:.2}ms", k, v.as_micros() as f64 / 1000.0))
+                            .collect::<Vec<String>>()
+                            .join(" ")
+                    );
+                    lines.push(Line::from(elapsed_str));
                 }
-                status_text
+                if let Some(transient_message) = &self.app.transient_message {
+                    lines.push(Line::from(transient_message.as_str()));
+                }
+                lines
             }
-            None => "No stack selected".to_string(),
+            None => vec![Line::from("No stack selected")],
         }
     }
 
