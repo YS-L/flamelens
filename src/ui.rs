@@ -56,8 +56,8 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
 
         let status_bar = Paragraph::new(self.get_status_text(area.width))
             .wrap(Wrap { trim: true })
-            .block(Block::new().borders(Borders::TOP));
-        let status_line_count_with_borders = status_bar.line_count(area.width) as u16 + 1;
+            .block(Block::new().borders(Borders::NONE));
+        let status_line_count_with_borders = status_bar.line_count(area.width) as u16;
 
         let layout = Layout::default()
             .direction(Direction::Vertical)
@@ -362,23 +362,6 @@ impl<'a> FlamelensWidget<'a> {
                         .unwrap()
                         .total_count
                 });
-                // format!("{:width$}", "", width = pad_length)
-                let status_text = format!(
-                    "Function: {} {}",
-                    self.app.flamegraph().get_stack_short_name_from_info(stack),
-                    FlamelensWidget::get_count_stats_str(
-                        None,
-                        stack.total_count,
-                        root_total_count,
-                        zoom_total_count
-                    ),
-                );
-                let status_text = format!("{:width$}", status_text, width = width as usize,);
-                lines.push(
-                    Line::from(status_text).style(FlamelensWidget::get_style_from_bg(
-                        COLOR_SELECTED_BACKGROUND,
-                    )),
-                );
                 if let Some(p) = &self.app.flamegraph_state().search_pattern {
                     if let (true, Some(hit_coverage_count)) =
                         (p.is_manual, self.app.flamegraph().hit_coverage_count())
@@ -401,6 +384,22 @@ impl<'a> FlamelensWidget<'a> {
                         );
                     }
                 }
+                let selected_text = format!(
+                    "Selected: {} {}",
+                    self.app.flamegraph().get_stack_short_name_from_info(stack),
+                    FlamelensWidget::get_count_stats_str(
+                        None,
+                        stack.total_count,
+                        root_total_count,
+                        zoom_total_count
+                    ),
+                );
+                let status_text = format!("{:width$}", selected_text, width = width as usize,);
+                lines.push(
+                    Line::from(status_text).style(FlamelensWidget::get_style_from_bg(
+                        COLOR_SELECTED_BACKGROUND,
+                    )),
+                );
                 if self.app.debug {
                     let elapsed_str = format!(
                         "Debug: {}",
