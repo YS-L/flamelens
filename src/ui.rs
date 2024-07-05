@@ -64,6 +64,7 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
             .constraints([
                 Constraint::Length(header_line_count_with_borders),
                 Constraint::Fill(1),
+                Constraint::Length(1),
                 Constraint::Length(status_line_count_with_borders),
             ])
             .split(area);
@@ -97,7 +98,7 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
                     None
                 }
             });
-        self.render_stacks(
+        let has_more_rows_to_render = self.render_stacks(
             self.app.flamegraph().root(),
             buf,
             flamegraph_area.x,
@@ -109,8 +110,12 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
         );
         let flamegraph_render_time = tic.elapsed();
 
+        // More rows indicator
+        self.get_more_rows_indicator(has_more_rows_to_render)
+            .render(layout[2], buf);
+
         // Status bar
-        status_bar.render(layout[2], buf);
+        status_bar.render(layout[3], buf);
 
         // Update widget state
         state.frame_height = flamegraph_area.height;
@@ -132,7 +137,7 @@ impl<'a> FlamelensWidget<'a> {
         y_max: u16,
         zoom_state: &Option<ZoomState>,
         re: &Option<&regex::Regex>,
-    ) {
+    ) -> bool {
         let after_level_offset = stack.level >= self.app.flamegraph_state().level_offset;
 
         // Only render if the stack is visible
@@ -147,7 +152,8 @@ impl<'a> FlamelensWidget<'a> {
             }
         } else {
             // Can skip rendering children if the stack is already not visible
-            return;
+            let has_more_rows_to_render = (y >= y_max) && effective_x_budget > 0;
+            return has_more_rows_to_render;
         }
 
         // Render children
@@ -163,6 +169,8 @@ impl<'a> FlamelensWidget<'a> {
                 }
             })
             .map(|idx| stack.children[idx]);
+
+        let mut has_more_rows_to_render = false;
         for child in &stack.children {
             let child_stack = self.app.flamegraph().get_stack(child).unwrap();
             let child_x_budget = if let Some(zoomed_child_id) = zoomed_child {
@@ -175,7 +183,7 @@ impl<'a> FlamelensWidget<'a> {
             } else {
                 x_budget * (child_stack.total_count as f64 / stack.total_count as f64)
             };
-            self.render_stacks(
+            has_more_rows_to_render |= self.render_stacks(
                 child_stack,
                 buf,
                 x + x_offset,
@@ -187,6 +195,8 @@ impl<'a> FlamelensWidget<'a> {
             );
             x_offset += child_x_budget as u16;
         }
+
+        has_more_rows_to_render
     }
 
     fn get_line_for_stack(
@@ -328,6 +338,14 @@ impl<'a> FlamelensWidget<'a> {
             self.get_status_text_buffer()
         } else {
             self.get_status_text_command(width)
+        }
+    }
+
+    fn get_more_rows_indicator(&self, has_more_rows_to_render: bool) -> Line {
+        if has_more_rows_to_render {
+            Line::from("(more ▾)")
+        } else {
+            Line::from("")
         }
     }
 
