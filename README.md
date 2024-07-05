@@ -84,3 +84,8 @@ If you want the live flamegraph functionality, install with the `--all-features`
 ```
 cargo install flamelens --locked --all-features
 ```
+
+Alternatively, build and install from source after cloning this repo:
+```
+cargo install --path $(pwd) --locked
+```
