@@ -6,7 +6,7 @@ use crate::{
 };
 use ratatui::{
     buffer::Buffer,
-    layout::{Constraint, Direction, Layout, Rect},
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, StatefulWidget, Widget, Wrap},
@@ -54,17 +54,15 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
             .block(Block::new().borders(Borders::BOTTOM | Borders::TOP));
         let header_line_count_with_borders = header.line_count(area.width) as u16 + 2;
 
-        let status_bar = Paragraph::new(self.get_status_text(area.width))
-            .wrap(Wrap { trim: true })
-            .block(Block::new().borders(Borders::NONE));
-        let status_line_count_with_borders = status_bar.line_count(area.width) as u16;
+        let mut status_bar =
+            Paragraph::new(self.get_status_text(area.width)).wrap(Wrap { trim: true });
+        let status_line_count_with_borders = status_bar.line_count(area.width) as u16 + 1;
 
         let layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
                 Constraint::Length(header_line_count_with_borders),
                 Constraint::Fill(1),
-                Constraint::Length(1),
                 Constraint::Length(status_line_count_with_borders),
             ])
             .split(area);
@@ -111,11 +109,16 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
         let flamegraph_render_time = tic.elapsed();
 
         // More rows indicator
-        self.get_more_rows_indicator(has_more_rows_to_render)
-            .render(layout[2], buf);
+        let mut status_bar_block = Block::new().borders(Borders::TOP);
+        if has_more_rows_to_render {
+            status_bar_block = status_bar_block
+                .title(" More ▾ (press f to scroll) ")
+                .title_alignment(Alignment::Center);
+        }
+        status_bar = status_bar.block(status_bar_block);
 
         // Status bar
-        status_bar.render(layout[3], buf);
+        status_bar.render(layout[2], buf);
 
         // Update widget state
         state.frame_height = flamegraph_area.height;
@@ -338,14 +341,6 @@ impl<'a> FlamelensWidget<'a> {
             self.get_status_text_buffer()
         } else {
             self.get_status_text_command(width)
-        }
-    }
-
-    fn get_more_rows_indicator(&self, has_more_rows_to_render: bool) -> Line {
-        if has_more_rows_to_render {
-            Line::from("(more ▾)")
-        } else {
-            Line::from("")
         }
     }
 
