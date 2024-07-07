@@ -19,10 +19,12 @@ struct Args {
     sorted: bool,
 
     /// Pid for live flamegraph
+    #[cfg(feature = "python")]
     #[clap(long, value_name = "pid")]
     pid: Option<String>,
 
     /// Additional arguments to pass to "py-spy record" command
+    #[cfg(feature = "python")]
     #[clap(long, value_name = "py-spy-args")]
     py_spy_args: Option<String>,
 
@@ -31,41 +33,45 @@ struct Args {
     debug: bool,
 }
 
+fn get_app_from_filename_or_stdin(args: &Args) -> App {
+    let (filename, content) = if let Some(filename) = &args.filename {
+        (
+            filename.as_str(),
+            std::fs::read_to_string(filename).expect("Could not read file"),
+        )
+    } else {
+        let mut buf: Vec<u8> = Vec::new();
+        io::stdin()
+            .read_to_end(&mut buf)
+            .expect("Could not read stdin");
+        let content = String::from_utf8(buf).expect("Could not parse stdin");
+        ("stdin", content)
+    };
+    let tic = std::time::Instant::now();
+    let flamegraph = FlameGraph::from_string(content, args.sorted);
+    let mut app = App::with_flamegraph(filename, flamegraph);
+    app.add_elapsed("flamegraph", tic.elapsed());
+    app
+}
+
 fn main() -> AppResult<()> {
     let args = Args::parse();
 
     // Create an application.
-    let mut app = if let Some(_pid) = args.pid {
-        cfg_if::cfg_if! {
-            if #[cfg(feature = "python")] {
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "python")] {
+            let mut app = if let Some(_pid) = args.pid {
                 App::with_pid(
                     _pid.parse().expect("Could not parse pid"),
                     args.py_spy_args.clone(),
                 )
             } else {
-                panic!("--pid is only available with the 'python' feature");
-            }
-        }
-    } else {
-        let (filename, content) = if let Some(filename) = &args.filename {
-            (
-                filename.as_str(),
-                std::fs::read_to_string(filename).expect("Could not read file"),
-            )
+                get_app_from_filename_or_stdin(&args)
+            };
         } else {
-            let mut buf: Vec<u8> = Vec::new();
-            io::stdin()
-                .read_to_end(&mut buf)
-                .expect("Could not read stdin");
-            let content = String::from_utf8(buf).expect("Could not parse stdin");
-            ("stdin", content)
-        };
-        let tic = std::time::Instant::now();
-        let flamegraph = FlameGraph::from_string(content, args.sorted);
-        let mut app = App::with_flamegraph(filename, flamegraph);
-        app.add_elapsed("flamegraph", tic.elapsed());
-        app
-    };
+            let mut app = get_app_from_filename_or_stdin(&args);
+        }
+    }
     app.debug = args.debug;
 
     // Initialize the terminal user interface.
