@@ -50,16 +50,12 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
     type State = FlamelensWidgetState;
 
     fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
-        if self.app.flamegraph_state().view_kind == ViewKind::FlameGraph {
-            self.render_flamegraph(area, buf, state);
-        } else {
-            self.render_table(area, buf, state);
-        }
+        self.render_all(area, buf, state);
     }
 }
 
 impl<'a> FlamelensWidget<'a> {
-    fn render_flamegraph(self, area: Rect, buf: &mut Buffer, state: &mut FlamelensWidgetState) {
+    fn render_all(self, area: Rect, buf: &mut Buffer, state: &mut FlamelensWidgetState) {
         let header = Paragraph::new(self.get_header_text())
             .wrap(Wrap { trim: false })
             .block(Block::new().borders(Borders::BOTTOM | Borders::TOP));
@@ -81,9 +77,38 @@ impl<'a> FlamelensWidget<'a> {
         // Header area
         header.render(layout[0], buf);
 
-        // Framegraph area
+        // Main area for flamegraph / top view
         let tic = std::time::Instant::now();
-        let flamegraph_area = layout[1];
+        let main_area = layout[1];
+        let has_more_rows_to_render =
+            if self.app.flamegraph_state().view_kind == ViewKind::FlameGraph {
+                self.render_flamegraph(main_area, buf)
+            } else {
+                self.render_table(main_area, buf);
+                false
+            };
+        let flamegraph_render_time = tic.elapsed();
+
+        // More rows indicator
+        let mut status_bar_block = Block::new().borders(Borders::TOP);
+        if has_more_rows_to_render {
+            status_bar_block = status_bar_block
+                .title(" More ▾ (press f to scroll) ")
+                .title_alignment(Alignment::Center);
+        }
+        status_bar = status_bar.block(status_bar_block);
+
+        // Status bar
+        status_bar.render(layout[2], buf);
+
+        // Update widget state
+        state.frame_height = main_area.height;
+        state.frame_width = main_area.width;
+        state.render_time = flamegraph_render_time;
+        state.cursor_position = self.get_cursor_position(layout[2]);
+    }
+
+    fn render_flamegraph(&self, area: Rect, buf: &mut Buffer) -> bool {
         let zoom_state = self
             .app
             .flamegraph_state()
@@ -110,52 +135,20 @@ impl<'a> FlamelensWidget<'a> {
         let has_more_rows_to_render = self.render_stacks(
             self.app.flamegraph().root(),
             buf,
-            flamegraph_area.x,
-            flamegraph_area.y,
-            flamegraph_area.width as f64,
-            flamegraph_area.bottom(),
+            area.x,
+            area.y,
+            area.width as f64,
+            area.bottom(),
             &zoom_state,
             &re,
         );
-        let flamegraph_render_time = tic.elapsed();
-
-        // More rows indicator
-        let mut status_bar_block = Block::new().borders(Borders::TOP);
-        if has_more_rows_to_render {
-            status_bar_block = status_bar_block
-                .title(" More ▾ (press f to scroll) ")
-                .title_alignment(Alignment::Center);
-        }
-        status_bar = status_bar.block(status_bar_block);
-
-        // Status bar
-        status_bar.render(layout[2], buf);
-
-        // Update widget state
-        state.frame_height = flamegraph_area.height;
-        state.frame_width = flamegraph_area.width;
-        state.render_time = flamegraph_render_time;
-        state.cursor_position = self.get_cursor_position(layout[2]);
+        has_more_rows_to_render
     }
 
-    fn render_table(self, area: Rect, buf: &mut Buffer, state: &mut FlamelensWidgetState) {
-        let header = Paragraph::new(self.get_header_text())
-            .wrap(Wrap { trim: false })
-            .block(Block::new().borders(Borders::BOTTOM | Borders::TOP));
-        let header_line_count_with_borders = header.line_count(area.width) as u16 + 2;
-
-        let layout = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints([
-                Constraint::Length(header_line_count_with_borders),
-                Constraint::Fill(1),
-            ])
-            .split(area);
-
-        // Ordered stacks
+    fn render_table(&self, area: Rect, buf: &mut Buffer) {
         let ordered_stacks_table = self.get_ordered_stacks_table();
         let mut table_state = TableState::default();
-        StatefulWidget::render(ordered_stacks_table, layout[1], buf, &mut table_state);
+        StatefulWidget::render(ordered_stacks_table, area, buf, &mut table_state);
     }
 
     #[allow(clippy::too_many_arguments)]

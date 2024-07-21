@@ -171,6 +171,7 @@ impl FlameGraph {
         for stack in stacks.iter() {
             let short_name = &content[stack.start_index..stack.end_index];
             let count = counts.entry(short_name).or_default();
+            // TODO: total is incorrect for recursive functions
             count.total += stack.total_count;
             count.own += stack.self_count;
         }
