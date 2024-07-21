@@ -147,7 +147,13 @@ impl<'a> FlamelensWidget<'a> {
 
     fn render_table(&self, area: Rect, buf: &mut Buffer) {
         let ordered_stacks_table = self.get_ordered_stacks_table();
-        let mut table_state = TableState::default();
+        let mut table_state = TableState::default().with_selected(
+            self.app
+                .flamegraph_state()
+                .table_state
+                .selected
+                .saturating_add(1),
+        );
         StatefulWidget::render(ordered_stacks_table, area, buf, &mut table_state);
     }
 
@@ -231,7 +237,7 @@ impl<'a> FlamelensWidget<'a> {
         } else {
             &self.app.flamegraph().ordered_stacks.by_own_count
         };
-        for (name, count) in counts.iter().take(50) {
+        for (name, count) in counts.iter() {
             rows.push(Row::new(vec![
                 count.total.to_string(),
                 count.own.to_string(),

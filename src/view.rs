@@ -424,6 +424,19 @@ impl FlameGraphView {
         self.state.unset_zoom();
         self.unset_search_pattern();
     }
+
+    pub fn to_next_row(&mut self) {
+        let new_value = min(
+            self.state.table_state.selected.saturating_add(1),
+            self.flamegraph.ordered_stacks.num_rows.saturating_sub(1),
+        );
+        self.state.table_state.selected = new_value;
+    }
+
+    pub fn to_previous_row(&mut self) {
+        let new_value = self.state.table_state.selected.saturating_sub(1);
+        self.state.table_state.selected = new_value;
+    }
 }
 
 #[cfg(test)]

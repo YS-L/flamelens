@@ -58,6 +58,7 @@ pub struct Count {
 pub struct Ordered {
     pub by_total_count: Vec<(String, Count)>,
     pub by_own_count: Vec<(String, Count)>,
+    pub num_rows: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -190,9 +191,11 @@ impl FlameGraph {
             .take(100)
             .map(|x| (x.0.to_string(), x.1.clone()))
             .collect::<Vec<_>>();
+        let num_rows = ordered_by_self_count.len();
         Ordered {
             by_total_count: ordered_by_total_count,
             by_own_count: ordered_by_self_count,
+            num_rows,
         }
     }
 

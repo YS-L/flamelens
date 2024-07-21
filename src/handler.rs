@@ -1,13 +1,19 @@
 use std::time::Instant;
 
-use crate::app::{App, AppResult, InputBuffer};
+use crate::{
+    app::{App, AppResult, InputBuffer},
+    state::ViewKind,
+};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 use tui_input::backend::crossterm::EventHandler;
 
 /// Handles the key events and updates the state of [`App`].
 pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
     if app.input_buffer.is_none() {
-        handle_command(key_event, app)
+        let tic = Instant::now();
+        handle_command(key_event, app)?;
+        app.add_elapsed("handle_key_events", tic.elapsed());
+        Ok(())
     } else {
         handle_input_buffer(key_event, app)
     }
@@ -15,7 +21,21 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
 
 /// Handle key events as commands
 pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
-    let tic = Instant::now();
+    let mut key_handled = handle_command_generic(key_event, app)?;
+    if !key_handled {
+        if app.flamegraph_state().view_kind == ViewKind::FlameGraph {
+            key_handled = handle_command_flamegraph(key_event, app)?;
+        } else {
+            key_handled = handle_command_table(key_event, app)?;
+        }
+    }
+    if key_handled && app.transient_message.is_some() {
+        app.clear_transient_message();
+    }
+    Ok(())
+}
+
+pub fn handle_command_generic(key_event: KeyEvent, app: &mut App) -> AppResult<bool> {
     let mut key_handled = true;
     match key_event.code {
         // Exit application on `q`
@@ -28,6 +48,28 @@ pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
                 app.quit();
             }
         }
+        KeyCode::Char('z') => {
+            app.flamegraph_view.state.toggle_freeze();
+        }
+        KeyCode::Tab => {
+            app.flamegraph_view.state.toggle_view_kind();
+        }
+        KeyCode::Char('/') => {
+            app.input_buffer = Some(InputBuffer {
+                buffer: tui_input::Input::new("".to_string()),
+                cursor: None,
+            });
+        }
+        _ => {
+            key_handled = false;
+        }
+    }
+    Ok(key_handled)
+}
+
+fn handle_command_flamegraph(key_event: KeyEvent, app: &mut App) -> AppResult<bool> {
+    let mut key_handled = true;
+    match key_event.code {
         KeyCode::Right | KeyCode::Char('l') => {
             app.flamegraph_view.to_next_sibling();
         }
@@ -67,31 +109,30 @@ pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         KeyCode::Char('r') => {
             app.flamegraph_view.reset();
         }
-        KeyCode::Char('z') => {
-            app.flamegraph_view.state.toggle_freeze();
-        }
         KeyCode::Char('#') => {
             app.search_selected();
         }
-        KeyCode::Tab => {
-            app.flamegraph_view.state.toggle_view_kind();
-        }
-        KeyCode::Char('/') => {
-            app.input_buffer = Some(InputBuffer {
-                buffer: tui_input::Input::new("".to_string()),
-                cursor: None,
-            });
-        }
-        // Other handlers you could add here.
         _ => {
             key_handled = false;
         }
     }
-    if key_handled && app.transient_message.is_some() {
-        app.clear_transient_message();
+    Ok(key_handled)
+}
+
+fn handle_command_table(key_event: KeyEvent, app: &mut App) -> AppResult<bool> {
+    let mut key_handled = true;
+    match key_event.code {
+        KeyCode::Down | KeyCode::Char('j') => {
+            app.flamegraph_view.to_next_row();
+        }
+        KeyCode::Up | KeyCode::Char('k') => {
+            app.flamegraph_view.to_previous_row();
+        }
+        _ => {
+            key_handled = false;
+        }
     }
-    app.add_elapsed("handle_key_events", tic.elapsed());
-    Ok(())
+    Ok(key_handled)
 }
 
 pub fn handle_input_buffer(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
