@@ -73,6 +73,9 @@ pub fn handle_command(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         KeyCode::Char('#') => {
             app.search_selected();
         }
+        KeyCode::Tab => {
+            app.flamegraph_view.state.toggle_view_kind();
+        }
         KeyCode::Char('/') => {
             app.input_buffer = Some(InputBuffer {
                 buffer: tui_input::Input::new("".to_string()),

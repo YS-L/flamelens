@@ -3,13 +3,14 @@ use crate::py_spy::SamplerStatus;
 use crate::{
     app::{App, FlameGraphInput},
     flame::{StackIdentifier, StackInfo},
+    state::{SortColumn, ViewKind},
 };
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, Paragraph, StatefulWidget, Widget, Wrap},
+    widgets::{Block, Borders, Paragraph, Row, StatefulWidget, Table, TableState, Widget, Wrap},
     Frame,
 };
 use std::time::Duration;
@@ -49,6 +50,16 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
     type State = FlamelensWidgetState;
 
     fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
+        if self.app.flamegraph_state().view_kind == ViewKind::FlameGraph {
+            self.render_flamegraph(area, buf, state);
+        } else {
+            self.render_table(area, buf, state);
+        }
+    }
+}
+
+impl<'a> FlamelensWidget<'a> {
+    fn render_flamegraph(self, area: Rect, buf: &mut Buffer, state: &mut FlamelensWidgetState) {
         let header = Paragraph::new(self.get_header_text())
             .wrap(Wrap { trim: false })
             .block(Block::new().borders(Borders::BOTTOM | Borders::TOP));
@@ -126,9 +137,27 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
         state.render_time = flamegraph_render_time;
         state.cursor_position = self.get_cursor_position(layout[2]);
     }
-}
 
-impl<'a> FlamelensWidget<'a> {
+    fn render_table(self, area: Rect, buf: &mut Buffer, state: &mut FlamelensWidgetState) {
+        let header = Paragraph::new(self.get_header_text())
+            .wrap(Wrap { trim: false })
+            .block(Block::new().borders(Borders::BOTTOM | Borders::TOP));
+        let header_line_count_with_borders = header.line_count(area.width) as u16 + 2;
+
+        let layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(header_line_count_with_borders),
+                Constraint::Fill(1),
+            ])
+            .split(area);
+
+        // Ordered stacks
+        let ordered_stacks_table = self.get_ordered_stacks_table();
+        let mut table_state = TableState::default();
+        StatefulWidget::render(ordered_stacks_table, layout[1], buf, &mut table_state);
+    }
+
     #[allow(clippy::too_many_arguments)]
     fn render_stacks(
         &self,
@@ -200,6 +229,30 @@ impl<'a> FlamelensWidget<'a> {
         }
 
         has_more_rows_to_render
+    }
+
+    fn get_ordered_stacks_table(&self) -> Table {
+        let mut rows = vec![Row::new(vec!["Total", "Own", "Name"])];
+        let counts = if self.app.flamegraph_state().table_state.sort_column == SortColumn::Total {
+            &self.app.flamegraph().ordered_stacks.by_total_count
+        } else {
+            &self.app.flamegraph().ordered_stacks.by_own_count
+        };
+        for (name, count) in counts.iter().take(50) {
+            rows.push(Row::new(vec![
+                count.total.to_string(),
+                count.own.to_string(),
+                name.to_string(),
+            ]));
+        }
+        let widths = [
+            Constraint::Percentage(5),
+            Constraint::Percentage(5),
+            Constraint::Percentage(80),
+        ];
+        Table::new(rows, widths)
+            .highlight_style(Style::new().add_modifier(Modifier::REVERSED))
+            .highlight_symbol(">>")
     }
 
     fn get_line_for_stack(

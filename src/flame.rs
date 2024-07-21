@@ -48,11 +48,24 @@ pub struct Hits {
     ids: Vec<StackIdentifier>,
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct Count {
+    pub total: u64,
+    pub own: u64,
+}
+
+#[derive(Debug, Clone)]
+pub struct Ordered {
+    pub by_total_count: Vec<(String, Count)>,
+    pub by_own_count: Vec<(String, Count)>,
+}
+
 #[derive(Debug, Clone)]
 pub struct FlameGraph {
     data: String,
     stacks: Vec<StackInfo>,
     levels: Vec<Vec<StackIdentifier>>,
+    pub ordered_stacks: Ordered,
     hits: Option<Hits>,
     sorted: bool,
 }
@@ -140,15 +153,46 @@ impl FlameGraph {
             last_line_index = line_index + 1;
         }
 
+        let ordered = FlameGraph::get_ordered_stacks(&content, &stacks);
         let mut out = Self {
             data: content,
             stacks,
             levels: vec![],
+            ordered_stacks: ordered,
             hits: None,
             sorted,
         };
         out.populate_levels(&ROOT_ID, 0, None);
         out
+    }
+
+    fn get_ordered_stacks(content: &str, stacks: &[StackInfo]) -> Ordered {
+        let mut counts = std::collections::HashMap::<&str, Count>::new();
+        for stack in stacks.iter() {
+            let short_name = &content[stack.start_index..stack.end_index];
+            let count = counts.entry(short_name).or_default();
+            count.total += stack.total_count;
+            count.own += stack.self_count;
+        }
+        let mut counts = counts.into_iter().collect::<Vec<_>>();
+        counts.sort_by_key(|(_, count)| count.total);
+        let ordered_by_total_count = counts
+            .iter()
+            .rev()
+            .take(100)
+            .map(|x| (x.0.to_string(), x.1.clone()))
+            .collect::<Vec<_>>();
+        counts.sort_by_key(|(_, count)| count.own);
+        let ordered_by_self_count = counts
+            .iter()
+            .rev()
+            .take(100)
+            .map(|x| (x.0.to_string(), x.1.clone()))
+            .collect::<Vec<_>>();
+        Ordered {
+            by_total_count: ordered_by_total_count,
+            by_own_count: ordered_by_self_count,
+        }
     }
 
     #[allow(clippy::too_many_arguments)]

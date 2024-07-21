@@ -14,6 +14,35 @@ impl ZoomState {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ViewKind {
+    FlameGraph,
+    Table,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum SortColumn {
+    Total,
+    Own,
+}
+
+#[derive(Debug, Clone)]
+pub struct TableState {
+    pub selected: usize,
+    pub offset: usize,
+    pub sort_column: SortColumn,
+}
+
+impl Default for TableState {
+    fn default() -> Self {
+        Self {
+            selected: 0,
+            offset: 0,
+            sort_column: SortColumn::Own,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct FlameGraphState {
     pub selected: StackIdentifier,
@@ -23,6 +52,8 @@ pub struct FlameGraphState {
     pub zoom: Option<ZoomState>,
     pub search_pattern: Option<SearchPattern>,
     pub freeze: bool,
+    pub view_kind: ViewKind,
+    pub table_state: TableState,
 }
 
 impl Default for FlameGraphState {
@@ -35,6 +66,8 @@ impl Default for FlameGraphState {
             zoom: None,
             search_pattern: None,
             freeze: false,
+            view_kind: ViewKind::FlameGraph,
+            table_state: TableState::default(),
         }
     }
 }
@@ -66,6 +99,13 @@ impl FlameGraphState {
 
     pub fn toggle_freeze(&mut self) {
         self.freeze = !self.freeze;
+    }
+
+    pub fn toggle_view_kind(&mut self) {
+        self.view_kind = match self.view_kind {
+            ViewKind::FlameGraph => ViewKind::Table,
+            ViewKind::Table => ViewKind::FlameGraph,
+        };
     }
 
     /// Update StackIdentifiers to point to the correct ones in the new flamegraph
