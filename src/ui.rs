@@ -10,7 +10,10 @@ use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, Paragraph, Row, StatefulWidget, Table, TableState, Widget, Wrap},
+    widgets::{
+        block::Position, Block, Borders, Paragraph, Row, StatefulWidget, Table, TableState, Widget,
+        Wrap,
+    },
     Frame,
 };
 use std::time::Duration;
@@ -56,10 +59,21 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
 
 impl<'a> FlamelensWidget<'a> {
     fn render_all(self, area: Rect, buf: &mut Buffer, state: &mut FlamelensWidgetState) {
+        let header_bottom_title = match self.app.flamegraph_state().view_kind {
+            ViewKind::FlameGraph => "[Flamegraph] | Top View",
+            ViewKind::Table => "Flamegraph | [Top View]",
+        };
+        let header_bottom_title = format!(" {} (press TAB to switch) ", header_bottom_title,);
         let header = Paragraph::new(self.get_header_text())
             .wrap(Wrap { trim: false })
-            .block(Block::new().borders(Borders::BOTTOM | Borders::TOP));
-        let header_line_count_with_borders = header.line_count(area.width) as u16 + 2;
+            .block(
+                Block::new()
+                    .borders(Borders::BOTTOM)
+                    .title_position(Position::Bottom)
+                    .title(header_bottom_title)
+                    .title_alignment(Alignment::Center),
+            );
+        let header_line_count_with_borders = header.line_count(area.width) as u16 + 1;
 
         let mut status_bar =
             Paragraph::new(self.get_status_text(area.width)).wrap(Wrap { trim: true });
@@ -249,9 +263,7 @@ impl<'a> FlamelensWidget<'a> {
             Constraint::Percentage(5),
             Constraint::Percentage(80),
         ];
-        Table::new(rows, widths)
-            .highlight_style(Style::new().add_modifier(Modifier::REVERSED))
-            .highlight_symbol(">>")
+        Table::new(rows, widths).highlight_style(Style::new().add_modifier(Modifier::REVERSED))
     }
 
     fn get_line_for_stack(
