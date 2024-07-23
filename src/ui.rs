@@ -26,6 +26,7 @@ const SEARCH_PREFIX: &str = "Search: ";
 const COLOR_SELECTED_STACK: Color = Color::Rgb(250, 250, 250);
 const COLOR_SELECTED_BACKGROUND: Color = Color::Rgb(65, 65, 65);
 const COLOR_MATCHED_BACKGROUND: Color = Color::Rgb(10, 35, 150);
+const COLOR_TABLE_SELECTED_ROW: Color = Color::Rgb(65, 65, 65);
 
 #[derive(Debug, Clone, Default)]
 pub struct FlamelensWidgetState {
@@ -250,16 +251,22 @@ impl<'a> FlamelensWidget<'a> {
                 label.to_string()
             }
         };
-        let mut rows = vec![Row::new(vec![
+        let header = Row::new(vec![
             add_sorted_indicator("Total", SortColumn::Total),
             add_sorted_indicator("Own", SortColumn::Own),
             "Name".to_string(),
-        ])];
+        ])
+        .style(
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .add_modifier(Modifier::REVERSED),
+        );
         let counts = if self.app.flamegraph_state().table_state.sort_column == SortColumn::Total {
             &self.app.flamegraph().ordered_stacks.by_total_count
         } else {
             &self.app.flamegraph().ordered_stacks.by_own_count
         };
+        let mut rows = vec![];
         for (name, count) in counts.iter() {
             rows.push(Row::new(vec![
                 count.total.to_string(),
@@ -272,7 +279,9 @@ impl<'a> FlamelensWidget<'a> {
             Constraint::Percentage(5),
             Constraint::Percentage(80),
         ];
-        Table::new(rows, widths).highlight_style(Style::new().add_modifier(Modifier::REVERSED))
+        Table::new(rows, widths)
+            .header(header)
+            .highlight_style(Style::default().bg(COLOR_TABLE_SELECTED_ROW))
     }
 
     fn get_line_for_stack(
