@@ -243,7 +243,18 @@ impl<'a> FlamelensWidget<'a> {
     }
 
     fn get_ordered_stacks_table(&self) -> Table {
-        let mut rows = vec![Row::new(vec!["Total", "Own", "Name"])];
+        let add_sorted_indicator = |label: &str, sort_column: SortColumn| {
+            if sort_column == self.app.flamegraph_state().table_state.sort_column {
+                format!("{} [▼]", label)
+            } else {
+                label.to_string()
+            }
+        };
+        let mut rows = vec![Row::new(vec![
+            add_sorted_indicator("Total", SortColumn::Total),
+            add_sorted_indicator("Own", SortColumn::Own),
+            "Name".to_string(),
+        ])];
         let counts = if self.app.flamegraph_state().table_state.sort_column == SortColumn::Total {
             &self.app.flamegraph().ordered_stacks.by_total_count
         } else {

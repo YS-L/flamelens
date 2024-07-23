@@ -2,7 +2,7 @@ use std::cmp::min;
 
 use crate::{
     flame::{FlameGraph, SearchPattern, StackIdentifier, StackInfo, ROOT_ID},
-    state::{FlameGraphState, ZoomState},
+    state::{FlameGraphState, SortColumn, ZoomState},
 };
 
 #[derive(Debug)]
@@ -436,6 +436,14 @@ impl FlameGraphView {
     pub fn to_previous_row(&mut self) {
         let new_value = self.state.table_state.selected.saturating_sub(1);
         self.state.table_state.selected = new_value;
+    }
+
+    pub fn set_sort_by_own(&mut self) {
+        self.state.table_state.sort_column = SortColumn::Own;
+    }
+
+    pub fn set_sort_by_total(&mut self) {
+        self.state.table_state.sort_column = SortColumn::Total;
     }
 }
 

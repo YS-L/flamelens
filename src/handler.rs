@@ -128,6 +128,12 @@ fn handle_command_table(key_event: KeyEvent, app: &mut App) -> AppResult<bool> {
         KeyCode::Up | KeyCode::Char('k') => {
             app.flamegraph_view.to_previous_row();
         }
+        KeyCode::Char('0') => {
+            app.flamegraph_view.set_sort_by_total();
+        }
+        KeyCode::Char('1') => {
+            app.flamegraph_view.set_sort_by_own();
+        }
         _ => {
             key_handled = false;
         }
