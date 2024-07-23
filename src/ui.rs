@@ -8,7 +8,7 @@ use crate::{
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
+    style::{Color, Modifier, Style, Stylize},
     text::{Line, Span},
     widgets::{
         block::Position, Block, Borders, Paragraph, Row, StatefulWidget, Table, TableState, Widget,
@@ -23,7 +23,8 @@ use std::{
 };
 
 const SEARCH_PREFIX: &str = "Search: ";
-const COLOR_SELECTED_BACKGROUND: Color = Color::Rgb(250, 250, 250);
+const COLOR_SELECTED_STACK: Color = Color::Rgb(250, 250, 250);
+const COLOR_SELECTED_BACKGROUND: Color = Color::Rgb(65, 65, 65);
 const COLOR_MATCHED_BACKGROUND: Color = Color::Rgb(10, 35, 150);
 
 #[derive(Debug, Clone, Default)]
@@ -60,18 +61,19 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
 impl<'a> FlamelensWidget<'a> {
     fn render_all(self, area: Rect, buf: &mut Buffer, state: &mut FlamelensWidgetState) {
         let header_bottom_title = match self.app.flamegraph_state().view_kind {
-            ViewKind::FlameGraph => "[Flamegraph] | Top View",
-            ViewKind::Table => "Flamegraph | [Top View]",
+            ViewKind::FlameGraph => "[Flamegraph] | Top Functions",
+            ViewKind::Table => "Flamegraph | [Top Functions]",
         };
         let header_bottom_title = format!(" {} (press TAB to switch) ", header_bottom_title,);
-        let header = Paragraph::new(self.get_header_text())
+        let header = Paragraph::new(self.get_header_text(area.width))
             .wrap(Wrap { trim: false })
+            .alignment(Alignment::Center)
             .block(
                 Block::new()
                     .borders(Borders::BOTTOM)
                     .title_position(Position::Bottom)
                     .title(header_bottom_title)
-                    .title_alignment(Alignment::Center),
+                    .title_alignment(Alignment::Left),
             );
         let header_line_count_with_borders = header.line_count(area.width) as u16 + 1;
 
@@ -315,7 +317,7 @@ impl<'a> FlamelensWidget<'a> {
 
     fn get_stack_color(&self, stack: &StackInfo, zoom_state: &Option<ZoomState>) -> Color {
         if self.app.flamegraph_state().selected == stack.id {
-            return COLOR_SELECTED_BACKGROUND;
+            return COLOR_SELECTED_STACK;
         }
         // Roughly based on flamegraph.pl
         fn hash_name(name: &str) -> f64 {
@@ -370,8 +372,8 @@ impl<'a> FlamelensWidget<'a> {
             .fg(FlamelensWidget::get_text_color(background_color))
     }
 
-    fn get_header_text(&self) -> String {
-        match &self.app.flamegraph_input {
+    fn get_header_text(&self, _width: u16) -> Line {
+        let header_text = match &self.app.flamegraph_input {
             FlameGraphInput::File(path) => format!("File: {}", path),
             FlameGraphInput::Pid(pid, info) => {
                 let mut out = format!("Process: {}", pid);
@@ -397,7 +399,8 @@ impl<'a> FlamelensWidget<'a> {
                 }
                 out
             }
-        }
+        };
+        Line::from(header_text).style(Style::default().bold())
     }
 
     fn get_status_text(&self, width: u16) -> Vec<Line> {
