@@ -165,7 +165,6 @@ impl<'a> FlamelensWidget<'a> {
                 .flamegraph_state()
                 .table_state
                 .selected
-                .saturating_add(1),
         );
         StatefulWidget::render(ordered_stacks_table, area, buf, &mut table_state);
     }
