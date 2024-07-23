@@ -60,11 +60,7 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
 
 impl<'a> FlamelensWidget<'a> {
     fn render_all(self, area: Rect, buf: &mut Buffer, state: &mut FlamelensWidgetState) {
-        let header_bottom_title = match self.app.flamegraph_state().view_kind {
-            ViewKind::FlameGraph => "[Flamegraph] | Top Functions",
-            ViewKind::Table => "Flamegraph | [Top Functions]",
-        };
-        let header_bottom_title = format!(" {} (press TAB to switch) ", header_bottom_title,);
+        let header_bottom_title = self.get_header_bottom_title();
         let header = Paragraph::new(self.get_header_text(area.width))
             .wrap(Wrap { trim: false })
             .alignment(Alignment::Center)
@@ -370,6 +366,37 @@ impl<'a> FlamelensWidget<'a> {
         Style::default()
             .bg(background_color)
             .fg(FlamelensWidget::get_text_color(background_color))
+    }
+
+    fn get_header_bottom_title(&self) -> Line {
+        let mut header_bottom_title_spans = vec![Span::from(" ")];
+
+        fn _get_view_kind_span(
+            label: &str,
+            view_kind: ViewKind,
+            current_view_kind: ViewKind,
+        ) -> Span {
+            let (content, style) = if view_kind == current_view_kind {
+                (format!("[{}]", label), Style::default().bold().red())
+            } else {
+                (label.to_string(), Style::default())
+            };
+            Span::styled(content, style)
+        }
+
+        header_bottom_title_spans.push(_get_view_kind_span(
+            "Flamegraph",
+            ViewKind::FlameGraph,
+            self.app.flamegraph_state().view_kind,
+        ));
+        header_bottom_title_spans.push(Span::from(" | "));
+        header_bottom_title_spans.push(_get_view_kind_span(
+            "Top Functions",
+            ViewKind::Table,
+            self.app.flamegraph_state().view_kind,
+        ));
+        header_bottom_title_spans.push(Span::from(" (press TAB to switch) "));
+        Line::from(header_bottom_title_spans)
     }
 
     fn get_header_text(&self, _width: u16) -> Line {

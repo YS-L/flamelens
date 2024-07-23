@@ -14,7 +14,7 @@ impl ZoomState {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ViewKind {
     FlameGraph,
     Table,
