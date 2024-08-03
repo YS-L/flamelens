@@ -24,7 +24,7 @@ use std::{
 
 const SEARCH_PREFIX: &str = "Search: ";
 const COLOR_SELECTED_STACK: Color = Color::Rgb(250, 250, 250);
-const COLOR_SELECTED_BACKGROUND: Color = Color::Rgb(65, 65, 65);
+const COLOR_SELECTED_BACKGROUND: Color = COLOR_SELECTED_STACK;
 const COLOR_MATCHED_BACKGROUND: Color = Color::Rgb(10, 35, 150);
 const COLOR_TABLE_SELECTED_ROW: Color = Color::Rgb(65, 65, 65);
 
@@ -70,7 +70,7 @@ impl<'a> FlamelensWidget<'a> {
                     .borders(Borders::BOTTOM)
                     .title_position(Position::Bottom)
                     .title(header_bottom_title)
-                    .title_alignment(Alignment::Left),
+                    .title_alignment(Alignment::Center),
             );
         let header_line_count_with_borders = header.line_count(area.width) as u16 + 1;
 
