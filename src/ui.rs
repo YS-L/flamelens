@@ -9,7 +9,7 @@ use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style, Stylize},
-    text::{Line, Span},
+    text::{Line, Span, Text},
     widgets::{
         block::Position, Block, Borders, Paragraph, Row, StatefulWidget, Table, TableState, Widget,
         Wrap,
@@ -62,7 +62,8 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
 impl<'a> FlamelensWidget<'a> {
     fn render_all(self, area: Rect, buf: &mut Buffer, state: &mut FlamelensWidgetState) {
         let header_bottom_title = self.get_header_bottom_title();
-        let header = Paragraph::new(self.get_header_text(area.width))
+        let header_text = Text::from(vec![self.get_header_text(area.width), Line::from("")]);
+        let header = Paragraph::new(header_text)
             .wrap(Wrap { trim: false })
             .alignment(Alignment::Center)
             .block(
@@ -160,12 +161,8 @@ impl<'a> FlamelensWidget<'a> {
 
     fn render_table(&self, area: Rect, buf: &mut Buffer) {
         let ordered_stacks_table = self.get_ordered_stacks_table();
-        let mut table_state = TableState::default().with_selected(
-            self.app
-                .flamegraph_state()
-                .table_state
-                .selected
-        );
+        let mut table_state =
+            TableState::default().with_selected(self.app.flamegraph_state().table_state.selected);
         StatefulWidget::render(ordered_stacks_table, area, buf, &mut table_state);
     }
 
