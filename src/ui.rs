@@ -241,11 +241,14 @@ impl<'a> FlamelensWidget<'a> {
 
     fn get_ordered_stacks_table(&self) -> Table {
         let add_sorted_indicator = |label: &str, sort_column: SortColumn| {
-            if sort_column == self.app.flamegraph_state().table_state.sort_column {
-                format!("{} [▼]", label)
+            let suffix = if sort_column == self.app.flamegraph_state().table_state.sort_column {
+                '▼'
+            } else if sort_column == SortColumn::Total {
+                '1'
             } else {
-                label.to_string()
-            }
+                '2'
+            };
+            format!("{} [{}]", label, suffix)
         };
         let header = Row::new(vec![
             add_sorted_indicator("Total", SortColumn::Total),
