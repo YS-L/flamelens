@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 pub type StackIdentifier = usize;
 pub static ROOT: &str = "all";
 pub static ROOT_ID: usize = 0;
@@ -92,6 +94,7 @@ impl FlameGraph {
             hit: false,
         });
         let mut last_line_index = 0;
+        let mut counts: HashMap<String, Count> = HashMap::new();
         for line_index in content
             .char_indices()
             .filter(|(_, c)| *c == '\n')
@@ -120,6 +123,7 @@ impl FlameGraph {
             let mut parent_id = ROOT_ID;
             let mut level = 1;
             let mut last_delim_index = 0;
+            let mut counted_names = HashSet::<String>::new();
             for delim_index in line
                 .char_indices()
                 .filter(|(_, c)| *c == ';')
@@ -127,6 +131,8 @@ impl FlameGraph {
             {
                 let stack_id = FlameGraph::update_one(
                     &mut stacks,
+                    &mut counts,
+                    &mut counted_names,
                     &content,
                     count,
                     last_line_index,
@@ -142,6 +148,8 @@ impl FlameGraph {
             }
             FlameGraph::update_one(
                 &mut stacks,
+                &mut counts,
+                &mut counted_names,
                 &content,
                 count,
                 last_line_index,
@@ -154,7 +162,7 @@ impl FlameGraph {
             last_line_index = line_index + 1;
         }
 
-        let ordered = FlameGraph::get_ordered_stacks(&content, &stacks);
+        let ordered = FlameGraph::get_ordered_stacks(&counts);
         let mut out = Self {
             data: content,
             stacks,
@@ -167,16 +175,8 @@ impl FlameGraph {
         out
     }
 
-    fn get_ordered_stacks(content: &str, stacks: &[StackInfo]) -> Ordered {
-        let mut counts = std::collections::HashMap::<&str, Count>::new();
-        for stack in stacks.iter() {
-            let short_name = &content[stack.start_index..stack.end_index];
-            let count = counts.entry(short_name).or_default();
-            // TODO: total is incorrect for recursive functions
-            count.total += stack.total_count;
-            count.own += stack.self_count;
-        }
-        let mut counts = counts.into_iter().collect::<Vec<_>>();
+    fn get_ordered_stacks(counts: &HashMap<String, Count>) -> Ordered {
+        let mut counts = counts.iter().collect::<Vec<_>>();
         counts.sort_by_key(|(_, count)| count.total);
         let ordered_by_total_count = counts
             .iter()
@@ -202,6 +202,8 @@ impl FlameGraph {
     #[allow(clippy::too_many_arguments)]
     fn update_one(
         stacks: &mut Vec<StackInfo>,
+        counts: &mut HashMap<String, Count>,
+        counted_names: &mut HashSet<String>,
         content: &str,
         count: u64,
         line_index: usize,
@@ -212,10 +214,13 @@ impl FlameGraph {
         is_self: bool,
     ) -> StackIdentifier {
         let short_name = &content[start_index..end_index];
+
         // Invariant: parent always exists. We can just check the short name to
         // check if the parent already contains the child, since the prior
         // prefixes should always match (definition of a parent).
         let parent_stack = stacks.get(parent_id).unwrap();
+
+        // Add or update the current stack
         let current_stack_id_if_exists = parent_stack
             .children
             .iter()
@@ -249,6 +254,17 @@ impl FlameGraph {
         if is_self {
             info.self_count += count;
         }
+
+        // Update summarized counts
+        let summarized_count = counts.entry(short_name.to_string()).or_default();
+        if !counted_names.contains(short_name) {
+            counted_names.insert(short_name.to_string());
+            summarized_count.total += count;
+        }
+        if is_self {
+            summarized_count.own += count;
+        }
+
         stack_id
     }
 
