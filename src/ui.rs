@@ -77,7 +77,7 @@ impl<'a> FlamelensWidget<'a> {
 
         let mut status_bar =
             Paragraph::new(self.get_status_text(area.width)).wrap(Wrap { trim: true });
-        let status_line_count_with_borders = status_bar.line_count(area.width) as u16 + 1;
+        let status_line_count_with_borders = status_bar.line_count(area.width) as u16 + 2;
 
         let layout = Layout::default()
             .direction(Direction::Vertical)
@@ -94,22 +94,20 @@ impl<'a> FlamelensWidget<'a> {
         // Main area for flamegraph / top view
         let tic = std::time::Instant::now();
         let main_area = layout[1];
-        let has_more_rows_to_render =
-            if self.app.flamegraph_state().view_kind == ViewKind::FlameGraph {
-                self.render_flamegraph(main_area, buf)
-            } else {
-                self.render_table(main_area, buf);
-                false
-            };
+        if self.app.flamegraph_state().view_kind == ViewKind::FlameGraph {
+            self.render_flamegraph(main_area, buf)
+        } else {
+            self.render_table(main_area, buf);
+            false
+        };
         let flamegraph_render_time = tic.elapsed();
 
-        // More rows indicator
-        let mut status_bar_block = Block::new().borders(Borders::TOP);
-        if has_more_rows_to_render {
-            status_bar_block = status_bar_block
-                .title(" More ▾ (press f to scroll) ")
-                .title_alignment(Alignment::Center);
-        }
+        // Help tags to be displayed in the status bar
+        let help_tags = self.get_help_tags();
+        let status_bar_block = Block::new()
+            .borders(Borders::BOTTOM | Borders::TOP)
+            .title_bottom(help_tags.get_line())
+            .title_alignment(Alignment::Center);
         status_bar = status_bar.block(status_bar_block);
 
         // Status bar
@@ -120,6 +118,26 @@ impl<'a> FlamelensWidget<'a> {
         state.frame_width = main_area.width;
         state.render_time = flamegraph_render_time;
         state.cursor_position = self.get_cursor_position(layout[2]);
+    }
+
+    fn get_help_tags(&self) -> HelpTags {
+        let mut help_tags = HelpTags::new();
+        if self.app.flamegraph_state().view_kind == ViewKind::FlameGraph {
+            help_tags.add("hjkl", "move cursor");
+            help_tags.add("f/b", "scroll");
+            help_tags.add("/", "search");
+            help_tags.add("#", "search like cursor");
+            if let Some(p) = &self.app.flamegraph_state().search_pattern {
+                if p.is_manual {
+                    help_tags.add("n/N", "next/prev search");
+                }
+            }
+            help_tags.add("r", "reset");
+        } else {
+            help_tags.add("1", "sort by total");
+            help_tags.add("2", "sort by own");
+        }
+        help_tags
     }
 
     fn render_flamegraph(&self, area: Rect, buf: &mut Buffer) -> bool {
@@ -242,13 +260,11 @@ impl<'a> FlamelensWidget<'a> {
     fn get_ordered_stacks_table(&self) -> Table {
         let add_sorted_indicator = |label: &str, sort_column: SortColumn| {
             let suffix = if sort_column == self.app.flamegraph_state().table_state.sort_column {
-                '▼'
-            } else if sort_column == SortColumn::Total {
-                '1'
+                " [▼]"
             } else {
-                '2'
+                ""
             };
-            format!("{} [{}]", label, suffix)
+            format!("{}{}", label, suffix)
         };
         let header = Row::new(vec![
             add_sorted_indicator("Total", SortColumn::Total),
@@ -430,7 +446,7 @@ impl<'a> FlamelensWidget<'a> {
             ViewKind::Table,
             self.app.flamegraph_state().view_kind,
         ));
-        header_bottom_title_spans.push(Span::from(" (press TAB to switch) "));
+        header_bottom_title_spans.push(Span::from(" "));
         Line::from(header_bottom_title_spans)
     }
 
@@ -483,7 +499,7 @@ impl<'a> FlamelensWidget<'a> {
         self.app.input_buffer.as_ref().map(|input_buffer| {
             (
                 (input_buffer.buffer.cursor() + SEARCH_PREFIX.len()) as u16,
-                status_area.bottom(),
+                status_area.bottom().saturating_sub(2),
             )
         })
     }
@@ -583,6 +599,38 @@ impl<'a> FlamelensWidget<'a> {
                 "".to_string()
             }
         )
+    }
+}
+
+struct HelpTags {
+    tags: Vec<(&'static str, &'static str)>,
+    default: Vec<(&'static str, &'static str)>,
+}
+
+impl HelpTags {
+    fn new() -> Self {
+        Self {
+            tags: vec![],
+            default: vec![("tab", "switch view"), ("q", "quit")],
+        }
+    }
+
+    fn add(&mut self, tag: &'static str, description: &'static str) {
+        self.tags.push((tag, description));
+    }
+
+    fn get_line(self) -> Line<'static> {
+        let mut spans = vec![Span::from(" ")];
+        for (tag, description) in self.tags.iter().chain(self.default.iter()) {
+            spans.push(Span::from("["));
+            spans.push(Span::styled(
+                *tag,
+                Style::default().add_modifier(Modifier::BOLD).yellow(),
+            ));
+            spans.push(Span::from(format!(": {}", description)));
+            spans.push(Span::from("] "));
+        }
+        Line::from(spans)
     }
 }
 
