@@ -266,17 +266,33 @@ impl<'a> FlamelensWidget<'a> {
             &self.app.flamegraph().ordered_stacks.by_own_count
         };
         let mut rows = vec![];
+        let total_count = self.app.flamegraph().total_count();
+        let mut total_max_width: u16 = 0;
+        let mut own_max_width: u16 = 0;
+
+        fn format_count(count: u64, total_count: u64) -> String {
+            format!(
+                "{} ({:.2}%)  ",
+                count,
+                100.0 * count as f64 / total_count as f64
+            )
+        }
+
         for (name, count) in counts.iter() {
+            let total_formatted = format_count(count.total, total_count);
+            let own_formatted = format_count(count.own, total_count);
+            total_max_width = total_max_width.max(total_formatted.len() as u16);
+            own_max_width = own_max_width.max(own_formatted.len() as u16);
             rows.push(Row::new(vec![
-                count.total.to_string(),
-                count.own.to_string(),
+                total_formatted,
+                own_formatted,
                 name.to_string(),
             ]));
         }
         let widths = [
-            Constraint::Percentage(5),
-            Constraint::Percentage(5),
-            Constraint::Percentage(80),
+            Constraint::Max(total_max_width),
+            Constraint::Max(own_max_width),
+            Constraint::Fill(1),
         ];
         Table::new(rows, widths)
             .header(header)
