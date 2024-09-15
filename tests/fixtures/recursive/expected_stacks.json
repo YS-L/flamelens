@@ -1,0 +1,2988 @@
+[
+  {
+    "id": 0,
+    "line_index": 0,
+    "start_index": 0,
+    "end_index": 0,
+    "total_count": 190,
+    "self_count": 0,
+    "parent": null,
+    "children": [
+      1
+    ],
+    "level": 0,
+    "width_factor": 1.0,
+    "hit": false
+  },
+  {
+    "id": 1,
+    "line_index": 0,
+    "start_index": 0,
+    "end_index": 29,
+    "total_count": 190,
+    "self_count": 0,
+    "parent": 0,
+    "children": [
+      2
+    ],
+    "level": 1,
+    "width_factor": 1.0,
+    "hit": false
+  },
+  {
+    "id": 2,
+    "line_index": 0,
+    "start_index": 30,
+    "end_index": 60,
+    "total_count": 190,
+    "self_count": 0,
+    "parent": 1,
+    "children": [
+      3
+    ],
+    "level": 2,
+    "width_factor": 1.0,
+    "hit": false
+  },
+  {
+    "id": 3,
+    "line_index": 0,
+    "start_index": 61,
+    "end_index": 91,
+    "total_count": 190,
+    "self_count": 0,
+    "parent": 2,
+    "children": [
+      4
+    ],
+    "level": 3,
+    "width_factor": 1.0,
+    "hit": false
+  },
+  {
+    "id": 4,
+    "line_index": 0,
+    "start_index": 92,
+    "end_index": 122,
+    "total_count": 190,
+    "self_count": 0,
+    "parent": 3,
+    "children": [
+      5
+    ],
+    "level": 4,
+    "width_factor": 1.0,
+    "hit": false
+  },
+  {
+    "id": 5,
+    "line_index": 0,
+    "start_index": 123,
+    "end_index": 153,
+    "total_count": 190,
+    "self_count": 0,
+    "parent": 4,
+    "children": [
+      6,
+      144,
+      181
+    ],
+    "level": 5,
+    "width_factor": 1.0,
+    "hit": false
+  },
+  {
+    "id": 6,
+    "line_index": 0,
+    "start_index": 154,
+    "end_index": 184,
+    "total_count": 187,
+    "self_count": 0,
+    "parent": 5,
+    "children": [
+      7,
+      152,
+      147
+    ],
+    "level": 6,
+    "width_factor": 0.9842105263157894,
+    "hit": false
+  },
+  {
+    "id": 7,
+    "line_index": 0,
+    "start_index": 185,
+    "end_index": 215,
+    "total_count": 181,
+    "self_count": 0,
+    "parent": 6,
+    "children": [
+      8,
+      117,
+      160
+    ],
+    "level": 7,
+    "width_factor": 0.9526315789473684,
+    "hit": false
+  },
+  {
+    "id": 8,
+    "line_index": 0,
+    "start_index": 216,
+    "end_index": 246,
+    "total_count": 175,
+    "self_count": 0,
+    "parent": 7,
+    "children": [
+      9,
+      154,
+      153
+    ],
+    "level": 8,
+    "width_factor": 0.9210526315789473,
+    "hit": false
+  },
+  {
+    "id": 9,
+    "line_index": 0,
+    "start_index": 247,
+    "end_index": 277,
+    "total_count": 170,
+    "self_count": 0,
+    "parent": 8,
+    "children": [
+      10,
+      199,
+      200
+    ],
+    "level": 9,
+    "width_factor": 0.8947368421052632,
+    "hit": false
+  },
+  {
+    "id": 10,
+    "line_index": 0,
+    "start_index": 278,
+    "end_index": 308,
+    "total_count": 167,
+    "self_count": 0,
+    "parent": 9,
+    "children": [
+      11,
+      150,
+      171
+    ],
+    "level": 10,
+    "width_factor": 0.8789473684210526,
+    "hit": false
+  },
+  {
+    "id": 11,
+    "line_index": 0,
+    "start_index": 309,
+    "end_index": 339,
+    "total_count": 161,
+    "self_count": 0,
+    "parent": 10,
+    "children": [
+      12,
+      151,
+      127
+    ],
+    "level": 11,
+    "width_factor": 0.8473684210526315,
+    "hit": false
+  },
+  {
+    "id": 12,
+    "line_index": 0,
+    "start_index": 340,
+    "end_index": 370,
+    "total_count": 157,
+    "self_count": 0,
+    "parent": 11,
+    "children": [
+      13,
+      164,
+      92
+    ],
+    "level": 12,
+    "width_factor": 0.8263157894736841,
+    "hit": false
+  },
+  {
+    "id": 13,
+    "line_index": 0,
+    "start_index": 371,
+    "end_index": 401,
+    "total_count": 153,
+    "self_count": 0,
+    "parent": 12,
+    "children": [
+      14,
+      134
+    ],
+    "level": 13,
+    "width_factor": 0.8052631578947368,
+    "hit": false
+  },
+  {
+    "id": 14,
+    "line_index": 0,
+    "start_index": 402,
+    "end_index": 432,
+    "total_count": 152,
+    "self_count": 0,
+    "parent": 13,
+    "children": [
+      15,
+      146,
+      121
+    ],
+    "level": 14,
+    "width_factor": 0.7999999999999999,
+    "hit": false
+  },
+  {
+    "id": 15,
+    "line_index": 0,
+    "start_index": 433,
+    "end_index": 463,
+    "total_count": 150,
+    "self_count": 0,
+    "parent": 14,
+    "children": [
+      16,
+      136,
+      161
+    ],
+    "level": 15,
+    "width_factor": 0.7894736842105262,
+    "hit": false
+  },
+  {
+    "id": 16,
+    "line_index": 0,
+    "start_index": 464,
+    "end_index": 494,
+    "total_count": 147,
+    "self_count": 0,
+    "parent": 15,
+    "children": [
+      17,
+      202,
+      96
+    ],
+    "level": 16,
+    "width_factor": 0.7736842105263156,
+    "hit": false
+  },
+  {
+    "id": 17,
+    "line_index": 0,
+    "start_index": 495,
+    "end_index": 525,
+    "total_count": 141,
+    "self_count": 0,
+    "parent": 16,
+    "children": [
+      18,
+      137
+    ],
+    "level": 17,
+    "width_factor": 0.7421052631578946,
+    "hit": false
+  },
+  {
+    "id": 18,
+    "line_index": 0,
+    "start_index": 526,
+    "end_index": 556,
+    "total_count": 139,
+    "self_count": 0,
+    "parent": 17,
+    "children": [
+      19,
+      167
+    ],
+    "level": 18,
+    "width_factor": 0.7315789473684209,
+    "hit": false
+  },
+  {
+    "id": 19,
+    "line_index": 0,
+    "start_index": 557,
+    "end_index": 587,
+    "total_count": 136,
+    "self_count": 0,
+    "parent": 18,
+    "children": [
+      20,
+      59,
+      193
+    ],
+    "level": 19,
+    "width_factor": 0.7157894736842104,
+    "hit": false
+  },
+  {
+    "id": 20,
+    "line_index": 0,
+    "start_index": 588,
+    "end_index": 618,
+    "total_count": 133,
+    "self_count": 0,
+    "parent": 19,
+    "children": [
+      21,
+      155,
+      143
+    ],
+    "level": 20,
+    "width_factor": 0.6999999999999998,
+    "hit": false
+  },
+  {
+    "id": 21,
+    "line_index": 0,
+    "start_index": 619,
+    "end_index": 649,
+    "total_count": 128,
+    "self_count": 0,
+    "parent": 20,
+    "children": [
+      22,
+      141
+    ],
+    "level": 21,
+    "width_factor": 0.6736842105263156,
+    "hit": false
+  },
+  {
+    "id": 22,
+    "line_index": 0,
+    "start_index": 650,
+    "end_index": 680,
+    "total_count": 126,
+    "self_count": 0,
+    "parent": 21,
+    "children": [
+      23,
+      131,
+      60
+    ],
+    "level": 22,
+    "width_factor": 0.6631578947368418,
+    "hit": false
+  },
+  {
+    "id": 23,
+    "line_index": 0,
+    "start_index": 681,
+    "end_index": 711,
+    "total_count": 124,
+    "self_count": 0,
+    "parent": 22,
+    "children": [
+      24,
+      132,
+      156
+    ],
+    "level": 23,
+    "width_factor": 0.6526315789473681,
+    "hit": false
+  },
+  {
+    "id": 24,
+    "line_index": 0,
+    "start_index": 712,
+    "end_index": 742,
+    "total_count": 116,
+    "self_count": 0,
+    "parent": 23,
+    "children": [
+      25,
+      176,
+      162
+    ],
+    "level": 24,
+    "width_factor": 0.6105263157894734,
+    "hit": false
+  },
+  {
+    "id": 25,
+    "line_index": 0,
+    "start_index": 743,
+    "end_index": 773,
+    "total_count": 112,
+    "self_count": 0,
+    "parent": 24,
+    "children": [
+      26,
+      165
+    ],
+    "level": 25,
+    "width_factor": 0.589473684210526,
+    "hit": false
+  },
+  {
+    "id": 26,
+    "line_index": 0,
+    "start_index": 774,
+    "end_index": 804,
+    "total_count": 111,
+    "self_count": 0,
+    "parent": 25,
+    "children": [
+      27,
+      157,
+      186
+    ],
+    "level": 26,
+    "width_factor": 0.5842105263157892,
+    "hit": false
+  },
+  {
+    "id": 27,
+    "line_index": 0,
+    "start_index": 805,
+    "end_index": 835,
+    "total_count": 106,
+    "self_count": 0,
+    "parent": 26,
+    "children": [
+      28,
+      177,
+      175
+    ],
+    "level": 27,
+    "width_factor": 0.557894736842105,
+    "hit": false
+  },
+  {
+    "id": 28,
+    "line_index": 0,
+    "start_index": 836,
+    "end_index": 866,
+    "total_count": 100,
+    "self_count": 0,
+    "parent": 27,
+    "children": [
+      29,
+      168
+    ],
+    "level": 28,
+    "width_factor": 0.526315789473684,
+    "hit": false
+  },
+  {
+    "id": 29,
+    "line_index": 0,
+    "start_index": 867,
+    "end_index": 897,
+    "total_count": 98,
+    "self_count": 0,
+    "parent": 28,
+    "children": [
+      30
+    ],
+    "level": 29,
+    "width_factor": 0.5157894736842102,
+    "hit": false
+  },
+  {
+    "id": 30,
+    "line_index": 0,
+    "start_index": 898,
+    "end_index": 928,
+    "total_count": 98,
+    "self_count": 0,
+    "parent": 29,
+    "children": [
+      31,
+      178,
+      179
+    ],
+    "level": 30,
+    "width_factor": 0.5157894736842102,
+    "hit": false
+  },
+  {
+    "id": 31,
+    "line_index": 0,
+    "start_index": 929,
+    "end_index": 959,
+    "total_count": 95,
+    "self_count": 0,
+    "parent": 30,
+    "children": [
+      32,
+      203,
+      191
+    ],
+    "level": 31,
+    "width_factor": 0.4999999999999997,
+    "hit": false
+  },
+  {
+    "id": 32,
+    "line_index": 0,
+    "start_index": 960,
+    "end_index": 990,
+    "total_count": 91,
+    "self_count": 0,
+    "parent": 31,
+    "children": [
+      33,
+      163
+    ],
+    "level": 32,
+    "width_factor": 0.47894736842105234,
+    "hit": false
+  },
+  {
+    "id": 33,
+    "line_index": 0,
+    "start_index": 991,
+    "end_index": 1021,
+    "total_count": 90,
+    "self_count": 0,
+    "parent": 32,
+    "children": [
+      34
+    ],
+    "level": 33,
+    "width_factor": 0.47368421052631554,
+    "hit": false
+  },
+  {
+    "id": 34,
+    "line_index": 0,
+    "start_index": 1022,
+    "end_index": 1052,
+    "total_count": 90,
+    "self_count": 0,
+    "parent": 33,
+    "children": [
+      35,
+      97
+    ],
+    "level": 34,
+    "width_factor": 0.47368421052631554,
+    "hit": false
+  },
+  {
+    "id": 35,
+    "line_index": 0,
+    "start_index": 1053,
+    "end_index": 1083,
+    "total_count": 89,
+    "self_count": 0,
+    "parent": 34,
+    "children": [
+      36,
+      205
+    ],
+    "level": 35,
+    "width_factor": 0.46842105263157874,
+    "hit": false
+  },
+  {
+    "id": 36,
+    "line_index": 0,
+    "start_index": 1084,
+    "end_index": 1114,
+    "total_count": 88,
+    "self_count": 0,
+    "parent": 35,
+    "children": [
+      37,
+      142
+    ],
+    "level": 36,
+    "width_factor": 0.4631578947368419,
+    "hit": false
+  },
+  {
+    "id": 37,
+    "line_index": 0,
+    "start_index": 1115,
+    "end_index": 1145,
+    "total_count": 86,
+    "self_count": 0,
+    "parent": 36,
+    "children": [
+      38,
+      133
+    ],
+    "level": 37,
+    "width_factor": 0.4526315789473682,
+    "hit": false
+  },
+  {
+    "id": 38,
+    "line_index": 0,
+    "start_index": 1146,
+    "end_index": 1176,
+    "total_count": 85,
+    "self_count": 0,
+    "parent": 37,
+    "children": [
+      39,
+      196
+    ],
+    "level": 38,
+    "width_factor": 0.44736842105263136,
+    "hit": false
+  },
+  {
+    "id": 39,
+    "line_index": 0,
+    "start_index": 1177,
+    "end_index": 1207,
+    "total_count": 82,
+    "self_count": 0,
+    "parent": 38,
+    "children": [
+      40
+    ],
+    "level": 39,
+    "width_factor": 0.43157894736842084,
+    "hit": false
+  },
+  {
+    "id": 40,
+    "line_index": 0,
+    "start_index": 1208,
+    "end_index": 1238,
+    "total_count": 82,
+    "self_count": 0,
+    "parent": 39,
+    "children": [
+      41,
+      118
+    ],
+    "level": 40,
+    "width_factor": 0.43157894736842084,
+    "hit": false
+  },
+  {
+    "id": 41,
+    "line_index": 0,
+    "start_index": 1239,
+    "end_index": 1269,
+    "total_count": 80,
+    "self_count": 0,
+    "parent": 40,
+    "children": [
+      42,
+      170
+    ],
+    "level": 41,
+    "width_factor": 0.4210526315789472,
+    "hit": false
+  },
+  {
+    "id": 42,
+    "line_index": 0,
+    "start_index": 1270,
+    "end_index": 1300,
+    "total_count": 77,
+    "self_count": 0,
+    "parent": 41,
+    "children": [
+      43,
+      197
+    ],
+    "level": 42,
+    "width_factor": 0.40526315789473666,
+    "hit": false
+  },
+  {
+    "id": 43,
+    "line_index": 0,
+    "start_index": 1301,
+    "end_index": 1331,
+    "total_count": 76,
+    "self_count": 0,
+    "parent": 42,
+    "children": [
+      44,
+      166,
+      119
+    ],
+    "level": 43,
+    "width_factor": 0.3999999999999998,
+    "hit": false
+  },
+  {
+    "id": 44,
+    "line_index": 0,
+    "start_index": 1332,
+    "end_index": 1362,
+    "total_count": 73,
+    "self_count": 0,
+    "parent": 43,
+    "children": [
+      46,
+      95,
+      45
+    ],
+    "level": 44,
+    "width_factor": 0.3842105263157893,
+    "hit": false
+  },
+  {
+    "id": 45,
+    "line_index": 0,
+    "start_index": 1363,
+    "end_index": 1393,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 44,
+    "children": [],
+    "level": 45,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 46,
+    "line_index": 1396,
+    "start_index": 2759,
+    "end_index": 2789,
+    "total_count": 69,
+    "self_count": 0,
+    "parent": 44,
+    "children": [
+      47,
+      169,
+      124
+    ],
+    "level": 45,
+    "width_factor": 0.3631578947368419,
+    "hit": false
+  },
+  {
+    "id": 47,
+    "line_index": 1396,
+    "start_index": 2790,
+    "end_index": 2820,
+    "total_count": 67,
+    "self_count": 0,
+    "parent": 46,
+    "children": [
+      48,
+      158,
+      93
+    ],
+    "level": 46,
+    "width_factor": 0.35263157894736824,
+    "hit": false
+  },
+  {
+    "id": 48,
+    "line_index": 1396,
+    "start_index": 2821,
+    "end_index": 2851,
+    "total_count": 61,
+    "self_count": 0,
+    "parent": 47,
+    "children": [
+      49,
+      159,
+      61
+    ],
+    "level": 47,
+    "width_factor": 0.3210526315789472,
+    "hit": false
+  },
+  {
+    "id": 49,
+    "line_index": 1396,
+    "start_index": 2852,
+    "end_index": 2882,
+    "total_count": 59,
+    "self_count": 0,
+    "parent": 48,
+    "children": [
+      50,
+      182
+    ],
+    "level": 48,
+    "width_factor": 0.3105263157894735,
+    "hit": false
+  },
+  {
+    "id": 50,
+    "line_index": 1396,
+    "start_index": 2883,
+    "end_index": 2913,
+    "total_count": 56,
+    "self_count": 0,
+    "parent": 49,
+    "children": [
+      51,
+      183
+    ],
+    "level": 49,
+    "width_factor": 0.29473684210526296,
+    "hit": false
+  },
+  {
+    "id": 51,
+    "line_index": 1396,
+    "start_index": 2914,
+    "end_index": 2944,
+    "total_count": 54,
+    "self_count": 0,
+    "parent": 50,
+    "children": [
+      52
+    ],
+    "level": 50,
+    "width_factor": 0.2842105263157893,
+    "hit": false
+  },
+  {
+    "id": 52,
+    "line_index": 1396,
+    "start_index": 2945,
+    "end_index": 2975,
+    "total_count": 54,
+    "self_count": 0,
+    "parent": 51,
+    "children": [
+      53,
+      130,
+      172
+    ],
+    "level": 51,
+    "width_factor": 0.2842105263157893,
+    "hit": false
+  },
+  {
+    "id": 53,
+    "line_index": 1396,
+    "start_index": 2976,
+    "end_index": 3006,
+    "total_count": 51,
+    "self_count": 0,
+    "parent": 52,
+    "children": [
+      54
+    ],
+    "level": 52,
+    "width_factor": 0.2684210526315788,
+    "hit": false
+  },
+  {
+    "id": 54,
+    "line_index": 1396,
+    "start_index": 3007,
+    "end_index": 3037,
+    "total_count": 51,
+    "self_count": 0,
+    "parent": 53,
+    "children": [
+      55
+    ],
+    "level": 53,
+    "width_factor": 0.2684210526315788,
+    "hit": false
+  },
+  {
+    "id": 55,
+    "line_index": 1396,
+    "start_index": 3038,
+    "end_index": 3068,
+    "total_count": 51,
+    "self_count": 0,
+    "parent": 54,
+    "children": [
+      56,
+      122
+    ],
+    "level": 54,
+    "width_factor": 0.2684210526315788,
+    "hit": false
+  },
+  {
+    "id": 56,
+    "line_index": 1396,
+    "start_index": 3069,
+    "end_index": 3099,
+    "total_count": 49,
+    "self_count": 0,
+    "parent": 55,
+    "children": [
+      57,
+      138
+    ],
+    "level": 55,
+    "width_factor": 0.2578947368421051,
+    "hit": false
+  },
+  {
+    "id": 57,
+    "line_index": 1396,
+    "start_index": 3100,
+    "end_index": 3130,
+    "total_count": 48,
+    "self_count": 0,
+    "parent": 56,
+    "children": [
+      62,
+      58
+    ],
+    "level": 56,
+    "width_factor": 0.25263157894736826,
+    "hit": false
+  },
+  {
+    "id": 58,
+    "line_index": 1396,
+    "start_index": 3131,
+    "end_index": 3161,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 57,
+    "children": [],
+    "level": 57,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 59,
+    "line_index": 3164,
+    "start_index": 3752,
+    "end_index": 3782,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 19,
+    "children": [],
+    "level": 20,
+    "width_factor": 0.010526315789473682,
+    "hit": false
+  },
+  {
+    "id": 60,
+    "line_index": 3785,
+    "start_index": 4466,
+    "end_index": 4496,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 22,
+    "children": [],
+    "level": 23,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 61,
+    "line_index": 4499,
+    "start_index": 5955,
+    "end_index": 5985,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 48,
+    "children": [],
+    "level": 48,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 62,
+    "line_index": 5988,
+    "start_index": 7723,
+    "end_index": 7753,
+    "total_count": 47,
+    "self_count": 0,
+    "parent": 57,
+    "children": [
+      63,
+      94
+    ],
+    "level": 57,
+    "width_factor": 0.2473684210526314,
+    "hit": false
+  },
+  {
+    "id": 63,
+    "line_index": 5988,
+    "start_index": 7754,
+    "end_index": 7784,
+    "total_count": 45,
+    "self_count": 0,
+    "parent": 62,
+    "children": [
+      64,
+      174,
+      173
+    ],
+    "level": 58,
+    "width_factor": 0.23684210526315774,
+    "hit": false
+  },
+  {
+    "id": 64,
+    "line_index": 5988,
+    "start_index": 7785,
+    "end_index": 7815,
+    "total_count": 42,
+    "self_count": 0,
+    "parent": 63,
+    "children": [
+      65,
+      129
+    ],
+    "level": 59,
+    "width_factor": 0.22105263157894722,
+    "hit": false
+  },
+  {
+    "id": 65,
+    "line_index": 5988,
+    "start_index": 7816,
+    "end_index": 7846,
+    "total_count": 41,
+    "self_count": 0,
+    "parent": 64,
+    "children": [
+      66,
+      123,
+      120
+    ],
+    "level": 60,
+    "width_factor": 0.2157894736842104,
+    "hit": false
+  },
+  {
+    "id": 66,
+    "line_index": 5988,
+    "start_index": 7847,
+    "end_index": 7877,
+    "total_count": 36,
+    "self_count": 0,
+    "parent": 65,
+    "children": [
+      67,
+      180,
+      148
+    ],
+    "level": 61,
+    "width_factor": 0.1894736842105262,
+    "hit": false
+  },
+  {
+    "id": 67,
+    "line_index": 5988,
+    "start_index": 7878,
+    "end_index": 7908,
+    "total_count": 34,
+    "self_count": 0,
+    "parent": 66,
+    "children": [
+      68
+    ],
+    "level": 62,
+    "width_factor": 0.17894736842105252,
+    "hit": false
+  },
+  {
+    "id": 68,
+    "line_index": 5988,
+    "start_index": 7909,
+    "end_index": 7939,
+    "total_count": 34,
+    "self_count": 0,
+    "parent": 67,
+    "children": [
+      69,
+      184
+    ],
+    "level": 63,
+    "width_factor": 0.17894736842105252,
+    "hit": false
+  },
+  {
+    "id": 69,
+    "line_index": 5988,
+    "start_index": 7940,
+    "end_index": 7970,
+    "total_count": 33,
+    "self_count": 0,
+    "parent": 68,
+    "children": [
+      70
+    ],
+    "level": 64,
+    "width_factor": 0.1736842105263157,
+    "hit": false
+  },
+  {
+    "id": 70,
+    "line_index": 5988,
+    "start_index": 7971,
+    "end_index": 8001,
+    "total_count": 33,
+    "self_count": 0,
+    "parent": 69,
+    "children": [
+      71,
+      185,
+      139
+    ],
+    "level": 65,
+    "width_factor": 0.1736842105263157,
+    "hit": false
+  },
+  {
+    "id": 71,
+    "line_index": 5988,
+    "start_index": 8002,
+    "end_index": 8032,
+    "total_count": 30,
+    "self_count": 0,
+    "parent": 70,
+    "children": [
+      72
+    ],
+    "level": 66,
+    "width_factor": 0.15789473684210517,
+    "hit": false
+  },
+  {
+    "id": 72,
+    "line_index": 5988,
+    "start_index": 8033,
+    "end_index": 8063,
+    "total_count": 30,
+    "self_count": 0,
+    "parent": 71,
+    "children": [
+      73
+    ],
+    "level": 67,
+    "width_factor": 0.15789473684210517,
+    "hit": false
+  },
+  {
+    "id": 73,
+    "line_index": 5988,
+    "start_index": 8064,
+    "end_index": 8094,
+    "total_count": 30,
+    "self_count": 0,
+    "parent": 72,
+    "children": [
+      74,
+      126,
+      125
+    ],
+    "level": 68,
+    "width_factor": 0.15789473684210517,
+    "hit": false
+  },
+  {
+    "id": 74,
+    "line_index": 5988,
+    "start_index": 8095,
+    "end_index": 8125,
+    "total_count": 28,
+    "self_count": 0,
+    "parent": 73,
+    "children": [
+      75,
+      201
+    ],
+    "level": 69,
+    "width_factor": 0.14736842105263148,
+    "hit": false
+  },
+  {
+    "id": 75,
+    "line_index": 5988,
+    "start_index": 8126,
+    "end_index": 8156,
+    "total_count": 27,
+    "self_count": 0,
+    "parent": 74,
+    "children": [
+      76,
+      149
+    ],
+    "level": 70,
+    "width_factor": 0.14210526315789465,
+    "hit": false
+  },
+  {
+    "id": 76,
+    "line_index": 5988,
+    "start_index": 8157,
+    "end_index": 8187,
+    "total_count": 24,
+    "self_count": 0,
+    "parent": 75,
+    "children": [
+      77,
+      187,
+      140
+    ],
+    "level": 71,
+    "width_factor": 0.12631578947368413,
+    "hit": false
+  },
+  {
+    "id": 77,
+    "line_index": 5988,
+    "start_index": 8188,
+    "end_index": 8218,
+    "total_count": 21,
+    "self_count": 0,
+    "parent": 76,
+    "children": [
+      78
+    ],
+    "level": 72,
+    "width_factor": 0.11052631578947361,
+    "hit": false
+  },
+  {
+    "id": 78,
+    "line_index": 5988,
+    "start_index": 8219,
+    "end_index": 8249,
+    "total_count": 21,
+    "self_count": 0,
+    "parent": 77,
+    "children": [
+      79,
+      189,
+      188
+    ],
+    "level": 73,
+    "width_factor": 0.11052631578947361,
+    "hit": false
+  },
+  {
+    "id": 79,
+    "line_index": 5988,
+    "start_index": 8250,
+    "end_index": 8280,
+    "total_count": 19,
+    "self_count": 0,
+    "parent": 78,
+    "children": [
+      80,
+      190
+    ],
+    "level": 74,
+    "width_factor": 0.09999999999999994,
+    "hit": false
+  },
+  {
+    "id": 80,
+    "line_index": 5988,
+    "start_index": 8281,
+    "end_index": 8311,
+    "total_count": 18,
+    "self_count": 0,
+    "parent": 79,
+    "children": [
+      81
+    ],
+    "level": 75,
+    "width_factor": 0.09473684210526309,
+    "hit": false
+  },
+  {
+    "id": 81,
+    "line_index": 5988,
+    "start_index": 8312,
+    "end_index": 8342,
+    "total_count": 18,
+    "self_count": 0,
+    "parent": 80,
+    "children": [
+      82
+    ],
+    "level": 76,
+    "width_factor": 0.09473684210526309,
+    "hit": false
+  },
+  {
+    "id": 82,
+    "line_index": 5988,
+    "start_index": 8343,
+    "end_index": 8373,
+    "total_count": 18,
+    "self_count": 0,
+    "parent": 81,
+    "children": [
+      83,
+      98
+    ],
+    "level": 77,
+    "width_factor": 0.09473684210526309,
+    "hit": false
+  },
+  {
+    "id": 83,
+    "line_index": 5988,
+    "start_index": 8374,
+    "end_index": 8404,
+    "total_count": 17,
+    "self_count": 0,
+    "parent": 82,
+    "children": [
+      84
+    ],
+    "level": 78,
+    "width_factor": 0.08947368421052625,
+    "hit": false
+  },
+  {
+    "id": 84,
+    "line_index": 5988,
+    "start_index": 8405,
+    "end_index": 8435,
+    "total_count": 17,
+    "self_count": 0,
+    "parent": 83,
+    "children": [
+      85,
+      135
+    ],
+    "level": 79,
+    "width_factor": 0.08947368421052625,
+    "hit": false
+  },
+  {
+    "id": 85,
+    "line_index": 5988,
+    "start_index": 8436,
+    "end_index": 8466,
+    "total_count": 16,
+    "self_count": 0,
+    "parent": 84,
+    "children": [
+      86
+    ],
+    "level": 80,
+    "width_factor": 0.0842105263157894,
+    "hit": false
+  },
+  {
+    "id": 86,
+    "line_index": 5988,
+    "start_index": 8467,
+    "end_index": 8497,
+    "total_count": 16,
+    "self_count": 0,
+    "parent": 85,
+    "children": [
+      87
+    ],
+    "level": 81,
+    "width_factor": 0.0842105263157894,
+    "hit": false
+  },
+  {
+    "id": 87,
+    "line_index": 5988,
+    "start_index": 8498,
+    "end_index": 8528,
+    "total_count": 16,
+    "self_count": 0,
+    "parent": 86,
+    "children": [
+      88,
+      145
+    ],
+    "level": 82,
+    "width_factor": 0.0842105263157894,
+    "hit": false
+  },
+  {
+    "id": 88,
+    "line_index": 5988,
+    "start_index": 8529,
+    "end_index": 8559,
+    "total_count": 15,
+    "self_count": 0,
+    "parent": 87,
+    "children": [
+      89,
+      192
+    ],
+    "level": 83,
+    "width_factor": 0.07894736842105257,
+    "hit": false
+  },
+  {
+    "id": 89,
+    "line_index": 5988,
+    "start_index": 8560,
+    "end_index": 8590,
+    "total_count": 14,
+    "self_count": 0,
+    "parent": 88,
+    "children": [
+      90
+    ],
+    "level": 84,
+    "width_factor": 0.07368421052631574,
+    "hit": false
+  },
+  {
+    "id": 90,
+    "line_index": 5988,
+    "start_index": 8591,
+    "end_index": 8621,
+    "total_count": 14,
+    "self_count": 0,
+    "parent": 89,
+    "children": [
+      99,
+      91
+    ],
+    "level": 85,
+    "width_factor": 0.07368421052631574,
+    "hit": false
+  },
+  {
+    "id": 91,
+    "line_index": 5988,
+    "start_index": 8622,
+    "end_index": 8652,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 90,
+    "children": [],
+    "level": 86,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 92,
+    "line_index": 8655,
+    "start_index": 9026,
+    "end_index": 9056,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 12,
+    "children": [],
+    "level": 13,
+    "width_factor": 0.005263157894736842,
+    "hit": false
+  },
+  {
+    "id": 93,
+    "line_index": 9059,
+    "start_index": 10484,
+    "end_index": 10514,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 47,
+    "children": [],
+    "level": 47,
+    "width_factor": 0.010526315789473679,
+    "hit": false
+  },
+  {
+    "id": 94,
+    "line_index": 10517,
+    "start_index": 12283,
+    "end_index": 12313,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 62,
+    "children": [],
+    "level": 58,
+    "width_factor": 0.010526315789473677,
+    "hit": false
+  },
+  {
+    "id": 95,
+    "line_index": 12316,
+    "start_index": 13679,
+    "end_index": 13709,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 44,
+    "children": [],
+    "level": 45,
+    "width_factor": 0.015789473684210516,
+    "hit": false
+  },
+  {
+    "id": 96,
+    "line_index": 13712,
+    "start_index": 14207,
+    "end_index": 14237,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 16,
+    "children": [],
+    "level": 17,
+    "width_factor": 0.015789473684210523,
+    "hit": false
+  },
+  {
+    "id": 97,
+    "line_index": 14240,
+    "start_index": 15293,
+    "end_index": 15323,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 34,
+    "children": [],
+    "level": 35,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 98,
+    "line_index": 15326,
+    "start_index": 17712,
+    "end_index": 17742,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 82,
+    "children": [],
+    "level": 78,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 99,
+    "line_index": 17745,
+    "start_index": 20379,
+    "end_index": 20409,
+    "total_count": 13,
+    "self_count": 0,
+    "parent": 90,
+    "children": [
+      100
+    ],
+    "level": 86,
+    "width_factor": 0.06842105263157891,
+    "hit": false
+  },
+  {
+    "id": 100,
+    "line_index": 17745,
+    "start_index": 20410,
+    "end_index": 20440,
+    "total_count": 13,
+    "self_count": 0,
+    "parent": 99,
+    "children": [
+      101
+    ],
+    "level": 87,
+    "width_factor": 0.06842105263157891,
+    "hit": false
+  },
+  {
+    "id": 101,
+    "line_index": 17745,
+    "start_index": 20441,
+    "end_index": 20471,
+    "total_count": 13,
+    "self_count": 0,
+    "parent": 100,
+    "children": [
+      102,
+      194
+    ],
+    "level": 88,
+    "width_factor": 0.06842105263157891,
+    "hit": false
+  },
+  {
+    "id": 102,
+    "line_index": 17745,
+    "start_index": 20472,
+    "end_index": 20502,
+    "total_count": 12,
+    "self_count": 0,
+    "parent": 101,
+    "children": [
+      103,
+      195,
+      128
+    ],
+    "level": 89,
+    "width_factor": 0.06315789473684208,
+    "hit": false
+  },
+  {
+    "id": 103,
+    "line_index": 17745,
+    "start_index": 20503,
+    "end_index": 20533,
+    "total_count": 10,
+    "self_count": 0,
+    "parent": 102,
+    "children": [
+      104
+    ],
+    "level": 90,
+    "width_factor": 0.052631578947368404,
+    "hit": false
+  },
+  {
+    "id": 104,
+    "line_index": 17745,
+    "start_index": 20534,
+    "end_index": 20564,
+    "total_count": 10,
+    "self_count": 0,
+    "parent": 103,
+    "children": [
+      105
+    ],
+    "level": 91,
+    "width_factor": 0.052631578947368404,
+    "hit": false
+  },
+  {
+    "id": 105,
+    "line_index": 17745,
+    "start_index": 20565,
+    "end_index": 20595,
+    "total_count": 10,
+    "self_count": 0,
+    "parent": 104,
+    "children": [
+      106
+    ],
+    "level": 92,
+    "width_factor": 0.052631578947368404,
+    "hit": false
+  },
+  {
+    "id": 106,
+    "line_index": 17745,
+    "start_index": 20596,
+    "end_index": 20626,
+    "total_count": 10,
+    "self_count": 0,
+    "parent": 105,
+    "children": [
+      107
+    ],
+    "level": 93,
+    "width_factor": 0.052631578947368404,
+    "hit": false
+  },
+  {
+    "id": 107,
+    "line_index": 17745,
+    "start_index": 20627,
+    "end_index": 20657,
+    "total_count": 10,
+    "self_count": 0,
+    "parent": 106,
+    "children": [
+      108
+    ],
+    "level": 94,
+    "width_factor": 0.052631578947368404,
+    "hit": false
+  },
+  {
+    "id": 108,
+    "line_index": 17745,
+    "start_index": 20658,
+    "end_index": 20688,
+    "total_count": 10,
+    "self_count": 0,
+    "parent": 107,
+    "children": [
+      109,
+      198
+    ],
+    "level": 95,
+    "width_factor": 0.052631578947368404,
+    "hit": false
+  },
+  {
+    "id": 109,
+    "line_index": 17745,
+    "start_index": 20689,
+    "end_index": 20719,
+    "total_count": 9,
+    "self_count": 0,
+    "parent": 108,
+    "children": [
+      110
+    ],
+    "level": 96,
+    "width_factor": 0.04736842105263157,
+    "hit": false
+  },
+  {
+    "id": 110,
+    "line_index": 17745,
+    "start_index": 20720,
+    "end_index": 20750,
+    "total_count": 9,
+    "self_count": 0,
+    "parent": 109,
+    "children": [
+      111
+    ],
+    "level": 97,
+    "width_factor": 0.04736842105263157,
+    "hit": false
+  },
+  {
+    "id": 111,
+    "line_index": 17745,
+    "start_index": 20751,
+    "end_index": 20781,
+    "total_count": 9,
+    "self_count": 0,
+    "parent": 110,
+    "children": [
+      112
+    ],
+    "level": 98,
+    "width_factor": 0.04736842105263157,
+    "hit": false
+  },
+  {
+    "id": 112,
+    "line_index": 17745,
+    "start_index": 20782,
+    "end_index": 20812,
+    "total_count": 9,
+    "self_count": 0,
+    "parent": 111,
+    "children": [
+      113
+    ],
+    "level": 99,
+    "width_factor": 0.04736842105263157,
+    "hit": false
+  },
+  {
+    "id": 113,
+    "line_index": 17745,
+    "start_index": 20813,
+    "end_index": 20843,
+    "total_count": 9,
+    "self_count": 0,
+    "parent": 112,
+    "children": [
+      114
+    ],
+    "level": 100,
+    "width_factor": 0.04736842105263157,
+    "hit": false
+  },
+  {
+    "id": 114,
+    "line_index": 17745,
+    "start_index": 20844,
+    "end_index": 20874,
+    "total_count": 9,
+    "self_count": 0,
+    "parent": 113,
+    "children": [
+      115
+    ],
+    "level": 101,
+    "width_factor": 0.04736842105263157,
+    "hit": false
+  },
+  {
+    "id": 115,
+    "line_index": 17745,
+    "start_index": 20875,
+    "end_index": 20905,
+    "total_count": 9,
+    "self_count": 0,
+    "parent": 114,
+    "children": [
+      116,
+      204
+    ],
+    "level": 102,
+    "width_factor": 0.04736842105263157,
+    "hit": false
+  },
+  {
+    "id": 116,
+    "line_index": 17745,
+    "start_index": 20906,
+    "end_index": 20930,
+    "total_count": 5,
+    "self_count": 5,
+    "parent": 115,
+    "children": [],
+    "level": 103,
+    "width_factor": 0.026315789473684206,
+    "hit": false
+  },
+  {
+    "id": 117,
+    "line_index": 20933,
+    "start_index": 21149,
+    "end_index": 21179,
+    "total_count": 4,
+    "self_count": 4,
+    "parent": 7,
+    "children": [],
+    "level": 8,
+    "width_factor": 0.021052631578947368,
+    "hit": false
+  },
+  {
+    "id": 118,
+    "line_index": 21182,
+    "start_index": 22421,
+    "end_index": 22451,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 40,
+    "children": [],
+    "level": 41,
+    "width_factor": 0.010526315789473679,
+    "hit": false
+  },
+  {
+    "id": 119,
+    "line_index": 22454,
+    "start_index": 23786,
+    "end_index": 23816,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 43,
+    "children": [],
+    "level": 44,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 120,
+    "line_index": 23819,
+    "start_index": 25678,
+    "end_index": 25708,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 65,
+    "children": [],
+    "level": 61,
+    "width_factor": 0.010526315789473679,
+    "hit": false
+  },
+  {
+    "id": 121,
+    "line_index": 25711,
+    "start_index": 26144,
+    "end_index": 26174,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 14,
+    "children": [],
+    "level": 15,
+    "width_factor": 0.005263157894736841,
+    "hit": false
+  },
+  {
+    "id": 122,
+    "line_index": 26177,
+    "start_index": 27850,
+    "end_index": 27880,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 55,
+    "children": [],
+    "level": 55,
+    "width_factor": 0.010526315789473677,
+    "hit": false
+  },
+  {
+    "id": 123,
+    "line_index": 27883,
+    "start_index": 29742,
+    "end_index": 29772,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 65,
+    "children": [],
+    "level": 61,
+    "width_factor": 0.015789473684210516,
+    "hit": false
+  },
+  {
+    "id": 124,
+    "line_index": 29775,
+    "start_index": 31169,
+    "end_index": 31199,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 46,
+    "children": [],
+    "level": 46,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 125,
+    "line_index": 31202,
+    "start_index": 33309,
+    "end_index": 33339,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 73,
+    "children": [],
+    "level": 69,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 126,
+    "line_index": 33342,
+    "start_index": 35449,
+    "end_index": 35479,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 73,
+    "children": [],
+    "level": 69,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 127,
+    "line_index": 35482,
+    "start_index": 35822,
+    "end_index": 35852,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 11,
+    "children": [],
+    "level": 12,
+    "width_factor": 0.010526315789473684,
+    "hit": false
+  },
+  {
+    "id": 128,
+    "line_index": 35855,
+    "start_index": 38613,
+    "end_index": 38643,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 102,
+    "children": [],
+    "level": 90,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 129,
+    "line_index": 38646,
+    "start_index": 40474,
+    "end_index": 40504,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 64,
+    "children": [],
+    "level": 60,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 130,
+    "line_index": 40507,
+    "start_index": 42087,
+    "end_index": 42117,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 52,
+    "children": [],
+    "level": 52,
+    "width_factor": 0.010526315789473677,
+    "hit": false
+  },
+  {
+    "id": 131,
+    "line_index": 42120,
+    "start_index": 42801,
+    "end_index": 42831,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 22,
+    "children": [],
+    "level": 23,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 132,
+    "line_index": 42834,
+    "start_index": 43546,
+    "end_index": 43576,
+    "total_count": 6,
+    "self_count": 6,
+    "parent": 23,
+    "children": [],
+    "level": 24,
+    "width_factor": 0.03157894736842104,
+    "hit": false
+  },
+  {
+    "id": 133,
+    "line_index": 43579,
+    "start_index": 44725,
+    "end_index": 44755,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 37,
+    "children": [],
+    "level": 38,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 134,
+    "line_index": 44758,
+    "start_index": 45160,
+    "end_index": 45190,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 13,
+    "children": [],
+    "level": 14,
+    "width_factor": 0.005263157894736842,
+    "hit": false
+  },
+  {
+    "id": 135,
+    "line_index": 45193,
+    "start_index": 47641,
+    "end_index": 47671,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 84,
+    "children": [],
+    "level": 80,
+    "width_factor": 0.005263157894736838,
+    "hit": false
+  },
+  {
+    "id": 136,
+    "line_index": 47674,
+    "start_index": 48138,
+    "end_index": 48168,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 15,
+    "children": [],
+    "level": 16,
+    "width_factor": 0.010526315789473684,
+    "hit": false
+  },
+  {
+    "id": 137,
+    "line_index": 48171,
+    "start_index": 48697,
+    "end_index": 48727,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 17,
+    "children": [],
+    "level": 18,
+    "width_factor": 0.010526315789473682,
+    "hit": false
+  },
+  {
+    "id": 138,
+    "line_index": 48730,
+    "start_index": 50434,
+    "end_index": 50464,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 56,
+    "children": [],
+    "level": 56,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 139,
+    "line_index": 50467,
+    "start_index": 52481,
+    "end_index": 52511,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 70,
+    "children": [],
+    "level": 66,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 140,
+    "line_index": 52514,
+    "start_index": 54714,
+    "end_index": 54744,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 76,
+    "children": [],
+    "level": 72,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 141,
+    "line_index": 54747,
+    "start_index": 55397,
+    "end_index": 55427,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 21,
+    "children": [],
+    "level": 22,
+    "width_factor": 0.01052631578947368,
+    "hit": false
+  },
+  {
+    "id": 142,
+    "line_index": 55430,
+    "start_index": 56545,
+    "end_index": 56575,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 36,
+    "children": [],
+    "level": 37,
+    "width_factor": 0.010526315789473679,
+    "hit": false
+  },
+  {
+    "id": 143,
+    "line_index": 56578,
+    "start_index": 57197,
+    "end_index": 57227,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 20,
+    "children": [],
+    "level": 21,
+    "width_factor": 0.01052631578947368,
+    "hit": false
+  },
+  {
+    "id": 144,
+    "line_index": 57230,
+    "start_index": 57384,
+    "end_index": 57414,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 5,
+    "children": [],
+    "level": 6,
+    "width_factor": 0.010526315789473684,
+    "hit": false
+  },
+  {
+    "id": 145,
+    "line_index": 57417,
+    "start_index": 59958,
+    "end_index": 59988,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 87,
+    "children": [],
+    "level": 83,
+    "width_factor": 0.005263157894736838,
+    "hit": false
+  },
+  {
+    "id": 146,
+    "line_index": 59991,
+    "start_index": 60424,
+    "end_index": 60454,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 14,
+    "children": [],
+    "level": 15,
+    "width_factor": 0.005263157894736841,
+    "hit": false
+  },
+  {
+    "id": 147,
+    "line_index": 60457,
+    "start_index": 60642,
+    "end_index": 60672,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 6,
+    "children": [],
+    "level": 7,
+    "width_factor": 0.010526315789473682,
+    "hit": false
+  },
+  {
+    "id": 148,
+    "line_index": 60675,
+    "start_index": 62565,
+    "end_index": 62595,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 66,
+    "children": [],
+    "level": 62,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 149,
+    "line_index": 62598,
+    "start_index": 64767,
+    "end_index": 64797,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 75,
+    "children": [],
+    "level": 71,
+    "width_factor": 0.015789473684210516,
+    "hit": false
+  },
+  {
+    "id": 150,
+    "line_index": 64800,
+    "start_index": 65109,
+    "end_index": 65139,
+    "total_count": 5,
+    "self_count": 5,
+    "parent": 10,
+    "children": [],
+    "level": 11,
+    "width_factor": 0.02631578947368421,
+    "hit": false
+  },
+  {
+    "id": 151,
+    "line_index": 65142,
+    "start_index": 65482,
+    "end_index": 65512,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 11,
+    "children": [],
+    "level": 12,
+    "width_factor": 0.010526315789473684,
+    "hit": false
+  },
+  {
+    "id": 152,
+    "line_index": 65515,
+    "start_index": 65700,
+    "end_index": 65730,
+    "total_count": 4,
+    "self_count": 4,
+    "parent": 6,
+    "children": [],
+    "level": 7,
+    "width_factor": 0.021052631578947364,
+    "hit": false
+  },
+  {
+    "id": 153,
+    "line_index": 65733,
+    "start_index": 65980,
+    "end_index": 66010,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 8,
+    "children": [],
+    "level": 9,
+    "width_factor": 0.005263157894736842,
+    "hit": false
+  },
+  {
+    "id": 154,
+    "line_index": 66013,
+    "start_index": 66260,
+    "end_index": 66290,
+    "total_count": 4,
+    "self_count": 4,
+    "parent": 8,
+    "children": [],
+    "level": 9,
+    "width_factor": 0.021052631578947368,
+    "hit": false
+  },
+  {
+    "id": 155,
+    "line_index": 66293,
+    "start_index": 66912,
+    "end_index": 66942,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 20,
+    "children": [],
+    "level": 21,
+    "width_factor": 0.015789473684210523,
+    "hit": false
+  },
+  {
+    "id": 156,
+    "line_index": 66945,
+    "start_index": 67657,
+    "end_index": 67687,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 23,
+    "children": [],
+    "level": 24,
+    "width_factor": 0.010526315789473679,
+    "hit": false
+  },
+  {
+    "id": 157,
+    "line_index": 67690,
+    "start_index": 68495,
+    "end_index": 68525,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 26,
+    "children": [],
+    "level": 27,
+    "width_factor": 0.01578947368421052,
+    "hit": false
+  },
+  {
+    "id": 158,
+    "line_index": 68528,
+    "start_index": 69953,
+    "end_index": 69983,
+    "total_count": 4,
+    "self_count": 4,
+    "parent": 47,
+    "children": [],
+    "level": 47,
+    "width_factor": 0.021052631578947358,
+    "hit": false
+  },
+  {
+    "id": 159,
+    "line_index": 69986,
+    "start_index": 71442,
+    "end_index": 71472,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 48,
+    "children": [],
+    "level": 48,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 160,
+    "line_index": 71475,
+    "start_index": 71691,
+    "end_index": 71721,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 7,
+    "children": [],
+    "level": 8,
+    "width_factor": 0.010526315789473684,
+    "hit": false
+  },
+  {
+    "id": 161,
+    "line_index": 71724,
+    "start_index": 72188,
+    "end_index": 72218,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 15,
+    "children": [],
+    "level": 16,
+    "width_factor": 0.005263157894736842,
+    "hit": false
+  },
+  {
+    "id": 162,
+    "line_index": 72221,
+    "start_index": 72964,
+    "end_index": 72994,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 24,
+    "children": [],
+    "level": 25,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 163,
+    "line_index": 72997,
+    "start_index": 73988,
+    "end_index": 74018,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 32,
+    "children": [],
+    "level": 33,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 164,
+    "line_index": 74021,
+    "start_index": 74392,
+    "end_index": 74422,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 12,
+    "children": [],
+    "level": 13,
+    "width_factor": 0.015789473684210523,
+    "hit": false
+  },
+  {
+    "id": 165,
+    "line_index": 74425,
+    "start_index": 75199,
+    "end_index": 75229,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 25,
+    "children": [],
+    "level": 26,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 166,
+    "line_index": 75232,
+    "start_index": 76564,
+    "end_index": 76594,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 43,
+    "children": [],
+    "level": 44,
+    "width_factor": 0.010526315789473679,
+    "hit": false
+  },
+  {
+    "id": 167,
+    "line_index": 76597,
+    "start_index": 77154,
+    "end_index": 77184,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 18,
+    "children": [],
+    "level": 19,
+    "width_factor": 0.015789473684210523,
+    "hit": false
+  },
+  {
+    "id": 168,
+    "line_index": 77187,
+    "start_index": 78054,
+    "end_index": 78084,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 28,
+    "children": [],
+    "level": 29,
+    "width_factor": 0.010526315789473679,
+    "hit": false
+  },
+  {
+    "id": 169,
+    "line_index": 78087,
+    "start_index": 79481,
+    "end_index": 79511,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 46,
+    "children": [],
+    "level": 46,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 170,
+    "line_index": 79514,
+    "start_index": 80784,
+    "end_index": 80814,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 41,
+    "children": [],
+    "level": 42,
+    "width_factor": 0.01578947368421052,
+    "hit": false
+  },
+  {
+    "id": 171,
+    "line_index": 80817,
+    "start_index": 81126,
+    "end_index": 81156,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 10,
+    "children": [],
+    "level": 11,
+    "width_factor": 0.005263157894736842,
+    "hit": false
+  },
+  {
+    "id": 172,
+    "line_index": 81159,
+    "start_index": 82739,
+    "end_index": 82769,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 52,
+    "children": [],
+    "level": 52,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 173,
+    "line_index": 82772,
+    "start_index": 84569,
+    "end_index": 84599,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 63,
+    "children": [],
+    "level": 59,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 174,
+    "line_index": 84602,
+    "start_index": 86399,
+    "end_index": 86429,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 63,
+    "children": [],
+    "level": 59,
+    "width_factor": 0.010526315789473677,
+    "hit": false
+  },
+  {
+    "id": 175,
+    "line_index": 86432,
+    "start_index": 87268,
+    "end_index": 87298,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 27,
+    "children": [],
+    "level": 28,
+    "width_factor": 0.01578947368421052,
+    "hit": false
+  },
+  {
+    "id": 176,
+    "line_index": 87301,
+    "start_index": 88044,
+    "end_index": 88074,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 24,
+    "children": [],
+    "level": 25,
+    "width_factor": 0.015789473684210516,
+    "hit": false
+  },
+  {
+    "id": 177,
+    "line_index": 88077,
+    "start_index": 88913,
+    "end_index": 88943,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 27,
+    "children": [],
+    "level": 28,
+    "width_factor": 0.01578947368421052,
+    "hit": false
+  },
+  {
+    "id": 178,
+    "line_index": 88946,
+    "start_index": 89875,
+    "end_index": 89905,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 30,
+    "children": [],
+    "level": 31,
+    "width_factor": 0.010526315789473677,
+    "hit": false
+  },
+  {
+    "id": 179,
+    "line_index": 89908,
+    "start_index": 90837,
+    "end_index": 90867,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 30,
+    "children": [],
+    "level": 31,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 180,
+    "line_index": 90870,
+    "start_index": 92760,
+    "end_index": 92790,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 66,
+    "children": [],
+    "level": 62,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 181,
+    "line_index": 92793,
+    "start_index": 92947,
+    "end_index": 92977,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 5,
+    "children": [],
+    "level": 6,
+    "width_factor": 0.005263157894736842,
+    "hit": false
+  },
+  {
+    "id": 182,
+    "line_index": 92980,
+    "start_index": 94467,
+    "end_index": 94497,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 49,
+    "children": [],
+    "level": 49,
+    "width_factor": 0.015789473684210516,
+    "hit": false
+  },
+  {
+    "id": 183,
+    "line_index": 94500,
+    "start_index": 96018,
+    "end_index": 96048,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 50,
+    "children": [],
+    "level": 50,
+    "width_factor": 0.010526315789473677,
+    "hit": false
+  },
+  {
+    "id": 184,
+    "line_index": 96051,
+    "start_index": 98003,
+    "end_index": 98033,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 68,
+    "children": [],
+    "level": 64,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 185,
+    "line_index": 98036,
+    "start_index": 100050,
+    "end_index": 100080,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 70,
+    "children": [],
+    "level": 66,
+    "width_factor": 0.010526315789473679,
+    "hit": false
+  },
+  {
+    "id": 186,
+    "line_index": 100083,
+    "start_index": 100888,
+    "end_index": 100918,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 26,
+    "children": [],
+    "level": 27,
+    "width_factor": 0.010526315789473679,
+    "hit": false
+  },
+  {
+    "id": 187,
+    "line_index": 100921,
+    "start_index": 103121,
+    "end_index": 103151,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 76,
+    "children": [],
+    "level": 72,
+    "width_factor": 0.010526315789473677,
+    "hit": false
+  },
+  {
+    "id": 188,
+    "line_index": 103154,
+    "start_index": 105416,
+    "end_index": 105446,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 78,
+    "children": [],
+    "level": 74,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 189,
+    "line_index": 105449,
+    "start_index": 107711,
+    "end_index": 107741,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 78,
+    "children": [],
+    "level": 74,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 190,
+    "line_index": 107744,
+    "start_index": 110037,
+    "end_index": 110067,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 79,
+    "children": [],
+    "level": 75,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 191,
+    "line_index": 110070,
+    "start_index": 111030,
+    "end_index": 111060,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 31,
+    "children": [],
+    "level": 32,
+    "width_factor": 0.010526315789473679,
+    "hit": false
+  },
+  {
+    "id": 192,
+    "line_index": 111063,
+    "start_index": 113635,
+    "end_index": 113665,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 88,
+    "children": [],
+    "level": 84,
+    "width_factor": 0.005263157894736838,
+    "hit": false
+  },
+  {
+    "id": 193,
+    "line_index": 113668,
+    "start_index": 114256,
+    "end_index": 114286,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 19,
+    "children": [],
+    "level": 20,
+    "width_factor": 0.005263157894736841,
+    "hit": false
+  },
+  {
+    "id": 194,
+    "line_index": 114289,
+    "start_index": 117016,
+    "end_index": 117046,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 101,
+    "children": [],
+    "level": 89,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 195,
+    "line_index": 117049,
+    "start_index": 119807,
+    "end_index": 119837,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 102,
+    "children": [],
+    "level": 90,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  },
+  {
+    "id": 196,
+    "line_index": 119840,
+    "start_index": 121017,
+    "end_index": 121047,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 38,
+    "children": [],
+    "level": 39,
+    "width_factor": 0.01578947368421052,
+    "hit": false
+  },
+  {
+    "id": 197,
+    "line_index": 121050,
+    "start_index": 122351,
+    "end_index": 122381,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 42,
+    "children": [],
+    "level": 43,
+    "width_factor": 0.00526315789473684,
+    "hit": false
+  },
+  {
+    "id": 198,
+    "line_index": 122384,
+    "start_index": 125328,
+    "end_index": 125358,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 108,
+    "children": [],
+    "level": 96,
+    "width_factor": 0.005263157894736841,
+    "hit": false
+  },
+  {
+    "id": 199,
+    "line_index": 125361,
+    "start_index": 125639,
+    "end_index": 125669,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 9,
+    "children": [],
+    "level": 10,
+    "width_factor": 0.010526315789473684,
+    "hit": false
+  },
+  {
+    "id": 200,
+    "line_index": 125672,
+    "start_index": 125950,
+    "end_index": 125980,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 9,
+    "children": [],
+    "level": 10,
+    "width_factor": 0.005263157894736842,
+    "hit": false
+  },
+  {
+    "id": 201,
+    "line_index": 125983,
+    "start_index": 128121,
+    "end_index": 128151,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 74,
+    "children": [],
+    "level": 70,
+    "width_factor": 0.0052631578947368385,
+    "hit": false
+  },
+  {
+    "id": 202,
+    "line_index": 128154,
+    "start_index": 128649,
+    "end_index": 128679,
+    "total_count": 3,
+    "self_count": 3,
+    "parent": 16,
+    "children": [],
+    "level": 17,
+    "width_factor": 0.015789473684210523,
+    "hit": false
+  },
+  {
+    "id": 203,
+    "line_index": 128682,
+    "start_index": 129642,
+    "end_index": 129672,
+    "total_count": 2,
+    "self_count": 2,
+    "parent": 31,
+    "children": [],
+    "level": 32,
+    "width_factor": 0.010526315789473679,
+    "hit": false
+  },
+  {
+    "id": 204,
+    "line_index": 129675,
+    "start_index": 132836,
+    "end_index": 132860,
+    "total_count": 4,
+    "self_count": 4,
+    "parent": 115,
+    "children": [],
+    "level": 103,
+    "width_factor": 0.02105263157894736,
+    "hit": false
+  },
+  {
+    "id": 205,
+    "line_index": 132863,
+    "start_index": 133947,
+    "end_index": 133977,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 35,
+    "children": [],
+    "level": 36,
+    "width_factor": 0.005263157894736839,
+    "hit": false
+  }
+]

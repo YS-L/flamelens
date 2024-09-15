@@ -1,10 +1,12 @@
 use std::collections::{HashMap, HashSet};
 
+use serde::Serialize;
+
 pub type StackIdentifier = usize;
 pub static ROOT: &str = "all";
 pub static ROOT_ID: usize = 0;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct StackInfo {
     pub id: StackIdentifier,
     pub line_index: usize,
@@ -50,13 +52,13 @@ pub struct Hits {
     ids: Vec<StackIdentifier>,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Serialize, Debug, Clone, Default)]
 pub struct Count {
     pub total: u64,
     pub own: u64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
 pub struct Ordered {
     pub by_total_count: Vec<(String, Count)>,
     pub by_own_count: Vec<(String, Count)>,
@@ -177,14 +179,14 @@ impl FlameGraph {
 
     fn get_ordered_stacks(counts: &HashMap<String, Count>) -> Ordered {
         let mut counts = counts.iter().collect::<Vec<_>>();
-        counts.sort_by_key(|(_, count)| count.total);
+        counts.sort_by_key(|(short_name, count)| (count.total, short_name.to_string()));
         let ordered_by_total_count = counts
             .iter()
             .rev()
             .take(100)
             .map(|x| (x.0.to_string(), x.1.clone()))
             .collect::<Vec<_>>();
-        counts.sort_by_key(|(_, count)| count.own);
+        counts.sort_by_key(|(short_name, count)| (count.own, short_name.to_string()));
         let ordered_by_self_count = counts
             .iter()
             .rev()
@@ -456,6 +458,8 @@ impl FlameGraph {
 mod tests {
     use super::*;
 
+    const UPDATE_FIXTURES: bool = false;
+
     #[derive(Debug, Clone, PartialEq)]
     pub struct StackInfoReadable<'a> {
         pub id: StackIdentifier,
@@ -470,143 +474,46 @@ mod tests {
         pub hit: bool,
     }
 
-    impl<'a> StackInfoReadable<'a> {
-        pub fn new(fg: &'a FlameGraph, stack_id: &'a StackIdentifier) -> StackInfoReadable<'a> {
-            let stack = fg.get_stack(&stack_id).unwrap();
-            StackInfoReadable {
-                id: stack.id,
-                short_name: fg.get_stack_short_name(stack_id).unwrap(),
-                full_name: fg.get_stack_full_name(stack_id).unwrap(),
-                total_count: stack.total_count,
-                self_count: stack.self_count,
-                parent: stack.parent,
-                children: stack.children.clone(),
-                level: stack.level,
-                width_factor: stack.width_factor,
-                hit: stack.hit,
-            }
+    fn check_result<P: AsRef<std::path::Path>>(data_filename: P) -> FlameGraph {
+        let content = std::fs::read_to_string(&data_filename).unwrap();
+        let fg = FlameGraph::from_string(content, true);
+
+        // Location to store all the fixtures for this test data
+        let tag = data_filename
+            .as_ref()
+            .file_stem()
+            .unwrap()
+            .to_str()
+            .unwrap();
+        let fixture_dir = format!("tests/fixtures/{}", tag);
+
+        // Check expected stacks
+        let serialized = serde_json::to_string_pretty(&fg.stacks).unwrap();
+        let filename = format!("{}/expected_stacks.json", fixture_dir.as_str());
+        if UPDATE_FIXTURES {
+            std::fs::create_dir_all(fixture_dir.as_str()).unwrap();
+            std::fs::write(&filename, serialized.clone()).unwrap();
         }
-    }
+        let expected = std::fs::read_to_string(&filename).unwrap();
+        assert_eq!(serialized, expected);
 
-    fn get_readable_stacks<'a>(fg: &'a FlameGraph) -> Vec<StackInfoReadable<'a>> {
-        fg.stacks
-            .iter()
-            .map(|s| StackInfoReadable::new(fg, &s.id))
-            .collect::<Vec<_>>()
-    }
+        // Check ordered counts
+        let serialized = serde_json::to_string_pretty(&fg.ordered_stacks).unwrap();
+        let filename = format!("{}/expected_ordered_counts.json", fixture_dir.as_str());
+        if UPDATE_FIXTURES {
+            std::fs::create_dir_all(fixture_dir).unwrap();
+            std::fs::write(&filename, serialized.clone()).unwrap();
+        }
+        let expected = std::fs::read_to_string(&filename).unwrap();
+        assert_eq!(serialized, expected);
 
-    fn _print_stacks(fg: &FlameGraph) {
-        let mut sorted_stacks = get_readable_stacks(fg);
-        sorted_stacks.sort_by_key(|x| x.id);
-        println!("{:?}", sorted_stacks);
+        assert_eq!(UPDATE_FIXTURES, false, "Set UPDATE_FIXTURES to false");
+        fg
     }
 
     #[test]
     fn test_simple() {
-        let content = std::fs::read_to_string("tests/data/py-spy-simple.txt").unwrap();
-        let fg = FlameGraph::from_string(content, true);
-        let stacks = get_readable_stacks(&fg);
-        // _print_stacks(&fg);
-        let items: Vec<StackInfoReadable> = vec![
-            StackInfoReadable {
-                id: 0,
-                short_name: "all",
-                full_name: "all",
-                total_count: 657,
-                self_count: 0,
-                parent: None,
-                children: vec![3, 1, 5],
-                level: 0,
-                width_factor: 1.0,
-                hit: false,
-            },
-            StackInfoReadable {
-                id: 1,
-                short_name: "<module> (long_running.py:24)",
-                full_name: "<module> (long_running.py:24)",
-                total_count: 17,
-                self_count: 0,
-                parent: Some(0),
-                children: vec![7, 2],
-                level: 1,
-                width_factor: 0.0258751902587519,
-                hit: false,
-            },
-            StackInfoReadable {
-                id: 2,
-                short_name: "quick_work (long_running.py:16)",
-                full_name: "<module> (long_running.py:24);quick_work (long_running.py:16)",
-                total_count: 7,
-                self_count: 7,
-                parent: Some(1),
-                children: vec![],
-                level: 2,
-                width_factor: 0.0106544901065449,
-                hit: false,
-            },
-            StackInfoReadable {
-                id: 3,
-                short_name: "<module> (long_running.py:25)",
-                full_name: "<module> (long_running.py:25)",
-                total_count: 639,
-                self_count: 0,
-                parent: Some(0),
-                children: vec![4, 6],
-                level: 1,
-                width_factor: 0.9726027397260274,
-                hit: false,
-            },
-            StackInfoReadable {
-                id: 4,
-                short_name: "work (long_running.py:8)",
-                full_name: "<module> (long_running.py:25);work (long_running.py:8)",
-                total_count: 421,
-                self_count: 421,
-                parent: Some(3),
-                children: vec![],
-                level: 2,
-                width_factor: 0.6407914764079147,
-                hit: false,
-            },
-            StackInfoReadable {
-                id: 5,
-                short_name: "<module> (long_running.py:26)",
-                full_name: "<module> (long_running.py:26)",
-                total_count: 1,
-                self_count: 1,
-                parent: Some(0),
-                children: vec![],
-                level: 1,
-                width_factor: 0.0015220700152207,
-                hit: false,
-            },
-            StackInfoReadable {
-                id: 6,
-                short_name: "work (long_running.py:7)",
-                full_name: "<module> (long_running.py:25);work (long_running.py:7)",
-                total_count: 218,
-                self_count: 218,
-                parent: Some(3),
-                children: vec![],
-                level: 2,
-                width_factor: 0.3318112633181126,
-                hit: false,
-            },
-            StackInfoReadable {
-                id: 7,
-                short_name: "quick_work (long_running.py:17)",
-                full_name: "<module> (long_running.py:24);quick_work (long_running.py:17)",
-                total_count: 10,
-                self_count: 10,
-                parent: Some(1),
-                children: vec![],
-                level: 2,
-                width_factor: 0.015220700152207,
-                hit: false,
-            },
-        ];
-        let expected = items.into_iter().collect::<Vec<StackInfoReadable>>();
-        assert_eq!(stacks, expected);
+        let fg = check_result("tests/data/py-spy-simple.txt");
         assert_eq!(fg.total_count(), 657);
         assert_eq!(
             *fg.root(),
@@ -628,85 +535,17 @@ mod tests {
 
     #[test]
     fn test_no_name_count() {
-        let content = std::fs::read_to_string("tests/data/invalid-lines.txt").unwrap();
-        let fg = FlameGraph::from_string(content, true);
-        let stacks = get_readable_stacks(&fg);
-        // _print_stacks(&fg);
-        let items: Vec<StackInfoReadable> = vec![
-            StackInfoReadable {
-                id: 0,
-                short_name: "all",
-                full_name: "all",
-                total_count: 428,
-                self_count: 0,
-                parent: None,
-                children: vec![2, 1],
-                level: 0,
-                width_factor: 1.0,
-                hit: false,
-            },
-            StackInfoReadable {
-                id: 1,
-                short_name: "<module> (long_running.py:24)",
-                full_name: "<module> (long_running.py:24)",
-                total_count: 7,
-                self_count: 7,
-                parent: Some(0),
-                children: vec![],
-                level: 1,
-                width_factor: 0.016355140186915886,
-                hit: false,
-            },
-            StackInfoReadable {
-                id: 2,
-                short_name: "<module> (long_running.py:25)",
-                full_name: "<module> (long_running.py:25)",
-                total_count: 421,
-                self_count: 421,
-                parent: Some(0),
-                children: vec![],
-                level: 1,
-                width_factor: 0.9836448598130841,
-                hit: false,
-            },
-        ];
-        let expected = items.into_iter().collect::<Vec<StackInfoReadable>>();
-        assert_eq!(stacks, expected);
+        let fg = check_result("tests/data/invalid-lines.txt");
         assert_eq!(fg.total_count(), 428);
     }
 
     #[test]
     fn test_ignore_lines_starting_with_hash() {
-        let content = std::fs::read_to_string("tests/data/ignore-metadata-lines.txt").unwrap();
-        let fg = FlameGraph::from_string(content, true);
-        let stacks = get_readable_stacks(&fg);
-        // _print_stacks(&fg);
-        let expected = vec![
-            StackInfoReadable {
-                id: 0,
-                short_name: "all",
-                full_name: "all",
-                total_count: 7,
-                self_count: 0,
-                parent: None,
-                children: vec![1],
-                level: 0,
-                width_factor: 1.0,
-                hit: false,
-            },
-            StackInfoReadable {
-                id: 1,
-                short_name: "<module> (long_running.py:24)",
-                full_name: "<module> (long_running.py:24)",
-                total_count: 7,
-                self_count: 7,
-                parent: Some(0),
-                children: vec![],
-                level: 1,
-                width_factor: 1.0,
-                hit: false,
-            },
-        ];
-        assert_eq!(stacks, expected);
+        check_result("tests/data/ignore-metadata-lines.txt");
+    }
+
+    #[test]
+    fn test_recursive() {
+        check_result("tests/data/recursive.txt");
     }
 }

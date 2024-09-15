@@ -1,0 +1,116 @@
+[
+  {
+    "id": 0,
+    "line_index": 0,
+    "start_index": 0,
+    "end_index": 0,
+    "total_count": 657,
+    "self_count": 0,
+    "parent": null,
+    "children": [
+      3,
+      1,
+      5
+    ],
+    "level": 0,
+    "width_factor": 1.0,
+    "hit": false
+  },
+  {
+    "id": 1,
+    "line_index": 0,
+    "start_index": 0,
+    "end_index": 29,
+    "total_count": 17,
+    "self_count": 0,
+    "parent": 0,
+    "children": [
+      7,
+      2
+    ],
+    "level": 1,
+    "width_factor": 0.0258751902587519,
+    "hit": false
+  },
+  {
+    "id": 2,
+    "line_index": 0,
+    "start_index": 30,
+    "end_index": 61,
+    "total_count": 7,
+    "self_count": 7,
+    "parent": 1,
+    "children": [],
+    "level": 2,
+    "width_factor": 0.0106544901065449,
+    "hit": false
+  },
+  {
+    "id": 3,
+    "line_index": 64,
+    "start_index": 64,
+    "end_index": 93,
+    "total_count": 639,
+    "self_count": 0,
+    "parent": 0,
+    "children": [
+      4,
+      6
+    ],
+    "level": 1,
+    "width_factor": 0.9726027397260274,
+    "hit": false
+  },
+  {
+    "id": 4,
+    "line_index": 64,
+    "start_index": 94,
+    "end_index": 118,
+    "total_count": 421,
+    "self_count": 421,
+    "parent": 3,
+    "children": [],
+    "level": 2,
+    "width_factor": 0.6407914764079147,
+    "hit": false
+  },
+  {
+    "id": 5,
+    "line_index": 123,
+    "start_index": 123,
+    "end_index": 152,
+    "total_count": 1,
+    "self_count": 1,
+    "parent": 0,
+    "children": [],
+    "level": 1,
+    "width_factor": 0.0015220700152207,
+    "hit": false
+  },
+  {
+    "id": 6,
+    "line_index": 155,
+    "start_index": 185,
+    "end_index": 209,
+    "total_count": 218,
+    "self_count": 218,
+    "parent": 3,
+    "children": [],
+    "level": 2,
+    "width_factor": 0.3318112633181126,
+    "hit": false
+  },
+  {
+    "id": 7,
+    "line_index": 214,
+    "start_index": 244,
+    "end_index": 275,
+    "total_count": 10,
+    "self_count": 10,
+    "parent": 1,
+    "children": [],
+    "level": 2,
+    "width_factor": 0.015220700152207,
+    "hit": false
+  }
+]

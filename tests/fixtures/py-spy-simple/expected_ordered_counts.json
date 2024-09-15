@@ -1,0 +1,105 @@
+{
+  "by_total_count": [
+    [
+      "<module> (long_running.py:25)",
+      {
+        "total": 639,
+        "own": 0
+      }
+    ],
+    [
+      "work (long_running.py:8)",
+      {
+        "total": 421,
+        "own": 421
+      }
+    ],
+    [
+      "work (long_running.py:7)",
+      {
+        "total": 218,
+        "own": 218
+      }
+    ],
+    [
+      "<module> (long_running.py:24)",
+      {
+        "total": 17,
+        "own": 0
+      }
+    ],
+    [
+      "quick_work (long_running.py:17)",
+      {
+        "total": 10,
+        "own": 10
+      }
+    ],
+    [
+      "quick_work (long_running.py:16)",
+      {
+        "total": 7,
+        "own": 7
+      }
+    ],
+    [
+      "<module> (long_running.py:26)",
+      {
+        "total": 1,
+        "own": 1
+      }
+    ]
+  ],
+  "by_own_count": [
+    [
+      "work (long_running.py:8)",
+      {
+        "total": 421,
+        "own": 421
+      }
+    ],
+    [
+      "work (long_running.py:7)",
+      {
+        "total": 218,
+        "own": 218
+      }
+    ],
+    [
+      "quick_work (long_running.py:17)",
+      {
+        "total": 10,
+        "own": 10
+      }
+    ],
+    [
+      "quick_work (long_running.py:16)",
+      {
+        "total": 7,
+        "own": 7
+      }
+    ],
+    [
+      "<module> (long_running.py:26)",
+      {
+        "total": 1,
+        "own": 1
+      }
+    ],
+    [
+      "<module> (long_running.py:25)",
+      {
+        "total": 639,
+        "own": 0
+      }
+    ],
+    [
+      "<module> (long_running.py:24)",
+      {
+        "total": 17,
+        "own": 0
+      }
+    ]
+  ],
+  "num_rows": 7
+}

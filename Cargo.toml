@@ -22,6 +22,8 @@ py-spy = { version = "0.3.14", optional = true }
 ratatui = { version = "0.26.3", features = ["unstable-rendered-line-info"] }
 regex = "1.10.5"
 remoteprocess = { version = "0.4.13", optional = true }
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"
 tui-input = "0.8.0"
 
 [features]
