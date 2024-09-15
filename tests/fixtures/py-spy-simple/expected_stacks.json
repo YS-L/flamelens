@@ -14,7 +14,9 @@
     ],
     "level": 0,
     "width_factor": 1.0,
-    "hit": false
+    "hit": false,
+    "short_name": "all",
+    "full_name": "all"
   },
   {
     "id": 1,
@@ -30,7 +32,9 @@
     ],
     "level": 1,
     "width_factor": 0.0258751902587519,
-    "hit": false
+    "hit": false,
+    "short_name": "<module> (long_running.py:24)",
+    "full_name": "<module> (long_running.py:24)"
   },
   {
     "id": 2,
@@ -43,7 +47,9 @@
     "children": [],
     "level": 2,
     "width_factor": 0.0106544901065449,
-    "hit": false
+    "hit": false,
+    "short_name": "quick_work (long_running.py:16)",
+    "full_name": "<module> (long_running.py:24);quick_work (long_running.py:16)"
   },
   {
     "id": 3,
@@ -59,7 +65,9 @@
     ],
     "level": 1,
     "width_factor": 0.9726027397260274,
-    "hit": false
+    "hit": false,
+    "short_name": "<module> (long_running.py:25)",
+    "full_name": "<module> (long_running.py:25)"
   },
   {
     "id": 4,
@@ -72,7 +80,9 @@
     "children": [],
     "level": 2,
     "width_factor": 0.6407914764079147,
-    "hit": false
+    "hit": false,
+    "short_name": "work (long_running.py:8)",
+    "full_name": "<module> (long_running.py:25);work (long_running.py:8)"
   },
   {
     "id": 5,
@@ -85,7 +95,9 @@
     "children": [],
     "level": 1,
     "width_factor": 0.0015220700152207,
-    "hit": false
+    "hit": false,
+    "short_name": "<module> (long_running.py:26)",
+    "full_name": "<module> (long_running.py:26)"
   },
   {
     "id": 6,
@@ -98,7 +110,9 @@
     "children": [],
     "level": 2,
     "width_factor": 0.3318112633181126,
-    "hit": false
+    "hit": false,
+    "short_name": "work (long_running.py:7)",
+    "full_name": "<module> (long_running.py:25);work (long_running.py:7)"
   },
   {
     "id": 7,
@@ -111,6 +125,8 @@
     "children": [],
     "level": 2,
     "width_factor": 0.015220700152207,
-    "hit": false
+    "hit": false,
+    "short_name": "quick_work (long_running.py:17)",
+    "full_name": "<module> (long_running.py:24);quick_work (long_running.py:17)"
   }
 ]

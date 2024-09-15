@@ -13,7 +13,9 @@
     ],
     "level": 0,
     "width_factor": 1.0,
-    "hit": false
+    "hit": false,
+    "short_name": "all",
+    "full_name": "all"
   },
   {
     "id": 1,
@@ -26,7 +28,9 @@
     "children": [],
     "level": 1,
     "width_factor": 0.016355140186915886,
-    "hit": false
+    "hit": false,
+    "short_name": "<module> (long_running.py:24)",
+    "full_name": "<module> (long_running.py:24)"
   },
   {
     "id": 2,
@@ -39,6 +43,8 @@
     "children": [],
     "level": 1,
     "width_factor": 0.9836448598130841,
-    "hit": false
+    "hit": false,
+    "short_name": "<module> (long_running.py:25)",
+    "full_name": "<module> (long_running.py:25)"
   }
 ]

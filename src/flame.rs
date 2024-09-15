@@ -460,11 +460,12 @@ mod tests {
 
     const UPDATE_FIXTURES: bool = false;
 
-    #[derive(Debug, Clone, PartialEq)]
+    #[derive(Serialize, Debug, Clone, PartialEq)]
     pub struct StackInfoReadable<'a> {
         pub id: StackIdentifier,
-        pub short_name: &'a str,
-        pub full_name: &'a str,
+        pub line_index: usize,
+        pub start_index: usize,
+        pub end_index: usize,
         pub total_count: u64,
         pub self_count: u64,
         pub parent: Option<StackIdentifier>,
@@ -472,6 +473,31 @@ mod tests {
         pub level: usize,
         pub width_factor: f64,
         pub hit: bool,
+        pub short_name: &'a str,
+        pub full_name: &'a str,
+    }
+
+    impl FlameGraph {
+        pub fn to_readable_stacks(&self) -> Vec<StackInfoReadable> {
+            self.stacks
+                .iter()
+                .map(|stack| StackInfoReadable {
+                    id: stack.id,
+                    line_index: stack.line_index,
+                    start_index: stack.start_index,
+                    end_index: stack.end_index,
+                    total_count: stack.total_count,
+                    self_count: stack.self_count,
+                    parent: stack.parent,
+                    children: stack.children.clone(),
+                    level: stack.level,
+                    width_factor: stack.width_factor,
+                    hit: stack.hit,
+                    short_name: self.get_stack_short_name_from_info(stack),
+                    full_name: self.get_stack_full_name_from_info(stack),
+                })
+                .collect()
+        }
     }
 
     fn check_result<P: AsRef<std::path::Path>>(data_filename: P) -> FlameGraph {
@@ -488,7 +514,7 @@ mod tests {
         let fixture_dir = format!("tests/fixtures/{}", tag);
 
         // Check expected stacks
-        let serialized = serde_json::to_string_pretty(&fg.stacks).unwrap();
+        let serialized = serde_json::to_string_pretty(&fg.to_readable_stacks()).unwrap();
         let filename = format!("{}/expected_stacks.json", fixture_dir.as_str());
         if UPDATE_FIXTURES {
             std::fs::create_dir_all(fixture_dir.as_str()).unwrap();
