@@ -22,9 +22,8 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-const SEARCH_PREFIX: &str = "Search: ";
+const SEARCH_PREFIX: &str = "";
 const COLOR_SELECTED_STACK: Color = Color::Rgb(250, 250, 250);
-const COLOR_SELECTED_BACKGROUND: Color = COLOR_SELECTED_STACK;
 const COLOR_MATCHED_BACKGROUND: Color = Color::Rgb(10, 35, 150);
 const COLOR_TABLE_SELECTED_ROW: Color = Color::Rgb(65, 65, 65);
 
@@ -75,17 +74,46 @@ impl<'a> FlamelensWidget<'a> {
             );
         let header_line_count_with_borders = header.line_count(area.width) as u16 + 1;
 
-        let mut status_bar =
-            Paragraph::new(self.get_status_text(area.width)).wrap(Wrap { trim: true });
-        let status_line_count_with_borders = status_bar.line_count(area.width) as u16 + 2;
+        // Context such as search, selected stack, etc.
+        let context_bars = self
+            .get_status_text(area.width)
+            .iter()
+            .map(|(title, line)| {
+                Paragraph::new(line.clone())
+                    .wrap(Wrap { trim: true })
+                    .block(
+                        Block::new()
+                            .borders(Borders::TOP)
+                            .title(format!("{} ", title))
+                            .title_style(Style::default().add_modifier(Modifier::BOLD).yellow())
+                            .title_position(Position::Top),
+                    )
+            })
+            .collect::<Vec<Paragraph>>();
+
+        // Help tags to be displayed at the bottom
+        let help_tags = self.get_help_tags();
+        let status_bar_block = Block::new()
+            .borders(Borders::BOTTOM)
+            .border_style(Style::default().fg(Color::Gray))
+            .title_bottom(help_tags.get_line())
+            .title_alignment(Alignment::Center);
+        let help_bar = Paragraph::new(Line::from("")).block(status_bar_block);
+
+        let mut constraints = vec![
+            Constraint::Length(header_line_count_with_borders),
+            Constraint::Fill(1),
+        ];
+        let context_bar_index_start = constraints.len();
+        for bar in context_bars.iter() {
+            constraints.push(Constraint::Length(bar.line_count(area.width) as u16 + 1));
+        }
+        constraints.push(Constraint::Length(1));
+        let help_bar_index = constraints.len() - 1;
 
         let layout = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([
-                Constraint::Length(header_line_count_with_borders),
-                Constraint::Fill(1),
-                Constraint::Length(status_line_count_with_borders),
-            ])
+            .constraints(constraints)
             .split(area);
 
         // Header area
@@ -102,22 +130,19 @@ impl<'a> FlamelensWidget<'a> {
         };
         let flamegraph_render_time = tic.elapsed();
 
-        // Help tags to be displayed in the status bar
-        let help_tags = self.get_help_tags();
-        let status_bar_block = Block::new()
-            .borders(Borders::BOTTOM | Borders::TOP)
-            .title_bottom(help_tags.get_line())
-            .title_alignment(Alignment::Center);
-        status_bar = status_bar.block(status_bar_block);
+        // Context bars
+        for (i, bar) in context_bars.iter().enumerate() {
+            bar.render(layout[context_bar_index_start + i], buf);
+        }
 
-        // Status bar
-        status_bar.render(layout[2], buf);
+        // Help bar
+        help_bar.render(layout[help_bar_index], buf);
 
         // Update widget state
         state.frame_height = main_area.height;
         state.frame_width = main_area.width;
         state.render_time = flamegraph_render_time;
-        state.cursor_position = self.get_cursor_position(layout[2]);
+        state.cursor_position = self.get_cursor_position(layout[help_bar_index - 1]);
     }
 
     fn get_help_tags(&self) -> HelpTags {
@@ -414,12 +439,6 @@ impl<'a> FlamelensWidget<'a> {
         }
     }
 
-    fn get_style_from_bg(background_color: Color) -> Style {
-        Style::default()
-            .bg(background_color)
-            .fg(FlamelensWidget::get_text_color(background_color))
-    }
-
     fn get_header_bottom_title(&self) -> Line {
         let mut header_bottom_title_spans = vec![Span::from(" ")];
 
@@ -482,7 +501,7 @@ impl<'a> FlamelensWidget<'a> {
         Line::from(header_text).style(Style::default().bold())
     }
 
-    fn get_status_text(&self, width: u16) -> Vec<Line> {
+    fn get_status_text(&self, width: u16) -> Vec<(&'static str, Line)> {
         if self.app.input_buffer.is_some() {
             self.get_status_text_buffer()
         } else {
@@ -490,22 +509,22 @@ impl<'a> FlamelensWidget<'a> {
         }
     }
 
-    fn get_status_text_buffer(&self) -> Vec<Line> {
+    fn get_status_text_buffer(&self) -> Vec<(&'static str, Line)> {
         let input_buffer = self.app.input_buffer.as_ref().unwrap();
         let status_text = format!("{}{}", SEARCH_PREFIX, input_buffer.buffer);
-        vec![Line::from(status_text)]
+        vec![("Search", Line::from(status_text))]
     }
 
     fn get_cursor_position(&self, status_area: Rect) -> Option<(u16, u16)> {
         self.app.input_buffer.as_ref().map(|input_buffer| {
             (
                 (input_buffer.buffer.cursor() + SEARCH_PREFIX.len()) as u16,
-                status_area.bottom().saturating_sub(2),
+                status_area.bottom().saturating_sub(1),
             )
         })
     }
 
-    fn get_status_text_command(&self, width: u16) -> Vec<Line> {
+    fn get_status_text_command(&self, width: u16) -> Vec<(&'static str, Line)> {
         let stack = self
             .app
             .flamegraph()
@@ -526,7 +545,7 @@ impl<'a> FlamelensWidget<'a> {
                         (p.is_manual, self.app.flamegraph().hit_coverage_count())
                     {
                         let match_text = format!(
-                            "Match: \"{}\" {}",
+                            "\"{}\" {}",
                             p.re.as_str(),
                             FlamelensWidget::get_count_stats_str(
                                 None,
@@ -536,15 +555,11 @@ impl<'a> FlamelensWidget<'a> {
                             )
                         );
                         let match_text = format!("{:width$}", match_text, width = width as usize,);
-                        lines.push(
-                            Line::from(match_text).style(FlamelensWidget::get_style_from_bg(
-                                COLOR_MATCHED_BACKGROUND,
-                            )),
-                        );
+                        lines.push(("Match", Line::from(match_text)));
                     }
                 }
                 let selected_text = format!(
-                    "Selected: {} {}",
+                    "{} {}",
                     self.app.flamegraph().get_stack_short_name_from_info(stack),
                     FlamelensWidget::get_count_stats_str(
                         None,
@@ -554,11 +569,7 @@ impl<'a> FlamelensWidget<'a> {
                     ),
                 );
                 let status_text = format!("{:width$}", selected_text, width = width as usize,);
-                lines.push(
-                    Line::from(status_text).style(FlamelensWidget::get_style_from_bg(
-                        COLOR_SELECTED_BACKGROUND,
-                    )),
-                );
+                lines.push(("Selected", Line::from(status_text)));
                 if self.app.debug {
                     let elapsed_str = format!(
                         "Debug: {}",
@@ -569,14 +580,14 @@ impl<'a> FlamelensWidget<'a> {
                             .collect::<Vec<String>>()
                             .join(" ")
                     );
-                    lines.push(Line::from(elapsed_str));
+                    lines.push(("Debug", Line::from(elapsed_str)));
                 }
                 if let Some(transient_message) = &self.app.transient_message {
-                    lines.push(Line::from(transient_message.as_str()));
+                    lines.push(("Info", Line::from(transient_message.as_str())));
                 }
                 lines
             }
-            None => vec![Line::from("No stack selected")],
+            None => vec![("Info", Line::from("No stack selected"))],
         }
     }
 
