@@ -125,6 +125,7 @@ impl<'a> FlamelensWidget<'a> {
         if self.app.flamegraph_state().view_kind == ViewKind::FlameGraph {
             help_tags.add("hjkl", "move cursor");
             help_tags.add("f/b", "scroll");
+            help_tags.add("enter/esc", "zoom");
             help_tags.add("/", "search");
             help_tags.add("#", "search like cursor");
             if let Some(p) = &self.app.flamegraph_state().search_pattern {
@@ -442,7 +443,7 @@ impl<'a> FlamelensWidget<'a> {
         ));
         header_bottom_title_spans.push(Span::from(" | "));
         header_bottom_title_spans.push(_get_view_kind_span(
-            "Top Functions",
+            "Top",
             ViewKind::Table,
             self.app.flamegraph_state().view_kind,
         ));
