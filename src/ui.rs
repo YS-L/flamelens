@@ -321,14 +321,27 @@ impl<'a> FlamelensWidget<'a> {
         }
 
         for entry in counts.iter().filter(|entry| entry.visible) {
-            let total_formatted = format_count(entry.count.total, total_count);
-            let own_formatted = format_count(entry.count.own, total_count);
-            total_max_width = total_max_width.max(total_formatted.len() as u16);
-            own_max_width = own_max_width.max(own_formatted.len() as u16);
+            let total_formatted = Line::from(format_count(entry.count.total, total_count));
+            let own_formatted = Line::from(format_count(entry.count.own, total_count));
+            total_max_width = total_max_width.max(total_formatted.width() as u16);
+            own_max_width = own_max_width.max(own_formatted.width() as u16);
+            let name_formatted = if let Some(p) = &self.app.flamegraph_state().search_pattern {
+                if p.is_manual {
+                    Line::from(self.get_highlighted_spans(
+                        entry.name.as_str(),
+                        &p.re,
+                        Style::default(),
+                    ))
+                } else {
+                    Line::from(entry.name.as_str())
+                }
+            } else {
+                Line::from(entry.name.as_str())
+            };
             rows.push(Row::new(vec![
                 total_formatted,
                 own_formatted,
-                entry.name.to_string(),
+                name_formatted,
             ]));
         }
         let widths = [
@@ -339,6 +352,30 @@ impl<'a> FlamelensWidget<'a> {
         Table::new(rows, widths)
             .header(header)
             .highlight_style(Style::default().bg(COLOR_TABLE_SELECTED_ROW))
+    }
+
+    fn get_highlighted_spans<'b>(
+        &self,
+        text: &'b str,
+        re: &regex::Regex,
+        style: Style,
+    ) -> Vec<Span<'b>> {
+        let mut spans = Vec::new();
+        let mut matches = re.find_iter(text);
+        for part in re.split(text) {
+            // Non-match, regular style
+            spans.push(Span::styled(part, style));
+            // Match, highlighted style
+            if let Some(matched) = matches.next() {
+                spans.push(Span::styled(
+                    matched.as_str(),
+                    style
+                        .fg(Color::Rgb(225, 10, 10))
+                        .add_modifier(Modifier::BOLD),
+                ));
+            }
+        }
+        spans
     }
 
     fn get_line_for_stack(
@@ -355,22 +392,7 @@ impl<'a> FlamelensWidget<'a> {
 
         // Stack name with highlighted search terms if needed
         let short_name_spans = if let (true, &Some(re)) = (stack.hit, re) {
-            let mut spans: Vec<Span> = Vec::new();
-            let mut matches = re.find_iter(short_name);
-            for part in re.split(short_name) {
-                // Non-match, regular style
-                spans.push(Span::styled(part, style));
-                // Match, highlighted style
-                if let Some(matched) = matches.next() {
-                    spans.push(Span::styled(
-                        matched.as_str(),
-                        style
-                            .fg(Color::Rgb(225, 10, 10))
-                            .add_modifier(Modifier::BOLD),
-                    ));
-                }
-            }
-            spans
+            self.get_highlighted_spans(short_name, re, style)
         } else {
             vec![Span::styled(short_name, style)]
         };
