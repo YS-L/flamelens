@@ -59,10 +59,47 @@ pub struct Count {
 }
 
 #[derive(Serialize, Debug, Clone)]
+pub struct CountEntry {
+    pub name: String,
+    pub count: Count,
+    pub visible: bool,
+}
+
+#[derive(Serialize, Debug, Clone)]
 pub struct Ordered {
-    pub by_total_count: Vec<(String, Count)>,
-    pub by_own_count: Vec<(String, Count)>,
+    pub by_total_count: Vec<CountEntry>,
+    pub by_own_count: Vec<CountEntry>,
     pub num_rows: usize,
+}
+
+impl Ordered {
+    pub fn set_search_pattern(&mut self, p: &SearchPattern) {
+        if p.is_manual {
+            self.by_total_count.iter_mut().for_each(|entry| {
+                entry.visible = p.re.is_match(&entry.name);
+            });
+            self.by_own_count.iter_mut().for_each(|entry| {
+                entry.visible = p.re.is_match(&entry.name);
+            });
+            self.num_rows = self
+                .by_own_count
+                .iter()
+                .filter(|entry| entry.visible)
+                .count();
+        } else {
+            self.clear_search_pattern();
+        }
+    }
+
+    pub fn clear_search_pattern(&mut self) {
+        self.by_total_count.iter_mut().for_each(|entry| {
+            entry.visible = true;
+        });
+        self.by_own_count.iter_mut().for_each(|entry| {
+            entry.visible = true;
+        });
+        self.num_rows = self.by_own_count.len();
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -183,15 +220,23 @@ impl FlameGraph {
         let ordered_by_total_count = counts
             .iter()
             .rev()
-            .take(100)
-            .map(|x| (x.0.to_string(), x.1.clone()))
+            // .take(1000)
+            .map(|x| CountEntry {
+                name: x.0.to_string(),
+                count: x.1.clone(),
+                visible: true,
+            })
             .collect::<Vec<_>>();
         counts.sort_by_key(|(short_name, count)| (count.own, short_name.to_string()));
         let ordered_by_self_count = counts
             .iter()
             .rev()
-            .take(100)
-            .map(|x| (x.0.to_string(), x.1.clone()))
+            // .take(1000)
+            .map(|x| CountEntry {
+                name: x.0.to_string(),
+                count: x.1.clone(),
+                visible: true,
+            })
             .collect::<Vec<_>>();
         let num_rows = ordered_by_self_count.len();
         Ordered {
@@ -412,11 +457,13 @@ impl FlameGraph {
             coverage_count: self._count_hit_coverage(ROOT_ID),
             ids: self._collect_hit_ids(),
         });
+        self.ordered_stacks.set_search_pattern(p);
     }
 
     pub fn clear_hits(&mut self) {
         self.stacks.iter_mut().for_each(|stack| stack.hit = false);
         self.hits = None;
+        self.ordered_stacks.clear_search_pattern();
     }
 
     pub fn hit_coverage_count(&self) -> Option<u64> {

@@ -320,15 +320,15 @@ impl<'a> FlamelensWidget<'a> {
             )
         }
 
-        for (name, count) in counts.iter() {
-            let total_formatted = format_count(count.total, total_count);
-            let own_formatted = format_count(count.own, total_count);
+        for entry in counts.iter().filter(|entry| entry.visible) {
+            let total_formatted = format_count(entry.count.total, total_count);
+            let own_formatted = format_count(entry.count.own, total_count);
             total_max_width = total_max_width.max(total_formatted.len() as u16);
             own_max_width = own_max_width.max(own_formatted.len() as u16);
             rows.push(Row::new(vec![
                 total_formatted,
                 own_formatted,
-                name.to_string(),
+                entry.name.to_string(),
             ]));
         }
         let widths = [

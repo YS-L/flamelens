@@ -134,6 +134,9 @@ fn handle_command_table(key_event: KeyEvent, app: &mut App) -> AppResult<bool> {
         KeyCode::Char('2') => {
             app.flamegraph_view.set_sort_by_own();
         }
+        KeyCode::Char('r') => {
+            app.flamegraph_view.reset();
+        }
         _ => {
             key_handled = false;
         }
