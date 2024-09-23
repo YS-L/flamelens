@@ -285,7 +285,7 @@ impl<'a> FlamelensWidget<'a> {
 
     fn get_ordered_stacks_table(&self) -> Table {
         let add_sorted_indicator = |label: &str, sort_column: SortColumn| {
-            let suffix = if sort_column == self.app.flamegraph_state().table_state.sort_column {
+            let suffix = if sort_column == self.app.flamegraph().ordered_stacks.sorted_column {
                 " [▼]"
             } else {
                 ""

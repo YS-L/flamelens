@@ -1,4 +1,4 @@
-use crate::flame::{FlameGraph, SearchPattern, SortColumn, StackIdentifier, ROOT_ID};
+use crate::flame::{FlameGraph, SearchPattern, StackIdentifier, ROOT_ID};
 
 #[derive(Debug, Clone)]
 pub struct ZoomState {
@@ -20,21 +20,10 @@ pub enum ViewKind {
     Table,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Default, Debug, Clone)]
 pub struct TableState {
     pub selected: usize,
     pub offset: usize,
-    pub sort_column: SortColumn,
-}
-
-impl Default for TableState {
-    fn default() -> Self {
-        Self {
-            selected: 0,
-            offset: 0,
-            sort_column: SortColumn::Own,
-        }
-    }
 }
 
 #[derive(Debug, Clone)]

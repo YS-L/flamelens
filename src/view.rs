@@ -449,6 +449,14 @@ impl FlameGraphView {
             .ordered_stacks
             .set_sort_column(SortColumn::Total);
     }
+
+    pub fn get_selected_row_name(&mut self) -> Option<&str> {
+        self.flamegraph
+            .ordered_stacks
+            .entries
+            .get(self.state.table_state.selected)
+            .map(|x| x.name.as_str())
+    }
 }
 
 #[cfg(test)]

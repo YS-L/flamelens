@@ -140,6 +140,9 @@ fn handle_command_table(key_event: KeyEvent, app: &mut App) -> AppResult<bool> {
         KeyCode::Char('r') => {
             app.flamegraph_view.reset();
         }
+        KeyCode::Enter => {
+            app.search_selected_row();
+        }
         _ => {
             key_handled = false;
         }

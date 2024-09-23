@@ -205,6 +205,17 @@ impl App {
         }
     }
 
+    pub fn search_selected_row(&mut self) {
+        let short_name = self
+            .flamegraph_view
+            .get_selected_row_name()
+            .map(|s| s.to_string());
+        if let Some(short_name) = short_name {
+            self.set_manual_search_pattern(short_name.as_str(), false);
+        }
+        self.flamegraph_view.state.toggle_view_kind();
+    }
+
     pub fn set_manual_search_pattern(&mut self, pattern: &str, is_regex: bool) {
         match SearchPattern::new(pattern, is_regex, true) {
             Ok(p) => self.flamegraph_view.set_search_pattern(p),
