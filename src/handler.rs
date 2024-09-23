@@ -60,6 +60,9 @@ pub fn handle_command_generic(key_event: KeyEvent, app: &mut App) -> AppResult<b
                 cursor: None,
             });
         }
+        KeyCode::Char('?') => {
+            app.toggle_debug();
+        }
         _ => {
             key_handled = false;
         }

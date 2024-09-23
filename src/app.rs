@@ -221,4 +221,8 @@ impl App {
     pub fn clear_transient_message(&mut self) {
         self.transient_message = None;
     }
+
+    pub fn toggle_debug(&mut self) {
+        self.debug = !self.debug;
+    }
 }
