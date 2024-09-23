@@ -122,7 +122,7 @@ impl<'a> FlamelensWidget<'a> {
         // Main area for flamegraph / top view
         let tic = std::time::Instant::now();
         let main_area = layout[1];
-        if self.app.flamegraph_state().view_kind == ViewKind::FlameGraph {
+        if self.is_flamegraph_view() {
             self.render_flamegraph(main_area, buf)
         } else {
             self.render_table(main_area, buf);
@@ -147,7 +147,7 @@ impl<'a> FlamelensWidget<'a> {
 
     fn get_help_tags(&self) -> HelpTags {
         let mut help_tags = HelpTags::new();
-        if self.app.flamegraph_state().view_kind == ViewKind::FlameGraph {
+        if self.is_flamegraph_view() {
             help_tags.add("hjkl", "move cursor");
             help_tags.add("f/b", "scroll");
             help_tags.add("enter/esc", "zoom");
@@ -158,10 +158,10 @@ impl<'a> FlamelensWidget<'a> {
                     help_tags.add("n/N", "next/prev search");
                 }
             }
-            help_tags.add("r", "reset");
         } else {
             help_tags.add("1", "sort by total");
             help_tags.add("2", "sort by own");
+            help_tags.add("/", "filter");
         }
         help_tags
     }
@@ -566,7 +566,7 @@ impl<'a> FlamelensWidget<'a> {
                     if let (true, Some(hit_coverage_count)) =
                         (p.is_manual, self.app.flamegraph().hit_coverage_count())
                     {
-                        let match_text = format!(
+                        let mut match_text = format!(
                             "\"{}\" {}",
                             p.re.as_str(),
                             FlamelensWidget::get_count_stats_str(
@@ -576,6 +576,15 @@ impl<'a> FlamelensWidget<'a> {
                                 zoom_total_count,
                             )
                         );
+                        if self.is_table_view()
+                            && self
+                                .app
+                                .flamegraph()
+                                .ordered_stacks
+                                .search_pattern_ignored_because_of_no_match
+                        {
+                            match_text += " (no match; showing all)";
+                        }
                         let match_text = format!("{:width$}", match_text, width = width as usize,);
                         lines.push(("Match", Line::from(match_text)));
                     }
@@ -591,7 +600,9 @@ impl<'a> FlamelensWidget<'a> {
                     ),
                 );
                 let status_text = format!("{:width$}", selected_text, width = width as usize,);
-                lines.push(("Selected", Line::from(status_text)));
+                if self.is_flamegraph_view() {
+                    lines.push(("Selected", Line::from(status_text)));
+                }
                 if self.app.debug {
                     let elapsed_str = format!(
                         "Debug: {}",
@@ -634,6 +645,18 @@ impl<'a> FlamelensWidget<'a> {
             }
         )
     }
+
+    fn view_kind(&self) -> ViewKind {
+        self.app.flamegraph_state().view_kind
+    }
+
+    fn is_table_view(&self) -> bool {
+        self.view_kind() == ViewKind::Table
+    }
+
+    fn is_flamegraph_view(&self) -> bool {
+        self.view_kind() == ViewKind::FlameGraph
+    }
 }
 
 struct HelpTags {
@@ -645,7 +668,7 @@ impl HelpTags {
     fn new() -> Self {
         Self {
             tags: vec![],
-            default: vec![("tab", "switch view"), ("q", "quit")],
+            default: vec![("r", "reset"), ("tab", "switch view"), ("q", "quit")],
         }
     }
 

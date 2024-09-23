@@ -70,6 +70,7 @@ pub struct Ordered {
     pub by_total_count: Vec<CountEntry>,
     pub by_own_count: Vec<CountEntry>,
     pub num_rows: usize,
+    pub search_pattern_ignored_because_of_no_match: bool,
 }
 
 impl Ordered {
@@ -86,6 +87,10 @@ impl Ordered {
                 .iter()
                 .filter(|entry| entry.visible)
                 .count();
+            if self.num_rows == 0 {
+                self.clear_search_pattern();
+                self.search_pattern_ignored_because_of_no_match = true;
+            }
         } else {
             self.clear_search_pattern();
         }
@@ -99,6 +104,7 @@ impl Ordered {
             entry.visible = true;
         });
         self.num_rows = self.by_own_count.len();
+        self.search_pattern_ignored_because_of_no_match = false;
     }
 }
 
@@ -243,6 +249,7 @@ impl FlameGraph {
             by_total_count: ordered_by_total_count,
             by_own_count: ordered_by_self_count,
             num_rows,
+            search_pattern_ignored_because_of_no_match: false,
         }
     }
 
