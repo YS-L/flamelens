@@ -1,4 +1,4 @@
-use crate::flame::{FlameGraph, SearchPattern, StackIdentifier, ROOT_ID};
+use crate::flame::{FlameGraph, SearchPattern, SortColumn, StackIdentifier, ROOT_ID};
 
 #[derive(Debug, Clone)]
 pub struct ZoomState {
@@ -18,12 +18,6 @@ impl ZoomState {
 pub enum ViewKind {
     FlameGraph,
     Table,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum SortColumn {
-    Total,
-    Own,
 }
 
 #[derive(Debug, Clone)]

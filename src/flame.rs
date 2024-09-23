@@ -65,28 +65,27 @@ pub struct CountEntry {
     pub visible: bool,
 }
 
+#[derive(Serialize, Debug, Clone, Eq, PartialEq, Copy)]
+pub enum SortColumn {
+    Total,
+    Own,
+}
+
 #[derive(Serialize, Debug, Clone)]
 pub struct Ordered {
-    pub by_total_count: Vec<CountEntry>,
-    pub by_own_count: Vec<CountEntry>,
+    pub entries: Vec<CountEntry>,
     pub num_rows: usize,
+    pub sorted_column: SortColumn,
     pub search_pattern_ignored_because_of_no_match: bool,
 }
 
 impl Ordered {
     pub fn set_search_pattern(&mut self, p: &SearchPattern) {
         if p.is_manual {
-            self.by_total_count.iter_mut().for_each(|entry| {
+            self.entries.iter_mut().for_each(|entry| {
                 entry.visible = p.re.is_match(&entry.name);
             });
-            self.by_own_count.iter_mut().for_each(|entry| {
-                entry.visible = p.re.is_match(&entry.name);
-            });
-            self.num_rows = self
-                .by_own_count
-                .iter()
-                .filter(|entry| entry.visible)
-                .count();
+            self.num_rows = self.entries.iter().filter(|entry| entry.visible).count();
             if self.num_rows == 0 {
                 self.clear_search_pattern();
                 self.search_pattern_ignored_because_of_no_match = true;
@@ -97,14 +96,29 @@ impl Ordered {
     }
 
     pub fn clear_search_pattern(&mut self) {
-        self.by_total_count.iter_mut().for_each(|entry| {
+        self.entries.iter_mut().for_each(|entry| {
             entry.visible = true;
         });
-        self.by_own_count.iter_mut().for_each(|entry| {
-            entry.visible = true;
-        });
-        self.num_rows = self.by_own_count.len();
+        self.num_rows = self.entries.len();
         self.search_pattern_ignored_because_of_no_match = false;
+    }
+
+    pub fn set_sort_column(&mut self, column: SortColumn) {
+        if column == self.sorted_column {
+            return;
+        }
+        self.sorted_column = column;
+        match column {
+            SortColumn::Total => {
+                self.entries
+                    .sort_by_key(|entry| (entry.count.total, entry.name.clone()));
+            }
+            SortColumn::Own => {
+                self.entries
+                    .sort_by_key(|entry| (entry.count.own, entry.name.clone()));
+            }
+        }
+        self.entries.reverse();
     }
 }
 
@@ -222,22 +236,10 @@ impl FlameGraph {
 
     fn get_ordered_stacks(counts: &HashMap<String, Count>) -> Ordered {
         let mut counts = counts.iter().collect::<Vec<_>>();
-        counts.sort_by_key(|(short_name, count)| (count.total, short_name.to_string()));
-        let ordered_by_total_count = counts
-            .iter()
-            .rev()
-            // .take(1000)
-            .map(|x| CountEntry {
-                name: x.0.to_string(),
-                count: x.1.clone(),
-                visible: true,
-            })
-            .collect::<Vec<_>>();
         counts.sort_by_key(|(short_name, count)| (count.own, short_name.to_string()));
         let ordered_by_self_count = counts
             .iter()
             .rev()
-            // .take(1000)
             .map(|x| CountEntry {
                 name: x.0.to_string(),
                 count: x.1.clone(),
@@ -246,9 +248,9 @@ impl FlameGraph {
             .collect::<Vec<_>>();
         let num_rows = ordered_by_self_count.len();
         Ordered {
-            by_total_count: ordered_by_total_count,
-            by_own_count: ordered_by_self_count,
+            entries: ordered_by_self_count,
             num_rows,
+            sorted_column: SortColumn::Own,
             search_pattern_ignored_because_of_no_match: false,
         }
     }

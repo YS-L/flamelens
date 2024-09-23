@@ -1,8 +1,8 @@
 use std::cmp::min;
 
 use crate::{
-    flame::{FlameGraph, SearchPattern, StackIdentifier, StackInfo, ROOT_ID},
-    state::{FlameGraphState, SortColumn, ZoomState},
+    flame::{FlameGraph, SearchPattern, SortColumn, StackIdentifier, StackInfo, ROOT_ID},
+    state::{FlameGraphState, ZoomState},
 };
 
 #[derive(Debug)]
@@ -439,11 +439,15 @@ impl FlameGraphView {
     }
 
     pub fn set_sort_by_own(&mut self) {
-        self.state.table_state.sort_column = SortColumn::Own;
+        self.flamegraph
+            .ordered_stacks
+            .set_sort_column(SortColumn::Own);
     }
 
     pub fn set_sort_by_total(&mut self) {
-        self.state.table_state.sort_column = SortColumn::Total;
+        self.flamegraph
+            .ordered_stacks
+            .set_sort_column(SortColumn::Total);
     }
 }
 

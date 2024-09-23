@@ -2,8 +2,8 @@
 use crate::py_spy::SamplerStatus;
 use crate::{
     app::{App, FlameGraphInput},
-    flame::{StackIdentifier, StackInfo},
-    state::{SortColumn, ViewKind},
+    flame::{SortColumn, StackIdentifier, StackInfo},
+    state::ViewKind,
 };
 use ratatui::{
     buffer::Buffer,
@@ -302,11 +302,7 @@ impl<'a> FlamelensWidget<'a> {
                 .add_modifier(Modifier::BOLD)
                 .add_modifier(Modifier::REVERSED),
         );
-        let counts = if self.app.flamegraph_state().table_state.sort_column == SortColumn::Total {
-            &self.app.flamegraph().ordered_stacks.by_total_count
-        } else {
-            &self.app.flamegraph().ordered_stacks.by_own_count
-        };
+        let counts = &self.app.flamegraph().ordered_stacks.entries;
         let mut rows = vec![];
         let total_count = self.app.flamegraph().total_count();
         let mut total_max_width: u16 = 0;
