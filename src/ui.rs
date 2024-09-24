@@ -7,7 +7,7 @@ use crate::{
 };
 use ratatui::{
     buffer::Buffer,
-    layout::{Alignment, Constraint, Direction, Layout, Rect},
+    layout::{Alignment, Constraint, Direction, Layout, Offset, Rect},
     style::{Color, Modifier, Style, Stylize},
     text::{Line, Span, Text},
     widgets::{
@@ -60,19 +60,19 @@ impl<'a> StatefulWidget for FlamelensWidget<'a> {
 
 impl<'a> FlamelensWidget<'a> {
     fn render_all(self, area: Rect, buf: &mut Buffer, state: &mut FlamelensWidgetState) {
-        let header_bottom_title = self.get_header_bottom_title();
-        let header_text = Text::from(vec![self.get_header_text(area.width), Line::from("")]);
+        let view_kind_indicator = self.get_view_kind_indicator();
+        let version_indicator = self.get_version_indicator();
+
+        let header_text = Text::from(self.get_header_text(area.width));
         let header = Paragraph::new(header_text)
             .wrap(Wrap { trim: false })
-            .alignment(Alignment::Center)
-            .block(
-                Block::new()
-                    .borders(Borders::BOTTOM)
-                    .title_position(Position::Bottom)
-                    .title(header_bottom_title)
-                    .title_alignment(Alignment::Center),
-            );
-        let header_line_count_with_borders = header.line_count(area.width) as u16 + 1;
+            .alignment(Alignment::Center);
+        let indicator_width = std::cmp::max(view_kind_indicator.width(), version_indicator.width());
+        let filename_width = area
+            .width
+            .saturating_sub(indicator_width as u16)
+            .saturating_sub(indicator_width as u16);
+        let header_line_count_with_borders = header.line_count(filename_width) as u16 + 2;
 
         // Context such as search, selected stack, etc.
         let context_bars = self
@@ -117,7 +117,20 @@ impl<'a> FlamelensWidget<'a> {
             .split(area);
 
         // Header area
-        header.render(layout[0], buf);
+        let header_layout = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(vec![
+                Constraint::Length(view_kind_indicator.width() as u16),
+                Constraint::Fill(1),
+                Constraint::Length(version_indicator.width() as u16),
+            ])
+            .split(layout[0]);
+        let header_block = Block::default().borders(Borders::BOTTOM | Borders::TOP);
+        let header_offset = Offset { x: 0, y: 1 };
+        header_block.render(layout[0], buf);
+        view_kind_indicator.render(header_layout[0].offset(header_offset), buf);
+        header.render(header_layout[1].offset(header_offset), buf);
+        version_indicator.render(header_layout[2].offset(header_offset), buf);
 
         // Main area for flamegraph / top view
         let tic = std::time::Instant::now();
@@ -457,7 +470,7 @@ impl<'a> FlamelensWidget<'a> {
         }
     }
 
-    fn get_header_bottom_title(&self) -> Line {
+    fn get_view_kind_indicator(&self) -> Line {
         let mut header_bottom_title_spans = vec![Span::from(" ")];
 
         fn _get_view_kind_span(
@@ -466,9 +479,9 @@ impl<'a> FlamelensWidget<'a> {
             current_view_kind: ViewKind,
         ) -> Span {
             let (content, style) = if view_kind == current_view_kind {
-                (format!("[{}]", label), Style::default().bold().red())
+                (format!("[{}]", label), Style::default().bold().yellow())
             } else {
-                (label.to_string(), Style::default())
+                (label.to_string(), Style::default().bold())
             };
             Span::styled(content, style)
         }
@@ -488,9 +501,14 @@ impl<'a> FlamelensWidget<'a> {
         Line::from(header_bottom_title_spans)
     }
 
+    fn get_version_indicator(&self) -> Line {
+        Line::from(format!("flamelens v{}", env!("CARGO_PKG_VERSION")))
+            .style(Style::default().bold())
+    }
+
     fn get_header_text(&self, _width: u16) -> Line {
         let header_text = match &self.app.flamegraph_input {
-            FlameGraphInput::File(path) => format!("File: {}", path),
+            FlameGraphInput::File(path) => path.to_string(),
             FlameGraphInput::Pid(pid, info) => {
                 let mut out = format!("Process: {}", pid);
                 if let Some(info) = info {
