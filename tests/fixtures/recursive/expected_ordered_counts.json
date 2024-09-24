@@ -1,105 +1,63 @@
 {
-  "by_total_count": [
-    [
-      "deep_work (long_running.py:28)",
-      {
-        "total": 190,
-        "own": 0
-      }
-    ],
-    [
-      "<module> (long_running.py:36)",
-      {
-        "total": 190,
-        "own": 0
-      }
-    ],
-    [
-      "deep_work (long_running.py:26)",
-      {
+  "entries": [
+    {
+      "name": "deep_work (long_running.py:26)",
+      "count": {
         "total": 109,
         "own": 109
-      }
-    ],
-    [
-      "deep_work (long_running.py:27)",
-      {
+      },
+      "visible": true
+    },
+    {
+      "name": "deep_work (long_running.py:27)",
+      "count": {
         "total": 72,
         "own": 72
-      }
-    ],
-    [
-      "deep_work (long_running.py:29)",
-      {
-        "total": 9,
-        "own": 0
-      }
-    ],
-    [
-      "work (long_running.py:8)",
-      {
+      },
+      "visible": true
+    },
+    {
+      "name": "work (long_running.py:8)",
+      "count": {
         "total": 5,
         "own": 5
-      }
-    ],
-    [
-      "work (long_running.py:7)",
-      {
+      },
+      "visible": true
+    },
+    {
+      "name": "work (long_running.py:7)",
+      "count": {
         "total": 4,
         "own": 4
-      }
-    ]
-  ],
-  "by_own_count": [
-    [
-      "deep_work (long_running.py:26)",
-      {
-        "total": 109,
-        "own": 109
-      }
-    ],
-    [
-      "deep_work (long_running.py:27)",
-      {
-        "total": 72,
-        "own": 72
-      }
-    ],
-    [
-      "work (long_running.py:8)",
-      {
-        "total": 5,
-        "own": 5
-      }
-    ],
-    [
-      "work (long_running.py:7)",
-      {
-        "total": 4,
-        "own": 4
-      }
-    ],
-    [
-      "deep_work (long_running.py:29)",
-      {
+      },
+      "visible": true
+    },
+    {
+      "name": "deep_work (long_running.py:29)",
+      "count": {
         "total": 9,
         "own": 0
-      }
-    ],
-    [
-      "deep_work (long_running.py:28)",
-      {
+      },
+      "visible": true
+    },
+    {
+      "name": "deep_work (long_running.py:28)",
+      "count": {
         "total": 190,
         "own": 0
-      }
-    ],
-    [
-      "<module> (long_running.py:36)",
-      {
+      },
+      "visible": true
+    },
+    {
+      "name": "<module> (long_running.py:36)",
+      "count": {
         "total": 190,
         "own": 0
-      }
-    ]
+      },
+      "visible": true
+    }
   ],
-  "num_rows": 7
+  "num_rows": 7,
+  "sorted_column": "Own",
+  "search_pattern_ignored_because_of_no_match": false
 }

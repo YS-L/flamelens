@@ -1,21 +1,15 @@
 {
-  "by_total_count": [
-    [
-      "<module> (long_running.py:24)",
-      {
+  "entries": [
+    {
+      "name": "<module> (long_running.py:24)",
+      "count": {
         "total": 7,
         "own": 7
-      }
-    ]
+      },
+      "visible": true
+    }
   ],
-  "by_own_count": [
-    [
-      "<module> (long_running.py:24)",
-      {
-        "total": 7,
-        "own": 7
-      }
-    ]
-  ],
-  "num_rows": 1
+  "num_rows": 1,
+  "sorted_column": "Own",
+  "search_pattern_ignored_because_of_no_match": false
 }
