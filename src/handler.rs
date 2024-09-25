@@ -131,6 +131,12 @@ fn handle_command_table(key_event: KeyEvent, app: &mut App) -> AppResult<bool> {
         KeyCode::Up | KeyCode::Char('k') => {
             app.flamegraph_view.to_previous_row();
         }
+        KeyCode::Char('f') => {
+            app.flamegraph_view.scroll_next_rows();
+        }
+        KeyCode::Char('b') => {
+            app.flamegraph_view.scroll_previous_rows();
+        }
         KeyCode::Char('1') => {
             app.flamegraph_view.set_sort_by_total();
         }

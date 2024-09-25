@@ -180,6 +180,8 @@ impl<'a> FlamelensWidget<'a> {
                 }
             }
         } else {
+            help_tags.add("j/k", "move cursor");
+            help_tags.add("f/b", "scroll");
             help_tags.add("1", "sort by total");
             help_tags.add("2", "sort by own");
             help_tags.add("/", "filter");
@@ -226,8 +228,9 @@ impl<'a> FlamelensWidget<'a> {
 
     fn render_table(&self, area: Rect, buf: &mut Buffer) {
         let ordered_stacks_table = self.get_ordered_stacks_table();
-        let mut table_state =
-            TableState::default().with_selected(self.app.flamegraph_state().table_state.selected);
+        let mut table_state = TableState::default()
+            .with_selected(self.app.flamegraph_state().table_state.selected)
+            .with_offset(self.app.flamegraph_state().table_state.offset);
         StatefulWidget::render(ordered_stacks_table, area, buf, &mut table_state);
     }
 

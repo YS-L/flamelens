@@ -434,9 +434,26 @@ impl FlameGraphView {
         self.state.table_state.selected = new_value;
     }
 
+    pub fn scroll_next_rows(&mut self) {
+        let delta = self.state.frame_height.unwrap_or(10) as usize;
+        let new_value = min(
+            self.state.table_state.selected.saturating_add(delta),
+            self.flamegraph.ordered_stacks.num_rows.saturating_sub(1),
+        );
+        self.state.table_state.selected = new_value;
+        self.state.table_state.offset = new_value;
+    }
+
     pub fn to_previous_row(&mut self) {
         let new_value = self.state.table_state.selected.saturating_sub(1);
         self.state.table_state.selected = new_value;
+    }
+
+    pub fn scroll_previous_rows(&mut self) {
+        let delta = self.state.frame_height.unwrap_or(10) as usize;
+        let new_value = self.state.table_state.selected.saturating_sub(delta);
+        self.state.table_state.selected = new_value;
+        self.state.table_state.offset = new_value;
     }
 
     pub fn set_sort_by_own(&mut self) {
