@@ -26,6 +26,13 @@ pub struct TableState {
     pub offset: usize,
 }
 
+impl TableState {
+    pub fn reset(&mut self) {
+        self.selected = 0;
+        self.offset = 0;
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct FlameGraphState {
     pub selected: StackIdentifier,
