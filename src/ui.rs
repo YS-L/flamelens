@@ -171,6 +171,14 @@ impl<'a> FlamelensWidget<'a> {
                     help_tags.add("n/N", "next/prev search");
                 }
             }
+            #[cfg(feature = "python")]
+            if let FlameGraphInput::Pid(_, _) = self.app.flamegraph_input {
+                if self.app.flamegraph_state().freeze {
+                    help_tags.add("z", "unfreeze");
+                } else {
+                    help_tags.add("z", "freeze");
+                }
+            }
         } else {
             help_tags.add("1", "sort by total");
             help_tags.add("2", "sort by own");
