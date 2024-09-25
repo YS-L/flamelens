@@ -1,6 +1,6 @@
 Output "demo.gif"
 Set Theme "Tomorrow Night"
-Set Width 2000
+Set Width 2400
 Set Height 1200
 Set Framerate 60
 Set PlaybackSpeed 0.5 # Make output 2 times slower
@@ -19,6 +19,12 @@ Enter
 Sleep 5s
 
 Enter
+Sleep 5s
+
+Tab
+Sleep 2s
+
+Type "r"
 Sleep 5s
 
 Type "q"
