@@ -18,6 +18,10 @@ struct Args {
     #[clap(long, action, value_name = "sorted")]
     sorted: bool,
 
+    /// Print data to stdout on exit. Useful when piping to other tools
+    #[clap(long, action, value_name = "echo")]
+    echo: bool,
+
     /// Pid for live flamegraph
     #[cfg(feature = "python")]
     #[clap(long, value_name = "pid")]
@@ -33,7 +37,7 @@ struct Args {
     debug: bool,
 }
 
-fn get_app_from_filename_or_stdin(args: &Args) -> App {
+fn get_app_from_filename_or_stdin(args: &Args, echo: bool) -> App {
     let (filename, content) = if let Some(filename) = &args.filename {
         (
             filename.as_str(),
@@ -47,6 +51,9 @@ fn get_app_from_filename_or_stdin(args: &Args) -> App {
         let content = String::from_utf8(buf).expect("Could not parse stdin");
         ("stdin", content)
     };
+    if echo {
+        println!("{}", content);
+    }
     let tic = std::time::Instant::now();
     let flamegraph = FlameGraph::from_string(content, args.sorted);
     let mut app = App::with_flamegraph(filename, flamegraph);
@@ -66,10 +73,10 @@ fn main() -> AppResult<()> {
                     args.py_spy_args.clone(),
                 )
             } else {
-                get_app_from_filename_or_stdin(&args)
+                get_app_from_filename_or_stdin(&args, args.echo)
             };
         } else {
-            let mut app = get_app_from_filename_or_stdin(&args);
+            let mut app = get_app_from_filename_or_stdin(&args, args.echo);
         }
     }
     app.debug = args.debug;
