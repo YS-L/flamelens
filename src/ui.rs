@@ -93,22 +93,27 @@ impl<'a> FlamelensWidget<'a> {
 
         // Help tags to be displayed at the bottom
         let help_tags = self.get_help_tags();
-        let status_bar_block = Block::new()
-            .borders(Borders::BOTTOM)
-            .border_style(Style::default().fg(Color::Gray))
-            .title_bottom(help_tags.get_line())
-            .title_alignment(Alignment::Center);
-        let help_bar = Paragraph::new(Line::from("")).block(status_bar_block);
+        let help_bar = Paragraph::new(help_tags.get_line())
+            .block(
+                Block::new()
+                    .borders(Borders::TOP)
+                    .border_style(Style::default().fg(Color::Gray)),
+            )
+            .alignment(Alignment::Center);
 
         let mut constraints = vec![
             Constraint::Length(header_line_count_with_borders),
             Constraint::Fill(1),
         ];
+
+        // Constraints for context bars
         let context_bar_index_start = constraints.len();
         for bar in context_bars.iter() {
             constraints.push(Constraint::Length(bar.line_count(area.width) as u16 + 1));
         }
-        constraints.push(Constraint::Length(1));
+
+        // Constraint for help bar
+        constraints.push(Constraint::Length(2));
         let help_bar_index = constraints.len() - 1;
 
         let layout = Layout::default()
@@ -701,7 +706,7 @@ impl HelpTags {
         self.tags.push((tag, description));
     }
 
-    fn get_line(self) -> Line<'static> {
+    fn get_line(&self) -> Line<'static> {
         let mut spans = vec![Span::from(" ")];
         for (tag, description) in self.tags.iter().chain(self.default.iter()) {
             spans.push(Span::from("["));
