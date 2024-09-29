@@ -97,7 +97,7 @@ impl<'a> FlamelensWidget<'a> {
             .block(
                 Block::new()
                     .borders(Borders::TOP)
-                    .border_style(Style::default().fg(Color::Gray)),
+                    .border_style(Style::default()),
             )
             .alignment(Alignment::Center);
 
@@ -477,9 +477,9 @@ impl<'a> FlamelensWidget<'a> {
             Color::Rgb(r, g, b) => {
                 let luma = 0.2126 * r as f64 + 0.7152 * g as f64 + 0.0722 * b as f64;
                 if luma > 128.0 {
-                    Color::Black
+                    Color::Rgb(10, 10, 10)
                 } else {
-                    Color::Gray
+                    Color::Rgb(225, 225, 225)
                 }
             }
             _ => Color::Black,
