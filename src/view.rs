@@ -38,6 +38,10 @@ impl FlameGraphView {
     pub fn replace_flamegraph(&mut self, mut new_flamegraph: FlameGraph) {
         self.state
             .handle_flamegraph_replacement(&self.flamegraph, &mut new_flamegraph);
+        // Preserve the sort column
+        new_flamegraph
+            .ordered_stacks
+            .set_sort_column(self.flamegraph.ordered_stacks.sorted_column);
         self.flamegraph = new_flamegraph;
         // Now the id in ZoomState points to the one in new flamegraph, but the ancestors and
         // descendants are not. Set the zoom again to update them.
