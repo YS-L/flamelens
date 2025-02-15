@@ -59,13 +59,9 @@ flamelens --pid <pid-of-python-program>
 
 This requires enabling the `python` feature when installing.
 
-<details>
-
-<summary>Example of a live flamegraph</summary>
+Example of a live flamegraph:
 
 ![demo-live](.github/demo-live.gif)
-
-</details>
 
 ## Key bindings
 Key | Action
