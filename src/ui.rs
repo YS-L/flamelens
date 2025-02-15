@@ -50,7 +50,7 @@ impl<'a> FlamelensWidget<'a> {
     }
 }
 
-impl<'a> StatefulWidget for FlamelensWidget<'a> {
+impl StatefulWidget for FlamelensWidget<'_> {
     type State = FlamelensWidgetState;
 
     fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
