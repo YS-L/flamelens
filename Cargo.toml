@@ -1,6 +1,6 @@
 [package]
 name = "flamelens"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Yung Siang Liau <liauys@gmail.com>"]
 license = "MIT"
 description = "Flamegraph viewer in the terminal"

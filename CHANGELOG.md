@@ -1,3 +1,8 @@
+# v0.3.1
+
+* Fix colors for light theme terminals
+* Fix sort column being reset incorrectly in live mode
+
 # v0.3.0
 
 * Add "top" view to show summary of slowest functions in a table:
