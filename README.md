@@ -99,3 +99,13 @@ Alternatively, build and install from source after cloning this repo:
 ```
 cargo install --path $(pwd) --locked
 ```
+
+### Distro Packages
+
+#### Arch Linux
+
+You can install from the [extra repository](https://archlinux.org/packages/extra/x86_64/flamelens/) using `pacman`:
+
+```
+pacman -S flamelens
+```
