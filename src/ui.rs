@@ -109,7 +109,7 @@ impl<'a> FlamelensWidget<'a> {
         // Constraints for context bars
         let context_bar_index_start = constraints.len();
         for bar in context_bars.iter() {
-            constraints.push(Constraint::Length(bar.line_count(area.width) as u16 + 1));
+            constraints.push(Constraint::Length(bar.line_count(area.width) as u16));
         }
 
         // Constraint for help bar
