@@ -55,7 +55,7 @@ impl<B: Backend> Tui<B> {
             ui::render(app, frame);
             if let Some(input_buffer) = &app.input_buffer {
                 if let Some(cursor) = input_buffer.cursor {
-                    frame.set_cursor(cursor.0, cursor.1);
+                    frame.set_cursor_position((cursor.0, cursor.1));
                 }
             }
         })?;

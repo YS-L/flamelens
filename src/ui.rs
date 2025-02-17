@@ -376,7 +376,7 @@ impl<'a> FlamelensWidget<'a> {
         ];
         Table::new(rows, widths)
             .header(header)
-            .highlight_style(Style::default().bg(COLOR_TABLE_SELECTED_ROW))
+            .row_highlight_style(Style::default().bg(COLOR_TABLE_SELECTED_ROW))
     }
 
     fn get_highlighted_spans<'b>(
@@ -729,7 +729,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     // - https://github.com/ratatui-org/ratatui/tree/master/examples
     let flamelens_widget = FlamelensWidget::new(app);
     let mut flamelens_state = FlamelensWidgetState::default();
-    frame.render_stateful_widget(flamelens_widget, frame.size(), &mut flamelens_state);
+    frame.render_stateful_widget(flamelens_widget, frame.area(), &mut flamelens_state);
     app.flamegraph_view
         .set_frame_height(flamelens_state.frame_height);
     app.flamegraph_view
