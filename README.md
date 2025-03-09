@@ -95,6 +95,8 @@ If you want the live flamegraph functionality, install with the `--all-features`
 cargo install flamelens --locked --all-features
 ```
 
+Note: Compiling with `--all-features` option may require `libunwind` to be installed on your system.
+
 Alternatively, build and install from source after cloning this repo:
 ```
 cargo install --path $(pwd) --locked
