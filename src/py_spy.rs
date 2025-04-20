@@ -161,6 +161,7 @@ pub fn run(
                     short_filename: None,
                     line: 0,
                     locals: None,
+                    is_entry: true,
                 });
             }
 
