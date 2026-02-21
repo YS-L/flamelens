@@ -1,4 +1,4 @@
-use clap::{command, Parser};
+use clap::Parser;
 use flamelens::app::{App, AppResult};
 use flamelens::event::{Event, EventHandler};
 use flamelens::flame::FlameGraph;

@@ -534,7 +534,7 @@ mod tests {
     }
 
     impl FlameGraph {
-        pub fn to_readable_stacks(&self) -> Vec<StackInfoReadable> {
+        pub fn to_readable_stacks(&self) -> Vec<StackInfoReadable<'_>> {
             self.stacks
                 .iter()
                 .map(|stack| StackInfoReadable {
