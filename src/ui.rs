@@ -312,7 +312,7 @@ impl<'a> FlamelensWidget<'a> {
         has_more_rows_to_render
     }
 
-    fn get_ordered_stacks_table(&self) -> Table {
+    fn get_ordered_stacks_table(&self) -> Table<'_> {
         let add_sorted_indicator = |label: &str, sort_column: SortColumn| {
             let suffix = if sort_column == self.app.flamegraph().ordered_stacks.sorted_column {
                 " [▼]"
@@ -409,7 +409,7 @@ impl<'a> FlamelensWidget<'a> {
         width: u16,
         style: Style,
         re: &Option<&regex::Regex>,
-    ) -> Line {
+    ) -> Line<'_> {
         let short_name = self.app.flamegraph().get_stack_short_name_from_info(stack);
 
         // Empty space separator at the beginning
@@ -486,14 +486,14 @@ impl<'a> FlamelensWidget<'a> {
         }
     }
 
-    fn get_view_kind_indicator(&self) -> Line {
+    fn get_view_kind_indicator(&self) -> Line<'_> {
         let mut header_bottom_title_spans = vec![Span::from(" ")];
 
         fn _get_view_kind_span(
             label: &str,
             view_kind: ViewKind,
             current_view_kind: ViewKind,
-        ) -> Span {
+        ) -> Span<'_> {
             let (content, style) = if view_kind == current_view_kind {
                 (format!("[{}]", label), Style::default().bold().yellow())
             } else {
@@ -517,12 +517,12 @@ impl<'a> FlamelensWidget<'a> {
         Line::from(header_bottom_title_spans)
     }
 
-    fn get_version_indicator(&self) -> Line {
+    fn get_version_indicator(&self) -> Line<'_> {
         Line::from(format!("flamelens v{}", env!("CARGO_PKG_VERSION")))
             .style(Style::default().bold())
     }
 
-    fn get_header_text(&self, _width: u16) -> Line {
+    fn get_header_text(&self, _width: u16) -> Line<'_> {
         let header_text = match &self.app.flamegraph_input {
             FlameGraphInput::File(path) => path.to_string(),
             FlameGraphInput::Pid(pid, info) => {
@@ -553,7 +553,7 @@ impl<'a> FlamelensWidget<'a> {
         Line::from(header_text).style(Style::default().bold())
     }
 
-    fn get_status_text(&self, width: u16) -> Vec<(&'static str, Line)> {
+    fn get_status_text(&self, width: u16) -> Vec<(&'static str, Line<'_>)> {
         if self.app.input_buffer.is_some() {
             self.get_status_text_buffer()
         } else {
@@ -561,7 +561,7 @@ impl<'a> FlamelensWidget<'a> {
         }
     }
 
-    fn get_status_text_buffer(&self) -> Vec<(&'static str, Line)> {
+    fn get_status_text_buffer(&self) -> Vec<(&'static str, Line<'_>)> {
         let input_buffer = self.app.input_buffer.as_ref().unwrap();
         let status_text = format!("{}{}", SEARCH_PREFIX, input_buffer.buffer);
         vec![("Search", Line::from(status_text))]
@@ -576,7 +576,7 @@ impl<'a> FlamelensWidget<'a> {
         })
     }
 
-    fn get_status_text_command(&self, width: u16) -> Vec<(&'static str, Line)> {
+    fn get_status_text_command(&self, width: u16) -> Vec<(&'static str, Line<'_>)> {
         let stack = self
             .app
             .flamegraph()
