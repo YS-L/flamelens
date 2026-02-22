@@ -26,7 +26,7 @@ pub mod py_spy;
 pub mod py_spy_flamegraph;
 
 // Public API for embedding flamelens as a library
-use app::{App, AppResult};
+use app::{App, AppResult, ParsedFlameGraph};
 use event::{Event, EventHandler};
 use flame::FlameGraph;
 use handler::handle_key_events;
@@ -82,19 +82,33 @@ pub fn run_from_live_stream(rx: std::sync::mpsc::Receiver<String>, title: &str) 
     let flamegraph = FlameGraph::from_string(String::new(), true);
     let mut app = App::with_flamegraph(title, flamegraph);
 
-    // Shared state for incoming data
-    let next_data = Arc::new(Mutex::new(None::<String>));
-    let next_data_clone = next_data.clone();
+    // Channel to send accumulated data to the background parsing thread
+    let (parse_tx, parse_rx) = std::sync::mpsc::channel::<String>();
 
-    // Spawn thread to receive updates
+    // Shared state for parsed flamegraph produced by the background thread
+    let next_flamegraph: Arc<Mutex<Option<ParsedFlameGraph>>> = Arc::new(Mutex::new(None));
+    let next_fg_clone = next_flamegraph.clone();
+
+    // Background thread for parsing flamegraphs without blocking the UI
     std::thread::spawn(move || {
-        while let Ok(data) = rx.recv() {
-            *next_data_clone.lock().unwrap() = Some(data);
+        while let Ok(combined) = parse_rx.recv() {
+            // Drain the channel to keep only the latest accumulated data
+            let mut latest = combined;
+            while let Ok(newer) = parse_rx.try_recv() {
+                latest = newer;
+            }
+            let tic = std::time::Instant::now();
+            let flamegraph = FlameGraph::from_string(latest, true);
+            let parsed = ParsedFlameGraph {
+                flamegraph,
+                elapsed: tic.elapsed(),
+            };
+            *next_fg_clone.lock().unwrap() = Some(parsed);
         }
     });
 
     // Store accumulated data
-    let mut accumulated_stacks = Vec::new();
+    let mut accumulated_stacks: Vec<String> = Vec::new();
 
     // TUI loop with live updates
     let backend = CrosstermBackend::new(io::stderr());
@@ -104,15 +118,22 @@ pub fn run_from_live_stream(rx: std::sync::mpsc::Receiver<String>, title: &str) 
     tui.init()?;
 
     while app.running {
-        // Check for new data
-        if let Some(new_data) = next_data.lock().unwrap().take() {
-            // Accumulate: merge new stacks with existing
+        // Drain all pending samples from the receiver so none are lost
+        let mut has_new_data = false;
+        while let Ok(new_data) = rx.try_recv() {
             accumulated_stacks = merge_collapsed_stacks(&accumulated_stacks, &new_data);
-            let combined = accumulated_stacks.join("\n");
+            has_new_data = true;
+        }
 
-            // Parse and update flamegraph
-            let flamegraph = FlameGraph::from_string(combined, true);
-            app.flamegraph_view.replace_flamegraph(flamegraph);
+        // Send accumulated data to background parsing thread
+        if has_new_data {
+            let combined = accumulated_stacks.join("\n");
+            let _ = parse_tx.send(combined);
+        }
+
+        // Swap in the latest parsed flamegraph if ready
+        if let Some(parsed) = next_flamegraph.lock().unwrap().take() {
+            app.flamegraph_view.replace_flamegraph(parsed.flamegraph);
         }
 
         tui.draw(&mut app)?;
