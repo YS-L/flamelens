@@ -13,5 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Install just
+      uses: taiki-e/install-action@just
     - name: Lint
-      run: make lint
+      run: just lint
