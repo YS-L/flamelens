@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y libunwind-dev liblzma-dev
-    - name: Build
-      run: cargo build --verbose --all-features
+    - name: Install just
+      uses: taiki-e/install-action@just
     - name: Test
-      run: cargo test --verbose --all-features
+      run: just test
