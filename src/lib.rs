@@ -44,9 +44,11 @@ use std::sync::{Arc, Mutex};
 ///
 /// # Example
 /// ```no_run
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let data = "main;foo;bar 100\nmain;foo;baz 50".to_string();
 /// flamelens::run_from_collapsed_stacks(data, "my-profile", false)?;
-/// ```
+/// # Ok(())
+/// # }
 pub fn run_from_collapsed_stacks(data: String, title: &str, sorted: bool) -> AppResult<()> {
     let flamegraph = FlameGraph::from_string(data, sorted);
     let mut app = App::with_flamegraph(title, flamegraph);
@@ -65,6 +67,7 @@ pub fn run_from_collapsed_stacks(data: String, title: &str, sorted: bool) -> App
 ///
 /// # Example
 /// ```no_run
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// use std::sync::mpsc;
 /// let (tx, rx) = mpsc::channel();
 ///
@@ -76,7 +79,8 @@ pub fn run_from_collapsed_stacks(data: String, title: &str, sorted: bool) -> App
 /// });
 ///
 /// flamelens::run_from_live_stream(rx, "my-profile [live]")?;
-/// ```
+/// # Ok(())
+/// # }
 pub fn run_from_live_stream(rx: std::sync::mpsc::Receiver<String>, title: &str) -> AppResult<()> {
     // Start with empty flamegraph
     let flamegraph = FlameGraph::from_string(String::new(), true);
