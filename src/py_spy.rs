@@ -162,6 +162,7 @@ pub fn run(
                     line: 0,
                     locals: None,
                     is_entry: true,
+                    is_shim_entry: true,
                 });
             }
 
