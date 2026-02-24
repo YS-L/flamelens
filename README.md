@@ -9,7 +9,7 @@
 Flamegraph tools such as [FlameGraph](https://github.com/brendangregg/FlameGraph) and
 [inferno](https://github.com/jonhoo/inferno) process output from various profiling tools and
 generate intermediate data in the "folded" format ready for flamegraph plotting. Instead of plotting
-the flamegraph as an SVG file, `flamelens` takes the folded stacks data and generate an interactive
+the flamegraph as an SVG file, `flamelens` takes the folded stacks data and generates an interactive
 flamegraph in the terminal.
 
 No more hauling SVG files and opening a browser just to have a quick look at the profiling result!
