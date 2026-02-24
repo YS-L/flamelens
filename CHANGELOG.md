@@ -1,4 +1,4 @@
-# (unreleased)
+# v0.4.0
 
 * Add public API for embedding `flamelens` as a library (#15 by @zz85)
 * Update `py-spy` to 0.4.1 to support Python 3.12 and 3.13
