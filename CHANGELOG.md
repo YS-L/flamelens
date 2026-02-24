@@ -1,3 +1,8 @@
+# (unreleased)
+
+* Add public API for embedding `flamelens` as a library (#15 by @zz85)
+* Update `py-spy` to 0.4.1 to support Python 3.12 and 3.13
+
 # v0.3.1
 
 * Fix colors for light theme terminals
