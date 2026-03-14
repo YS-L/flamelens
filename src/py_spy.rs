@@ -26,10 +26,10 @@ SOFTWARE.
 */
 use crate::py_spy_flamegraph::Flamegraph as PySpyFlamegraph;
 use anyhow::Error;
-use py_spy::config::RecordDuration;
-use py_spy::sampler;
 use py_spy::Config;
 use py_spy::Frame;
+use py_spy::config::RecordDuration;
+use py_spy::sampler;
 use remoteprocess;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -132,10 +132,10 @@ pub fn run(
         }
 
         intervals += 1;
-        if let Some(max_intervals) = max_intervals {
-            if intervals >= max_intervals {
-                break;
-            }
+        if let Some(max_intervals) = max_intervals
+            && intervals >= max_intervals
+        {
+            break;
         }
 
         for trace in sample.traces.iter_mut() {

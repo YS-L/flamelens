@@ -1,4 +1,4 @@
-use crate::flame::{FlameGraph, SearchPattern, StackIdentifier, ROOT_ID};
+use crate::flame::{FlameGraph, ROOT_ID, SearchPattern, StackIdentifier};
 
 #[derive(Debug, Clone)]
 pub struct ZoomState {

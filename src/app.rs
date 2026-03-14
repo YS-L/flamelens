@@ -1,6 +1,6 @@
 use crate::flame::{FlameGraph, SearchPattern};
 #[cfg(feature = "python")]
-use crate::py_spy::{record_samples, ProfilerOutput, SamplerState, SamplerStatus};
+use crate::py_spy::{ProfilerOutput, SamplerState, SamplerStatus, record_samples};
 use crate::state::FlameGraphState;
 use crate::view::FlameGraphView;
 #[cfg(feature = "python")]
@@ -83,17 +83,19 @@ impl App {
         {
             let next_flamegraph = next_flamegraph.clone();
             let pyspy_data = pyspy_data.clone();
-            let _handle = thread::spawn(move || loop {
-                if let Some(output) = pyspy_data.lock().unwrap().take() {
-                    let tic = std::time::Instant::now();
-                    let flamegraph = FlameGraph::from_string(output.data, true);
-                    let parsed = ParsedFlameGraph {
-                        flamegraph,
-                        elapsed: tic.elapsed(),
-                    };
-                    *next_flamegraph.lock().unwrap() = Some(parsed);
+            let _handle = thread::spawn(move || {
+                loop {
+                    if let Some(output) = pyspy_data.lock().unwrap().take() {
+                        let tic = std::time::Instant::now();
+                        let flamegraph = FlameGraph::from_string(output.data, true);
+                        let parsed = ParsedFlameGraph {
+                            flamegraph,
+                            elapsed: tic.elapsed(),
+                        };
+                        *next_flamegraph.lock().unwrap() = Some(parsed);
+                    }
+                    thread::sleep(std::time::Duration::from_millis(250));
                 }
-                thread::sleep(std::time::Duration::from_millis(250));
             });
         }
 
@@ -145,15 +147,15 @@ impl App {
     /// Handles the tick event of the terminal.
     pub fn tick(&mut self) {
         // Replace flamegraph
-        if !self.flamegraph_view.state.freeze {
-            if let Some(parsed) = self.next_flamegraph.lock().unwrap().take() {
-                self.elapsed
-                    .insert("flamegraph".to_string(), parsed.elapsed);
-                let tic = std::time::Instant::now();
-                self.flamegraph_view.replace_flamegraph(parsed.flamegraph);
-                self.elapsed
-                    .insert("replacement".to_string(), tic.elapsed());
-            }
+        if !self.flamegraph_view.state.freeze
+            && let Some(parsed) = self.next_flamegraph.lock().unwrap().take()
+        {
+            self.elapsed
+                .insert("flamegraph".to_string(), parsed.elapsed);
+            let tic = std::time::Instant::now();
+            self.flamegraph_view.replace_flamegraph(parsed.flamegraph);
+            self.elapsed
+                .insert("replacement".to_string(), tic.elapsed());
         }
 
         // Exit if fatal error in sampler
@@ -163,7 +165,10 @@ impl App {
             .as_ref()
             .map(|s| s.lock().unwrap().status.clone())
         {
-            panic!("py-spy sampler exited with error: {}\n\nYou likely need to rerun this program with sudo.", s);
+            panic!(
+                "py-spy sampler exited with error: {}\n\nYou likely need to rerun this program with sudo.",
+                s
+            );
         }
     }
 

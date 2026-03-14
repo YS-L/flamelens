@@ -1,7 +1,7 @@
 use std::cmp::min;
 
 use crate::{
-    flame::{FlameGraph, SearchPattern, SortColumn, StackIdentifier, StackInfo, ROOT_ID},
+    flame::{FlameGraph, ROOT_ID, SearchPattern, SortColumn, StackIdentifier, StackInfo},
     state::{FlameGraphState, ZoomState},
 };
 
@@ -23,10 +23,10 @@ impl FlameGraphView {
 
     pub fn select_id(&mut self, stack_id: &StackIdentifier) {
         self.state.select_id(stack_id);
-        if let Some(p) = self.state.search_pattern.as_ref() {
-            if p.is_manual {
-                return;
-            }
+        if let Some(p) = self.state.search_pattern.as_ref()
+            && p.is_manual
+        {
+            return;
         }
         let pattern = self.flamegraph.get_stack_short_name(stack_id);
         if let Some(pattern) = pattern {
@@ -103,10 +103,10 @@ impl FlameGraphView {
             .map(|x| x.parent)
         {
             if let Some(parent) = parent {
-                if let Some(parent_stack) = self.flamegraph.get_stack(&parent) {
-                    if !self.is_stack_in_view_port(parent_stack) {
-                        self.state.level_offset -= 1;
-                    }
+                if let Some(parent_stack) = self.flamegraph.get_stack(&parent)
+                    && !self.is_stack_in_view_port(parent_stack)
+                {
+                    self.state.level_offset -= 1;
                 }
                 self.select_id(&parent);
             }
@@ -152,21 +152,21 @@ impl FlameGraphView {
     fn select_stack_in_view_port(&mut self) {
         if let Some(stacks) = self.flamegraph.get_stacks_at_level(self.state.level_offset) {
             for stack_id in stacks {
-                if let Some(stack) = self.flamegraph.get_stack(stack_id) {
-                    if self.is_stack_visibly_wide(stack, None) {
-                        self.state.select_id(stack_id);
-                        break;
-                    }
+                if let Some(stack) = self.flamegraph.get_stack(stack_id)
+                    && self.is_stack_visibly_wide(stack, None)
+                {
+                    self.state.select_id(stack_id);
+                    break;
                 }
             }
         }
     }
 
     fn keep_selected_stack_in_view_port(&mut self) {
-        if let Some(stack) = self.flamegraph.get_stack(&self.state.selected) {
-            if !self.is_stack_in_view_port(stack) {
-                self.select_stack_in_view_port();
-            }
+        if let Some(stack) = self.flamegraph.get_stack(&self.state.selected)
+            && !self.is_stack_in_view_port(stack)
+        {
+            self.select_stack_in_view_port();
         }
     }
 
@@ -184,10 +184,10 @@ impl FlameGraphView {
         let level = self.flamegraph.get_stacks_at_level(stack.level)?;
         let level_idx = level.iter().position(|x| x == stack_id)?;
         for sibling_id in level[level_idx + 1..].iter() {
-            if let Some(stack) = self.flamegraph.get_stack(sibling_id) {
-                if self.is_stack_visibly_wide(stack, None) {
-                    return Some(sibling_id).cloned();
-                }
+            if let Some(stack) = self.flamegraph.get_stack(sibling_id)
+                && self.is_stack_visibly_wide(stack, None)
+            {
+                return Some(sibling_id).cloned();
             }
         }
         None
@@ -198,10 +198,10 @@ impl FlameGraphView {
         let level = self.flamegraph.get_stacks_at_level(stack.level)?;
         let level_idx = level.iter().position(|x| x == stack_id)?;
         for sibling_id in level[..level_idx].iter().rev() {
-            if let Some(stack) = self.flamegraph.get_stack(sibling_id) {
-                if self.is_stack_visibly_wide(stack, None) {
-                    return Some(sibling_id).cloned();
-                }
+            if let Some(stack) = self.flamegraph.get_stack(sibling_id)
+                && self.is_stack_visibly_wide(stack, None)
+            {
+                return Some(sibling_id).cloned();
             }
         }
         None
@@ -342,10 +342,10 @@ impl FlameGraphView {
     }
 
     pub fn scroll_to_selected(&mut self) {
-        if let Some(stack) = self.get_selected_stack() {
-            if !self.is_stack_in_view_port(stack) {
-                self.set_level_offset(stack.level);
-            }
+        if let Some(stack) = self.get_selected_stack()
+            && !self.is_stack_in_view_port(stack)
+        {
+            self.set_level_offset(stack.level);
         }
     }
 
@@ -415,10 +415,10 @@ impl FlameGraphView {
     }
 
     pub fn unset_manual_search_pattern(&mut self) {
-        if let Some(p) = self.state.search_pattern.as_ref() {
-            if p.is_manual {
-                self.unset_search_pattern();
-            }
+        if let Some(p) = self.state.search_pattern.as_ref()
+            && p.is_manual
+        {
+            self.unset_search_pattern();
         }
     }
 
