@@ -3,8 +3,8 @@ use crate::event::EventHandler;
 use crate::ui;
 use crossterm::event::DisableMouseCapture;
 use crossterm::terminal::{self, EnterAlternateScreen, LeaveAlternateScreen};
-use ratatui::backend::Backend;
 use ratatui::Terminal;
+use ratatui::backend::Backend;
 use std::io;
 use std::panic;
 
@@ -20,7 +20,7 @@ pub struct Tui<B: Backend> {
     pub events: EventHandler,
 }
 
-impl<B: Backend> Tui<B> {
+impl<B: Backend<Error = io::Error>> Tui<B> {
     /// Constructs a new instance of [`Tui`].
     pub fn new(terminal: Terminal<B>, events: EventHandler) -> Self {
         Self { terminal, events }
@@ -53,10 +53,10 @@ impl<B: Backend> Tui<B> {
     pub fn draw(&mut self, app: &mut App) -> AppResult<()> {
         self.terminal.draw(|frame| {
             ui::render(app, frame);
-            if let Some(input_buffer) = &app.input_buffer {
-                if let Some(cursor) = input_buffer.cursor {
-                    frame.set_cursor_position((cursor.0, cursor.1));
-                }
+            if let Some(input_buffer) = &app.input_buffer
+                && let Some(cursor) = input_buffer.cursor
+            {
+                frame.set_cursor_position((cursor.0, cursor.1));
             }
         })?;
         Ok(())

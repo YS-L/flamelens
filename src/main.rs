@@ -4,8 +4,8 @@ use flamelens::event::{Event, EventHandler};
 use flamelens::flame::FlameGraph;
 use flamelens::handler::handle_key_events;
 use flamelens::tui::Tui;
-use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
+use ratatui::backend::CrosstermBackend;
 use std::io::{self, Read};
 
 #[derive(Parser, Debug)]

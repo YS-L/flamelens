@@ -499,10 +499,10 @@ impl FlameGraph {
         let mut hits = vec![];
         for level in self.levels.iter() {
             for stacks in level.iter() {
-                if let Some(stack) = self.get_stack(stacks) {
-                    if stack.hit {
-                        hits.push(*stacks);
-                    }
+                if let Some(stack) = self.get_stack(stacks)
+                    && stack.hit
+                {
+                    hits.push(*stacks);
                 }
             }
         }
@@ -589,7 +589,7 @@ mod tests {
         let expected = std::fs::read_to_string(&filename).unwrap();
         assert_eq!(serialized, expected);
 
-        assert_eq!(UPDATE_FIXTURES, false, "Set UPDATE_FIXTURES to false");
+        const { assert!(!UPDATE_FIXTURES, "Set UPDATE_FIXTURES to false") };
         fg
     }
 

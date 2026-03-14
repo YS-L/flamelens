@@ -30,8 +30,8 @@ use app::{App, AppResult, ParsedFlameGraph};
 use event::{Event, EventHandler};
 use flame::FlameGraph;
 use handler::handle_key_events;
-use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
+use ratatui::backend::CrosstermBackend;
 use std::io;
 use std::sync::{Arc, Mutex};
 
@@ -183,19 +183,19 @@ fn merge_collapsed_stacks(existing: &[String], new_data: &str) -> Vec<String> {
 
     // Parse existing
     for line in existing {
-        if let Some((stack, count_str)) = line.rsplit_once(' ') {
-            if let Ok(count) = count_str.parse::<u64>() {
-                *counts.entry(stack.to_string()).or_insert(0) += count;
-            }
+        if let Some((stack, count_str)) = line.rsplit_once(' ')
+            && let Ok(count) = count_str.parse::<u64>()
+        {
+            *counts.entry(stack.to_string()).or_insert(0) += count;
         }
     }
 
     // Add new
     for line in new_data.lines() {
-        if let Some((stack, count_str)) = line.rsplit_once(' ') {
-            if let Ok(count) = count_str.parse::<u64>() {
-                *counts.entry(stack.to_string()).or_insert(0) += count;
-            }
+        if let Some((stack, count_str)) = line.rsplit_once(' ')
+            && let Ok(count) = count_str.parse::<u64>()
+        {
+            *counts.entry(stack.to_string()).or_insert(0) += count;
         }
     }
 

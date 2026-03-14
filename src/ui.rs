@@ -6,15 +6,15 @@ use crate::{
     state::ViewKind,
 };
 use ratatui::{
+    Frame,
     buffer::Buffer,
     layout::{Alignment, Constraint, Direction, Layout, Offset, Rect},
-    style::{Color, Modifier, Style, Stylize},
+    style::{Color, Modifier, Style},
     text::{Line, Span, Text},
     widgets::{
-        block::Position, Block, Borders, Paragraph, Row, StatefulWidget, Table, TableState, Widget,
+        Block, Borders, Paragraph, Row, StatefulWidget, Table, TableState, TitlePosition, Widget,
         Wrap,
     },
-    Frame,
 };
 use std::time::Duration;
 use std::{
@@ -86,7 +86,7 @@ impl<'a> FlamelensWidget<'a> {
                             .borders(Borders::TOP)
                             .title(format!("{} ", title))
                             .title_style(Style::default().add_modifier(Modifier::BOLD).yellow())
-                            .title_position(Position::Top),
+                            .title_position(TitlePosition::Top),
                     )
             })
             .collect::<Vec<Paragraph>>();
@@ -171,10 +171,10 @@ impl<'a> FlamelensWidget<'a> {
             help_tags.add("enter/esc", "zoom");
             help_tags.add("/", "search");
             help_tags.add("#", "search like cursor");
-            if let Some(p) = &self.app.flamegraph_state().search_pattern {
-                if p.is_manual {
-                    help_tags.add("n/N", "next/prev search");
-                }
+            if let Some(p) = &self.app.flamegraph_state().search_pattern
+                && p.is_manual
+            {
+                help_tags.add("n/N", "next/prev search");
             }
             #[cfg(feature = "python")]
             if let FlameGraphInput::Pid(_, _) = self.app.flamegraph_input {
@@ -218,7 +218,8 @@ impl<'a> FlamelensWidget<'a> {
                     None
                 }
             });
-        let has_more_rows_to_render = self.render_stacks(
+
+        self.render_stacks(
             self.app.flamegraph().root(),
             buf,
             area.x,
@@ -227,8 +228,7 @@ impl<'a> FlamelensWidget<'a> {
             area.bottom(),
             &zoom_state,
             &re,
-        );
-        has_more_rows_to_render
+        )
     }
 
     fn render_table(&self, area: Rect, buf: &mut Buffer) {
@@ -462,12 +462,12 @@ impl<'a> FlamelensWidget<'a> {
         } else {
             unreachable!();
         }
-        if let Some(zoom_state) = zoom_state {
-            if zoom_state.ancestors.contains(&stack.id) {
-                r = (r as f64 / 2.5) as u8;
-                g = (g as f64 / 2.5) as u8;
-                b = (b as f64 / 2.5) as u8;
-            }
+        if let Some(zoom_state) = zoom_state
+            && zoom_state.ancestors.contains(&stack.id)
+        {
+            r = (r as f64 / 2.5) as u8;
+            g = (g as f64 / 2.5) as u8;
+            b = (b as f64 / 2.5) as u8;
         }
         Color::Rgb(r, g, b)
     }
@@ -592,32 +592,31 @@ impl<'a> FlamelensWidget<'a> {
                         .unwrap()
                         .total_count
                 });
-                if let Some(p) = &self.app.flamegraph_state().search_pattern {
-                    if let (true, Some(hit_coverage_count)) =
+                if let Some(p) = &self.app.flamegraph_state().search_pattern
+                    && let (true, Some(hit_coverage_count)) =
                         (p.is_manual, self.app.flamegraph().hit_coverage_count())
+                {
+                    let mut match_text = format!(
+                        "\"{}\" {}",
+                        p.re.as_str(),
+                        FlamelensWidget::get_count_stats_str(
+                            None,
+                            hit_coverage_count,
+                            root_total_count,
+                            zoom_total_count,
+                        )
+                    );
+                    if self.is_table_view()
+                        && self
+                            .app
+                            .flamegraph()
+                            .ordered_stacks
+                            .search_pattern_ignored_because_of_no_match
                     {
-                        let mut match_text = format!(
-                            "\"{}\" {}",
-                            p.re.as_str(),
-                            FlamelensWidget::get_count_stats_str(
-                                None,
-                                hit_coverage_count,
-                                root_total_count,
-                                zoom_total_count,
-                            )
-                        );
-                        if self.is_table_view()
-                            && self
-                                .app
-                                .flamegraph()
-                                .ordered_stacks
-                                .search_pattern_ignored_because_of_no_match
-                        {
-                            match_text += " (no match; showing all)";
-                        }
-                        let match_text = format!("{:width$}", match_text, width = width as usize,);
-                        lines.push(("Match", Line::from(match_text)));
+                        match_text += " (no match; showing all)";
                     }
+                    let match_text = format!("{:width$}", match_text, width = width as usize,);
+                    lines.push(("Match", Line::from(match_text)));
                 }
                 let selected_text = format!(
                     "{} {}",
