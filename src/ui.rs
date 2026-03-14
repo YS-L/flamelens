@@ -11,7 +11,7 @@ use ratatui::{
     style::{Color, Modifier, Style, Stylize},
     text::{Line, Span, Text},
     widgets::{
-        block::Position, Block, Borders, Paragraph, Row, StatefulWidget, Table, TableState, Widget,
+        TitlePosition, Block, Borders, Paragraph, Row, StatefulWidget, Table, TableState, Widget,
         Wrap,
     },
     Frame,
@@ -86,7 +86,7 @@ impl<'a> FlamelensWidget<'a> {
                             .borders(Borders::TOP)
                             .title(format!("{} ", title))
                             .title_style(Style::default().add_modifier(Modifier::BOLD).yellow())
-                            .title_position(Position::Top),
+                            .title_position(TitlePosition::Top)
                     )
             })
             .collect::<Vec<Paragraph>>();

@@ -20,7 +20,7 @@ pub struct Tui<B: Backend> {
     pub events: EventHandler,
 }
 
-impl<B: Backend> Tui<B> {
+impl<B: Backend<Error = io::Error>> Tui<B> {
     /// Constructs a new instance of [`Tui`].
     pub fn new(terminal: Terminal<B>, events: EventHandler) -> Self {
         Self { terminal, events }
