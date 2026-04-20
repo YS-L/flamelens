@@ -27,6 +27,25 @@ const COLOR_SELECTED_STACK: Color = Color::Rgb(250, 250, 250);
 const COLOR_MATCHED_BACKGROUND: Color = Color::Rgb(10, 35, 150);
 const COLOR_TABLE_SELECTED_ROW: Color = Color::Rgb(65, 65, 65);
 
+/// Differential coloring for a stack, following flamegraph.pl's color_scale.
+/// Returns (r, g, b) where unchanged frames are near-neutral gray,
+/// positive deltas (hotter in "after") scale toward red, and
+/// negative deltas (colder in "after") scale toward blue.
+fn diff_color(delta: Option<i64>, max_abs_diff: u64) -> (u8, u8, u8) {
+    let delta = delta.unwrap_or(0);
+    if max_abs_diff == 0 || delta == 0 {
+        return (230, 230, 230);
+    }
+    let ratio = (delta as f64 / max_abs_diff as f64).clamp(-1.0, 1.0);
+    if ratio > 0.0 {
+        let v = (210.0 * (1.0 - ratio)).round() as u8;
+        (255, v, v)
+    } else {
+        let v = (210.0 * (1.0 + ratio)).round() as u8;
+        (v, v, 255)
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct FlamelensWidgetState {
     frame_height: u16,
@@ -445,22 +464,44 @@ impl<'a> FlamelensWidget<'a> {
             name.hash(&mut hasher);
             hasher.finish() as f64 / u64::MAX as f64
         }
-        let full_name = self.app.flamegraph().get_stack_full_name_from_info(stack);
-        let v1 = hash_name(full_name);
-        let v2 = hash_name(full_name);
+        // In diff mode, suppress the auto-search blue highlight (triggered when
+        // moving the cursor across frames with the same short name) so it does
+        // not mask the differential color. Manual searches (`/foo`, `#`) still win.
+        let search_is_manual = self
+            .app
+            .flamegraph_state()
+            .search_pattern
+            .as_ref()
+            .map(|p| p.is_manual)
+            .unwrap_or(false);
+        let effective_hit = stack.hit
+            && (search_is_manual || !self.app.flamegraph().diff_mode);
         let mut r;
         let mut g;
         let mut b;
-        if !stack.hit {
+        if effective_hit {
+            if let Color::Rgb(r_, g_, b_) = COLOR_MATCHED_BACKGROUND {
+                r = r_;
+                g = g_;
+                b = b_;
+            } else {
+                unreachable!();
+            }
+        } else if self.app.flamegraph().diff_mode {
+            // Differential coloring, mirroring flamegraph.pl's color_scale:
+            // unchanged → neutral, delta>0 → red (hotter in "after"),
+            // delta<0 → blue (colder in "after"). Magnitude scaled by max |delta|.
+            let (dr, dg, db) = diff_color(stack.diff, self.app.flamegraph().max_abs_diff);
+            r = dr;
+            g = dg;
+            b = db;
+        } else {
+            let full_name = self.app.flamegraph().get_stack_full_name_from_info(stack);
+            let v1 = hash_name(full_name);
+            let v2 = hash_name(full_name);
             r = 205 + (50.0 * v2) as u8;
             g = (230.0 * v1) as u8;
             b = (55.0 * v2) as u8;
-        } else if let Color::Rgb(r_, g_, b_) = COLOR_MATCHED_BACKGROUND {
-            r = r_;
-            g = g_;
-            b = b_;
-        } else {
-            unreachable!();
         }
         if let Some(zoom_state) = zoom_state {
             if zoom_state.ancestors.contains(&stack.id) {
